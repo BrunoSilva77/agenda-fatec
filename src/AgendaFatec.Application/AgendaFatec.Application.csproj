@@ -9,6 +9,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AgendaFatec.Domain\AgendaFatec.Domain.csproj" />
+    <ProjectReference Include="..\AgendaFatec.Infrastructure\AgendaFatec.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
   </ItemGroup>
 
 </Project>

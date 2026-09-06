@@ -1,3 +1,5 @@
+using AgendaFatec.Application.Interfaces;
+using AgendaFatec.Application.Services;
 using AgendaFatec.Domain.Interfaces;
 using AgendaFatec.Infrastructure.Data;
 using AgendaFatec.Infrastructure.Services.Siga;
@@ -13,14 +15,23 @@ builder.Services.AddDbContext<AgendaFatecDbContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
-// Injeção de Dependência do Serviço SIGA (Mock para ambiente de desenvolvimento)
+// Injeção de Dependência dos Serviços de Aplicação
+builder.Services.AddScoped<IReservaService, ReservaService>();
+builder.Services.AddScoped<ILaboratorioService, LaboratorioService>();
+
+// Injeção de Dependência do Serviço SIGA (Mock para ambiente de desenvolvimento / offline)
 builder.Services.AddScoped<ISigaAuthService, MockSigaAuthService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "Agenda Fatec API", Version = "v1", Description = "API de Agendamento de Laboratórios - Fatec Araçatuba" });
+    c.SwaggerDoc("v1", new() 
+    { 
+        Title = "Agenda Fatec API", 
+        Version = "v1", 
+        Description = "API de Agendamento de Laboratórios - Fatec Araçatuba (com suporte a ETEC e LGPD)" 
+    });
 });
 
 // Configuração de CORS para integração com o site da Fatec
