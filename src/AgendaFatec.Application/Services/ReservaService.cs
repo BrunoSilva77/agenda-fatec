@@ -192,12 +192,13 @@ public class ReservaService : IReservaService
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            // Recarrega entidades com relacionamentos para retorno formatado
+            // Recarrega entidades com relacionamentos para retorno formatado ordenado cronologicamente
             var ids = novasReservas.Select(r => r.Id).ToList();
             var reservasSalvas = await _context.Reservas
                 .Include(r => r.Laboratorio)
                 .Include(r => r.Usuario)
                 .Where(r => ids.Contains(r.Id))
+                .OrderBy(r => r.DataInicio)
                 .ToListAsync();
 
             return reservasSalvas.Select(MapearParaDto);
