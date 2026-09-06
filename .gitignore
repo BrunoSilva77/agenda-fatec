@@ -1,0 +1,24 @@
+## .gitignore para projetos .NET / C# / Visual Studio
+
+# Build and Output
+bin/
+obj/
+out/
+publish/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs & temp
+*.log
+*.tmp
+TestResults/
+
+# OS Specific
+.DS_Store
+Thumbs.db
