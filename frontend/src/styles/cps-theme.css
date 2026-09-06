@@ -1,0 +1,344 @@
+/* ==========================================================================
+   ESTILOS INSTITUCIONAIS CENTRO PAULA SOUZA / FATEC ARAÇATUBA
+   ========================================================================== */
+
+/* Barra Superior Oficial Governo de São Paulo */
+.sp-gov-bar {
+  background-color: var(--sp-black);
+  color: #FFFFFF;
+  padding: 6px 24px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--cps-red);
+}
+
+.sp-gov-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sp-gov-flag {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  background: linear-gradient(to bottom, #000 33%, #FFF 33%, #FFF 66%, #C00 66%);
+  border-radius: 1px;
+}
+
+/* Header Institucional */
+.cps-header {
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.cps-header-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cps-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cps-logo-badge {
+  background: linear-gradient(135deg, var(--cps-red) 0%, var(--cps-red-dark) 100%);
+  color: #FFFFFF;
+  font-weight: 900;
+  font-size: 1.25rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  letter-spacing: -0.05em;
+  box-shadow: 0 4px 10px rgba(178, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.cps-logo-sub {
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.cps-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.cps-main-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.cps-sub-title {
+  font-size: 0.8rem;
+  color: var(--cps-red);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Navegação e Tabs */
+.cps-nav-tabs {
+  display: flex;
+  gap: 8px;
+  background: #F1F5F9;
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+}
+
+.cps-tab-btn {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cps-tab-btn:hover {
+  color: var(--cps-red);
+}
+
+.cps-tab-btn.active {
+  background: #FFFFFF;
+  color: var(--cps-red);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Cartões de Laboratórios */
+.lab-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.lab-card:hover {
+  transform: translateY(-2px);
+  border-color: #CBD5E1;
+  box-shadow: var(--shadow-md);
+}
+
+.lab-card.active {
+  border-color: var(--cps-red);
+  box-shadow: 0 0 0 3px rgba(178, 0, 0, 0.12), var(--shadow-md);
+  background: #FFFBFB;
+}
+
+.lab-card.etec {
+  border-left-width: 6px;
+  border-left-color: var(--color-etec);
+}
+
+.etec-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-etec);
+  color: var(--color-etec);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-etec);
+}
+
+/* Slots de Horários */
+.slot-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.slot-card.available {
+  border-left: 4px solid var(--color-available);
+  background: #FAFCFA;
+}
+
+.slot-card.available:hover {
+  background: var(--bg-available);
+  border-color: var(--border-available);
+}
+
+.slot-card.occupied {
+  border-left: 4px solid var(--color-occupied);
+  background: #FFFDFD;
+}
+
+.slot-card.conflict {
+  border-left: 4px solid var(--color-conflict);
+  background: var(--bg-conflict);
+}
+
+/* Modais */
+.cps-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.cps-modal-content {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  max-width: 540px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  animation: modalIn 0.25s ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.cps-modal-header {
+  background: linear-gradient(to right, #F8FAFC, #FFFFFF);
+  border-bottom: 1px solid var(--border-light);
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cps-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Botões Oficiais */
+.btn-cps {
+  background-color: var(--cps-red);
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(178, 0, 0, 0.2);
+}
+
+.btn-cps:hover {
+  background-color: var(--cps-red-hover);
+  box-shadow: 0 4px 8px rgba(178, 0, 0, 0.3);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-outline:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+/* Alerta Informativo LGPD */
+.lgpd-banner {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-left: 4px solid var(--sp-blue);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Footer Institucional */
+.cps-footer {
+  background-color: #1E293B;
+  color: #94A3B8;
+  font-size: 0.85rem;
+  padding: 36px 24px 24px;
+  margin-top: 60px;
+  border-top: 4px solid var(--cps-red);
+}
+
+.cps-footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cps-footer-bottom {
+  max-width: 1280px;
+  margin: 16px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 0.78rem;
+}
