@@ -41,10 +41,9 @@ public class ReservaConfiguration : IEntityTypeConfiguration<Reserva>
             .IsRequired();
 
         // CONTROLE DE CONCORRÊNCIA OTIMISTA:
-        // Configura RowVersion (SQL Server timestamp) como concurrency token no EF Core
         builder.Property(r => r.RowVersion)
-            .IsRowVersion()
-            .IsConcurrencyToken();
+            .IsConcurrencyToken()
+            .ValueGeneratedOnAdd();
 
         // Relacionamentos
         builder.HasOne(r => r.Laboratorio)
