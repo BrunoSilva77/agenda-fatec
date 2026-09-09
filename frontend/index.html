@@ -988,7 +988,7 @@ function renderAuditoria() {
 }
 
 function showSection(name) {
-  if (name === 'coordenador' && !coordenadorLogado) {
+  if ((name === 'coordenador' || name === 'auditoria') && !coordenadorLogado) {
     abrirLogin();
     return;
   }
