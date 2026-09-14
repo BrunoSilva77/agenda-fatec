@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda Fatec Araçatuba - Agendamento de Laboratórios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,600,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Source Sans Pro', sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 26px;
+      color: #000;
+      background: #fff;
+    }
+    a { text-decoration: none !important; transition: all .3s ease-in-out; }
+    h1,h2,h3,h4,h5,h6 { color: #232323; font-family: 'Source Sans Pro', sans-serif; }
+
+    /* TOPBAR - identico ao site */
+    .topbar {
+      border-bottom: 1px solid #eee;
+      background-color: #fff;
+      padding: 9px 15px;
+    }
+    .topbar .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; max-width: 1170px; margin: 0 auto; }
+    .topbar ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 10px; }
+    .topbar li, .topbar a { color: #757575; font-size: 13px; font-weight: 400; }
+    .topbar .fa-facebook { color: #3b5998; }
+    .topbar .fa-instagram { color: #e1306c; }
+    .topbar .fa-tiktok { color: #000; }
+    .topbar i { margin-right: 3px; }
+    .buttonLogin {
+      background-color: #cc3b3b;
+      color: white;
+      padding: 4px 16px;
+      border: none;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .buttonLogin:hover { background-color: #8a0101; }
+
+    /* HEADER - identico ao site */
+    .site-header {
+      padding: 20px 0;
+      background-color: #fff;
+      border-bottom: 1px solid #eee;
+    }
+    .site-header .container { max-width: 1170px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .logo-area img { height: 75px; width: 120px; }
+    .logo-text h1 { font-size: 22px; color: #8b1a1a; margin: 0; line-height: 1.1; font-weight: 600; }
+    .logo-text small { font-size: 12px; color: #757575; }
+    nav.main-nav { display: flex; gap: 0; }
+    nav.main-nav a {
+      color: #8b1a1a !important;
+      font-size: 15px;
+      font-weight: 400;
+      padding: 17px 14px 3px;
+      border-bottom: 3px solid transparent;
+      display: inline-block;
+      position: relative;
+    }
+    nav.main-nav a:hover, nav.main-nav a.active {
+      border-bottom-color: #cc3b3b;
+    }
+
+    /* HERO / SPOTLIGHT - estilo Fatec */
+    .hero {
+      background: url('https://fatecaracatuba.edu.br/novo/resources/img/fatec2.jpg') center/cover no-repeat;
+      position: relative;
+      padding: 120px 0;
+      text-align: center;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(204,59,59,.85);
+    }
+    .hero .container { position: relative; z-index: 1; max-width: 1170px; margin: 0 auto; }
+    .hero h2 { color: #fff; font-size: 42px; font-weight: 300; margin-bottom: 10px; }
+    .hero p { color: rgba(255,255,255,.9); font-size: 18px; max-width: 650px; margin: 0 auto 20px; }
+
+    /* SECTIONS */
+    .section { padding: 80px 0; background: #fff; }
+    .section.lb { background: #f1f6f7; }
+    .section-title { text-align: center; margin-bottom: 42px; }
+    .section-title small { font-size: 16px; color: #767676; display: block; margin-bottom: 4px; }
+    .section-title h3 { font-size: 34px; font-weight: 300; margin: 0 0 10px; line-height: 1; }
+    .section-title hr { width: 80px; margin: 10px auto 20px; border: 1px dotted #ccc; }
+
+    /* CONTAINER */
+    .container { max-width: 1170px; margin: 0 auto; padding: 0 15px; }
+
+    /* LAB GRID */
+    .lab-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+    .lab-card {
+      background: #f1f6f7;
+      border: 4px solid #f7fafb;
+      border-top: 6px solid #f7fafb;
+      padding: 30px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .3s ease-in-out;
+      position: relative;
+      overflow: hidden;
+    }
+    .lab-card:hover {
+      border-color: #f7fafb;
+      border-top-color: #cc3b3b;
+      box-shadow: 0 10px 5px 0px rgba(226,228,229,.5);
+    }
+    .lab-card.selected {
+      border-color: #cc3b3b;
+      border-top-color: #cc3b3b;
+      background: #fff;
+      box-shadow: 0 10px 5px 0px rgba(226,228,229,.5);
+    }
+    .lab-card .lab-icon { font-size: 50px; color: #cc3b3b; margin-bottom: 15px; }
+    .lab-card h4 { color: #232323; margin: 0 0 6px; font-size: 18px; font-weight: 600; }
+    .lab-card p { color: #757575; font-size: 14px; margin: 0; }
+    .badge-etec {
+      background: #cc3b3b;
+      color: #fff;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 8px;
+      display: inline-block;
+      font-weight: 600;
+    }
+
+    /* DATE BAR */
+    .date-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      background: #f1f6f7;
+      padding: 16px 24px;
+      border-radius: 4px;
+    }
+    .date-bar label { font-weight: 600; color: #232323; font-size: 15px; }
+    .date-bar input[type="date"] {
+      border: 1px solid #e4e5e6;
+      border-radius: 4px;
+      padding: 8px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+    }
+    .date-bar input[type="date"]:focus { outline: none; border-color: #8b1a1a; }
+
+    /* SCHEDULE TABLE */
+    .schedule-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .schedule-table th {
+      background: #8b1a1a;
+      color: #fff;
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .schedule-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f1f1;
+      vertical-align: middle;
+    }
+    .schedule-table tr:hover td { background: #f9f9f9; }
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .status-livre { background: #fff3e0; color: #e65100; }
+    .status-ocupado { background: #fce4ec; color: #c62828; }
+    .status-conflito { background: #fce4ec; color: #b71c1c; }
+    .status-confirmada { background: #fbe9e7; color: #d84315; }
+    .btn-reservar {
+      background: #cc3b3b;
+      color: #fff;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background .2s;
+    }
+    .btn-reservar:hover { background: #a02e2e; }
+
+    /* CARD */
+    .card {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 10px 10px 5px 0px rgba(226,228,229,1);
+      overflow: hidden;
+    }
+    .card-header {
+      background: #cc3b3b;
+      color: #fff;
+      padding: 16px 24px;
+      font-weight: 600;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-body { padding: 24px; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 4px;
+      width: 90%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,.25);
+    }
+    .modal-header {
+      background: #cc3b3b;
+      color: #fff;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { font-size: 18px; margin: 0; font-weight: 600; }
+    .modal-close { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+    .modal-body { padding: 24px; }
+    .modal-body label { display: block; font-weight: 600; margin-bottom: 4px; color: #232323; font-size: 14px; }
+    .modal-body input, .modal-body select, .modal-body textarea {
+      width: 100%;
+      border: 1px solid #e4e5e6;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 16px;
+      background: #f1f6f7;
+    }
+    .modal-body input:focus, .modal-body select:focus, .modal-body textarea:focus { outline: none; border-color: #8b1a1a; background: #fff; }
+    .modal-footer { padding: 0 24px 24px; display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-primary {
+      background: #cc3b3b;
+      color: #fff;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 3px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background .2s;
+    }
+    .btn-primary:hover { background: #a02e2e; }
+    .btn-secondary {
+      background: #e4e5e6;
+      color: #232323;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 3px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-secondary:hover { background: #d0d0d0; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid #e4e5e6; }
+    .tab-btn {
+      padding: 14px 28px;
+      border: none;
+      background: #f1f6f7;
+      color: #757575;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all .2s;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+    .tab-btn.active { background: #fff; color: #8b1a1a; border-bottom-color: #cc3b3b; }
+    .tab-content { display: none; background: #fff; padding: 24px; border-radius: 0 0 4px 4px; }
+    .tab-content.active { display: block; }
+
+    /* AUDIT TABLE */
+    .audit-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .audit-table th { background: #8b1a1a; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+    .audit-table td { padding: 10px 14px; border-bottom: 1px solid #f1f1f1; }
+    .audit-table tr:hover td { background: #f9f9f9; }
+
+    /* CONFLICT CARD */
+    .conflict-card {
+      border: 2px solid #c62828;
+      border-radius: 4px;
+      padding: 20px;
+      margin-bottom: 16px;
+      background: #fce4ec;
+    }
+    .conflict-card h4 { color: #b71c1c; margin: 0 0 10px; font-size: 17px; font-weight: 600; }
+    .conflict-card p { margin: 4px 0; font-size: 14px; color: #555; }
+    .conflict-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .btn-approve { background: #2e7d32; color: #fff; border: none; padding: 7px 18px; border-radius: 3px; cursor: pointer; font-weight: 600; font-size: 13px; }
+    .btn-reject { background: #c62828; color: #fff; border: none; padding: 7px 18px; border-radius: 3px; cursor: pointer; font-weight: 600; font-size: 13px; }
+
+    /* FOOTER - identico ao site */
+    .footer {
+      background: #232323;
+      color: #ccc;
+      padding: 40px 0 20px;
+    }
+    .footer .container { max-width: 1170px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 30px; }
+    .footer h4 { color: #fff; font-size: 16px; margin-bottom: 14px; font-weight: 600; }
+    .footer p, .footer li { font-size: 14px; line-height: 2; color: #999; }
+    .footer ul { list-style: none; padding: 0; }
+    .footer a { color: #999; text-decoration: none; }
+    .footer a:hover { color: #fff; }
+    .footer-bottom {
+      text-align: center;
+      border-top: 1px solid #333;
+      margin-top: 24px;
+      padding-top: 16px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #cc3b3b;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 4px;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      z-index: 2000;
+      display: none;
+    }
+    .toast.error { background: #c62828; }
+    .toast.show { display: block; animation: slideUp .3s ease; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* CALLOUT */
+    .callout {
+      padding: 30px;
+      background-color: #fff;
+      box-shadow: 10px 10px 5px 0px rgba(226,228,229,1);
+      border-radius: 4px;
+      margin-top: 40px;
+    }
+    .callout p { font-size: 22px; margin: 0; }
+    .btn-transparent {
+      display: inline-block;
+      border: 2px solid #cc3b3b;
+      color: #cc3b3b;
+      padding: 10px 30px;
+      border-radius: 3px;
+      font-weight: 600;
+      transition: all .3s;
+    }
+    .btn-transparent:hover { background: #cc3b3b; color: #fff; }
+
+    /* RESPONSIVE */
+    @media (max-width: 992px) {
+      .lab-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer .container { grid-template-columns: 1fr 1fr; }
+      nav.main-nav { display: none; }
+    }
+    @media (max-width: 576px) {
+      .lab-grid { grid-template-columns: 1fr; }
+      .hero h2 { font-size: 28px; }
+      .schedule-table { font-size: 12px; }
+      .footer .container { grid-template-columns: 1fr; }
+    }
+
+    /* LOGIN MODAL */
+    .login-icon { text-align: center; margin-bottom: 20px; }
+    .login-icon i { font-size: 60px; color: #cc3b3b; }
+    .login-error { background: #fce4ec; color: #c62828; padding: 10px 14px; border-radius: 4px; font-size: 13px; margin-bottom: 14px; display: none; border-left: 4px solid #c62828; }
+    .login-error.show { display: block; }
+    .login-hint { text-align: center; margin-top: 14px; font-size: 12px; color: #999; }
+
+    /* USER BADGE */
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fce4ec;
+      padding: 4px 14px 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #8b1a1a;
+    }
+    .user-badge i { font-size: 14px; }
+    .user-badge .btn-logout {
+      background: none;
+      border: none;
+      color: #c62828;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0 0 0 8px;
+      border-left: 1px solid #e4e5e6;
+      margin-left: 4px;
+    }
+    .user-badge .btn-logout:hover { color: #8a0101; }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="container">
+    <ul>
+      <li>Acompanhe nossas Redes:</li>
+      <li><a href="https://www.facebook.com/fatecaracatuba/" target="_blank"><i class="fab fa-facebook"></i></a></li>
+      <li><a href="https://www.instagram.com/fatec177/" target="_blank"><i class="fab fa-instagram"></i></a></li>
+      <li><a href="https://www.tiktok.com/@fatec177" target="_blank"><i class="fab fa-tiktok"></i></a></li>
+    </ul>
+    <ul>
+      <li><i class="fa fa-clock-o"></i> Seg à Sex 7h30-11h30, 13h-17h</li>
+      <li><i class="fa fa-phone"></i> (18) 3625-9914</li>
+      <li id="loginArea"><button class="buttonLogin" onclick="abrirLogin()"><i class="fa fa-sign-in"></i> Login Coordenador</button></li>
+    </ul>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container">
+    <div class="logo-area">
+      <img src="https://fatecaracatuba.edu.br/novo/resources/img/logo-fatec.png" alt="Fatec Araçatuba">
+      <div class="logo-text">
+        <h1>Agenda Fatec</h1>
+        <small>Agendamento de Laboratórios</small>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <a href="#" class="active" onclick="showSection('agendamento')">Agendamento</a>
+      <a href="#" onclick="showSection('coordenador')">Coordenador</a>
+      <a href="#" onclick="showSection('auditoria')">Auditoria LGPD</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <h2>Sistema de Agendamento de Laboratórios</h2>
+    <p>Agendamento de laboratórios da Fatec Araçatuba com suporte a ETEC e conformidade LGPD</p>
+  </div>
+</section>
+
+<!-- AGENDAMENTO -->
+<section class="section" id="sec-agendamento">
+  <div class="container">
+    <div class="section-title">
+      <small>Bem vindo a Fatec Araçatuba</small>
+      <h3>Selecione o Laboratório</h3>
+      <hr>
+    </div>
+    <div class="lab-grid" id="labGrid"></div>
+
+    <div class="date-bar" id="dateBar" style="display:none;">
+      <label><i class="fa fa-calendar"></i> Data:</label>
+      <input type="date" id="inputDate" onchange="carregarGrade()">
+      <span id="dateInfo" style="color:#757575; font-size:14px;"></span>
+    </div>
+
+    <div id="gradeContainer" style="display:none;">
+      <div class="card">
+        <div class="card-header"><i class="fa fa-table"></i> Grade de Horários - <span id="labNomeGrade"></span></div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="schedule-table" id="scheduleTable">
+            <thead>
+              <tr>
+                <th>Horário</th>
+                <th>Turno</th>
+                <th>Status</th>
+                <th>Ocupação</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAINEL COORDENADOR -->
+<section class="section lb" id="sec-coordenador" style="display:none;">
+  <div class="container">
+    <div class="section-title">
+      <small>Gestão de Reservas</small>
+      <h3>Painel do Coordenador</h3>
+      <hr>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab(this, 'tab-conflitos')">Conflitos Pendentes</button>
+      <button class="tab-btn" onclick="showTab(this, 'tab-reservas')">Todas as Reservas</button>
+    </div>
+    <div class="tab-content active" id="tab-conflitos">
+      <div id="conflitosList"></div>
+    </div>
+    <div class="tab-content" id="tab-reservas">
+      <table class="audit-table">
+        <thead>
+          <tr><th>Laboratório</th><th>Professor</th><th>Disciplina</th><th>Data/Horário</th><th>Status</th></tr>
+        </thead>
+        <tbody id="reservasTable"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- AUDITORIA LGPD -->
+<section class="section" id="sec-auditoria" style="display:none;">
+  <div class="container">
+    <div class="section-title">
+      <small>Conformidade</small>
+      <h3>Trilha de Auditoria LGPD</h3>
+      <hr>
+    </div>
+    <div class="card">
+      <div class="card-body" style="overflow-x:auto;">
+        <table class="audit-table">
+          <thead>
+            <tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Entidade</th><th>Detalhes</th><th>IP</th></tr>
+          </thead>
+          <tbody id="auditTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALLOUT -->
+<section class="section lb" style="padding: 42px 0 !important;">
+  <div class="container">
+    <div class="callout" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;">
+      <p style="flex:1;">Ficou com dúvidas? Procure a coordenação do curso.</p>
+      <a href="https://fatecaracatuba.edu.br/novo/contato" class="btn-transparent" target="_blank">Contate-nos</a>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL RESERVA -->
+<div class="modal-overlay" id="modalReserva">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-plus-circle"></i> Nova Reserva</h3>
+      <button class="modal-close" onclick="fecharModal('modalReserva')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="reservaSlotId">
+      <input type="hidden" id="reservaData">
+      <p id="reservaInfo" style="background:#fce4ec; padding:12px; border-radius:4px; font-size:14px; margin-bottom:16px; border-left:4px solid #cc3b3b;"></p>
+      <label>Finalidade / Disciplina *</label>
+      <input type="text" id="reservaFinalidade" placeholder="Ex: Estruturas de Dados">
+      <label>Nome do Professor *</label>
+      <input type="text" id="reservaProfessor" placeholder="Ex: Prof. Carlos Eduardo">
+      <label>E-mail Institucional *</label>
+      <input type="email" id="reservaEmail" placeholder="Ex: carlos.eduardo@fatec.sp.gov.br">
+      <label>Observação</label>
+      <textarea id="reservaObs" rows="2" placeholder="Ex: Necessita projetor"></textarea>
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" id="reservaRecorrente" style="width:auto; margin:0;"> Agendamento Recorrente (semanal)
+      </label>
+      <div id="recorrenciaOpts" style="display:none; margin-top:8px;">
+        <label>Quantas semanas? (máx. 4)</label>
+        <input type="number" id="reservaSemanas" min="1" max="4" value="2">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="fecharModal('modalReserva')">Cancelar</button>
+      <button class="btn-primary" onclick="confirmarReserva()"><i class="fa fa-check"></i> Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFLITO -->
+<div class="modal-overlay" id="modalConflito">
+  <div class="modal">
+    <div class="modal-header" style="background:#c62828;">
+      <h3><i class="fa fa-exclamation-triangle"></i> Resolver Conflito</h3>
+      <button class="modal-close" onclick="fecharModal('modalConflito')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="conflitoReservaId">
+      <p id="conflitoInfo" style="background:#fce4ec; padding:12px; border-radius:4px; font-size:14px; margin-bottom:16px; border-left:4px solid #c62828;"></p>
+      <label>Decisão *</label>
+      <select id="conflitoDecisao">
+        <option value="">Selecione...</option>
+        <option value="1">Confirmar Reserva</option>
+        <option value="3">Cancelar Reserva</option>
+      </select>
+      <label>Justificativa *</label>
+      <textarea id="conflitoJustificativa" rows="3" placeholder="Descreva o motivo da decisão..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="fecharModal('modalConflito')">Fechar</button>
+      <button class="btn-primary" style="background:#c62828;" onclick="resolverConflito()"><i class="fa fa-gavel"></i> Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LOGIN COORDENADOR -->
+<div class="modal-overlay" id="modalLogin">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h3><i class="fa fa-lock"></i> Acesso Coordenador</h3>
+      <button class="modal-close" onclick="fecharModal('modalLogin')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="login-icon"><i class="fa fa-user-shield"></i></div>
+      <div class="login-error" id="loginError">E-mail ou senha inválidos.</div>
+      <label>E-mail Institucional *</label>
+      <input type="email" id="loginEmail" placeholder="Ex: coordenador@fatec.sp.gov.br">
+      <label>Senha *</label>
+      <input type="password" id="loginSenha" placeholder="Digite sua senha">
+      <button class="btn-primary" style="width:100%; margin-top:8px;" onclick="fazerLogin()"><i class="fa fa-sign-in"></i> Entrar</button>
+      <p class="login-hint">Para teste: <strong>coordenador@fatec.sp.gov.br</strong> / <strong>123456</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div>
+      <h4>Estágio</h4>
+      <ul>
+        <li><a href="https://fatecaracatuba.edu.br/novo/estagio" target="_blank">Sobre Estágio</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Trabalho de Graduação</h4>
+      <ul>
+        <li><a href="https://fatecaracatuba.edu.br/novo/trabalho-de-graduacao" target="_blank">Sobre TG</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Links</h4>
+      <ul>
+        <li><a href="https://fatecaracatuba.edu.br/novo" target="_blank">Site Fatec</a></li>
+        <li><a href="https://siga.cps.sp.gov.br/sigaaluno/applogin.aspx" target="_blank">SIGA Alunos</a></li>
+        <li><a href="https://siga.cps.sp.gov.br/fatec/login.aspx" target="_blank">SIGA Professores</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contato e Atendimento</h4>
+      <p><i class="glyphicon glyphicon-pushpin"></i> Av. Prestes Maia, 1764 - Jd. Ipanema, Araçatuba/SP - Cep: 16052-045</p>
+      <p><i class="glyphicon glyphicon-time"></i> Segunda à Sexta-feira das 7h30 às 11h30, das 13h às 17h</p>
+      <p><i class="glyphicon glyphicon-phone"></i> (18) 3625-9914 (Whatsapp)</p>
+      <p><i class="glyphicon glyphicon-envelope"></i> comunicacao.aracatuba@fatec.sp.gov.br</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; 2026 Fatec Araçatuba - Agenda de Laboratórios. Todos os direitos reservados.
+  </div>
+</footer>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+const laboratorios = [
+  { id: 1, nome: 'Laboratório 1', compartilhadoEtec: true, capacidade: 30, ativo: true },
+  { id: 2, nome: 'Laboratório 2', compartilhadoEtec: true, capacidade: 30, ativo: true },
+  { id: 9, nome: 'Laboratório 9', compartilhadoEtec: false, capacidade: 35, ativo: true },
+  { id: 10, nome: 'Laboratório 10', compartilhadoEtec: false, capacidade: 35, ativo: true },
+];
+
+const slotsPadrao = [
+  { id: 1, turno: 'Manhã', horaInicio: '07:30', horaFim: '08:20', descricao: 'Manhã - Bloco 1' },
+  { id: 2, turno: 'Manhã', horaInicio: '08:20', horaFim: '09:10', descricao: 'Manhã - Bloco 2' },
+  { id: 3, turno: 'Manhã', horaInicio: '09:20', horaFim: '10:10', descricao: 'Manhã - Bloco 3' },
+  { id: 4, turno: 'Manhã', horaInicio: '10:10', horaFim: '11:00', descricao: 'Manhã - Bloco 4' },
+  { id: 5, turno: 'Manhã', horaInicio: '11:10', horaFim: '12:00', descricao: 'Manhã - Bloco 5' },
+  { id: 6, turno: 'Manhã', horaInicio: '12:00', horaFim: '12:50', descricao: 'Manhã - Bloco 6' },
+  { id: 7, turno: 'Noite', horaInicio: '18:40', horaFim: '19:30', descricao: 'Noite - Bloco 1' },
+  { id: 8, turno: 'Noite', horaInicio: '19:30', horaFim: '20:20', descricao: 'Noite - Bloco 2' },
+  { id: 9, turno: 'Noite', horaInicio: '20:20', horaFim: '21:10', descricao: 'Noite - Bloco 3' },
+  { id: 10, turno: 'Noite', horaInicio: '21:20', horaFim: '22:10', descricao: 'Noite - Bloco 4' },
+  { id: 11, turno: 'Noite', horaInicio: '22:10', horaFim: '23:00', descricao: 'Noite - Bloco 5' },
+];
+
+const slotsEtec = [
+  { id: 101, turno: 'Tarde', horaInicio: '13:15', horaFim: '14:05', descricao: 'ETEC - Bloco 1' },
+  { id: 102, turno: 'Tarde', horaInicio: '14:05', horaFim: '14:55', descricao: 'ETEC - Bloco 2' },
+  { id: 103, turno: 'Tarde', horaInicio: '15:10', horaFim: '16:00', descricao: 'ETEC - Bloco 3' },
+];
+
+let reservas = [
+  { id: '1', laboratorioId: 1, usuarioNome: 'Prof. Carlos Eduardo', finalidade: 'Estruturas de Dados', dataInicio: hojeStr() + 'T07:30:00', dataFim: hojeStr() + 'T08:20:00', status: 1 },
+  { id: '2', laboratorioId: 2, usuarioNome: 'Profa. Juliana Santos', finalidade: 'Banco de Dados SQL', dataInicio: hojeStr() + 'T19:30:00', dataFim: hojeStr() + 'T21:10:00', status: 1 },
+  { id: '3', laboratorioId: 9, usuarioNome: 'Prof. Carlos Eduardo', finalidade: 'Inteligência Artificial', dataInicio: hojeStr() + 'T20:20:00', dataFim: hojeStr() + 'T22:10:00', status: 2 },
+];
+
+let auditorias = [
+  { id: 1, usuarioEmail: 'carlos.eduardo@fatec.sp.gov.br', acao: 'CRIACAO_RESERVA', entidadeAfetada: 'Reserva', registroId: '1', detalhes: 'Reserva criada para Lab 1 (Estruturas de Dados).', ipOrigem: '189.19.45.12', dataHoraUtc: new Date(Date.now() - 3600000).toISOString() },
+  { id: 2, usuarioEmail: 'marcelo.oliveira@fatec.sp.gov.br', acao: 'RESOLUCAO_CONFLITO', entidadeAfetada: 'Reserva', registroId: '3', detalhes: 'Conflito identificado para deliberação institucional.', ipOrigem: '189.19.45.2', dataHoraUtc: new Date().toISOString() },
+];
+
+let labSelecionado = null;
+let coordenadorLogado = false;
+let coordenadorEmail = '';
+const SESSAO_DURACAO = 24 * 60 * 60 * 1000; // 1 dia
+
+// Usuários mock (simula o SIGA)
+const usuariosCoord = [
+  { email: 'coordenador@fatec.sp.gov.br', senha: '123456', nome: 'Prof. Marcelo Oliveira', perfil: 'Coordenador' },
+  { email: 'admin@fatec.sp.gov.br', senha: 'admin', nome: 'Admin Sistema', perfil: 'Administrador' },
+];
+
+function hojeStr() { return new Date().toISOString().split('T')[0]; }
+
+// Verifica se a sessão ainda é válida
+function verificarSessao() {
+  const loginTime = localStorage.getItem('fatec_login_time');
+  if (!loginTime) return false;
+  if (Date.now() - parseInt(loginTime) > SESSAO_DURACAO) {
+    localStorage.removeItem('fatec_login_time');
+    localStorage.removeItem('fatec_user');
+    return false;
+  }
+  return true;
+}
+
+// Restaura sessão salva se ainda válida
+function restaurarSessao() {
+  if (verificarSessao()) {
+    const user = JSON.parse(localStorage.getItem('fatec_user'));
+    if (user) {
+      coordenadorLogado = true;
+      coordenadorEmail = user.email;
+    }
+  }
+}
+
+// === LOGIN ===
+function abrirLogin() {
+  document.getElementById('loginEmail').value = localStorage.getItem('fatec_email') || '';
+  document.getElementById('loginSenha').value = '';
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('modalLogin').classList.add('active');
+  setTimeout(() => {
+    const emailSalvo = localStorage.getItem('fatec_email');
+    if (emailSalvo) document.getElementById('loginSenha').focus();
+    else document.getElementById('loginEmail').focus();
+  }, 100);
+}
+
+function fazerLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('loginSenha').value;
+  const user = usuariosCoord.find(u => u.email === email && u.senha === senha);
+
+  if (!user) {
+    document.getElementById('loginError').classList.add('show');
+    return;
+  }
+
+  localStorage.setItem('fatec_email', email);
+  localStorage.setItem('fatec_user', JSON.stringify(user));
+  localStorage.setItem('fatec_login_time', String(Date.now()));
+
+  coordenadorLogado = true;
+  coordenadorEmail = user.email;
+  fecharModal('modalLogin');
+  renderUserBadge();
+  showToast(`Bem-vindo, ${user.nome}!`);
+  showSection('coordenador');
+  document.querySelectorAll('nav.main-nav a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('nav.main-nav a')[1].classList.add('active');
+}
+
+function logout() {
+  coordenadorLogado = false;
+  coordenadorEmail = '';
+  localStorage.removeItem('fatec_user');
+  localStorage.removeItem('fatec_login_time');
+  renderUserBadge();
+  showSection('agendamento');
+  document.querySelectorAll('nav.main-nav a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('nav.main-nav a')[0].classList.add('active');
+  showToast('Logout realizado com sucesso.');
+}
+
+function renderUserBadge() {
+  const area = document.getElementById('loginArea');
+  if (coordenadorLogado) {
+    const user = usuariosCoord.find(u => u.email === coordenadorEmail);
+    area.innerHTML = `<span class="user-badge"><i class="fa fa-user-shield"></i> ${user?.nome || coordenadorEmail} <button class="btn-logout" onclick="logout()" title="Sair"><i class="fa fa-sign-out"></i></button></span>`;
+  } else {
+    const emailSalvo = localStorage.getItem('fatec_email');
+    const label = emailSalvo ? 'Entrar' : 'Login Coordenador';
+    area.innerHTML = `<button class="buttonLogin" onclick="abrirLogin()"><i class="fa fa-sign-in"></i> ${label}</button>`;
+  }
+}
+
+// Enter no login
+document.getElementById('loginSenha').addEventListener('keydown', function(e) { if (e.key === 'Enter') fazerLogin(); });
+
+function renderLabs() {
+  document.getElementById('labGrid').innerHTML = laboratorios.map(l => `
+    <div class="lab-card ${labSelecionado === l.id ? 'selected' : ''}" onclick="selecionarLab(${l.id})">
+      <div class="lab-icon"><i class="fa fa-desktop"></i></div>
+      <h4>${l.nome}</h4>
+      <p>Capacidade: ${l.capacidade} alunos</p>
+      ${l.compartilhadoEtec ? '<span class="badge-etec">Compartilhado ETEC</span>' : ''}
+    </div>
+  `).join('');
+}
+
+function selecionarLab(id) {
+  labSelecionado = id;
+  renderLabs();
+  document.getElementById('dateBar').style.display = 'flex';
+  document.getElementById('gradeContainer').style.display = 'none';
+  document.getElementById('inputDate').value = hojeStr();
+  carregarGrade();
+}
+
+function carregarGrade() {
+  if (!labSelecionado) return;
+  const data = document.getElementById('inputDate').value;
+  if (!data) return;
+  const lab = laboratorios.find(l => l.id === labSelecionado);
+  let slots = [...slotsPadrao];
+  if (lab.compartilhadoEtec) slots = [...slots, ...slotsEtec];
+
+  document.getElementById('gradeContainer').style.display = 'block';
+  document.getElementById('labNomeGrade').textContent = lab.nome;
+  document.getElementById('dateInfo').textContent = new Date(data + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+  document.getElementById('scheduleBody').innerHTML = slots.map(s => {
+    const ini = data + 'T' + s.horaInicio + ':00';
+    const fim = data + 'T' + s.horaFim + ':00';
+    const r = reservas.find(r => r.laboratorioId === labSelecionado && r.status !== 3 && r.dataInicio < fim && r.dataFim > ini);
+    const livre = !r;
+    const sClass = livre ? 'status-livre' : (r.status === 2 ? 'status-conflito' : 'status-ocupado');
+    const sText = livre ? 'Livre' : (r.status === 2 ? 'Conflito' : 'Ocupado');
+    return `<tr>
+      <td><strong>${s.horaInicio} - ${s.horaFim}</strong></td>
+      <td>${s.turno}</td>
+      <td><span class="status-badge ${sClass}">${sText}</span></td>
+      <td>${livre ? '-' : r.usuarioNome + ' - ' + r.finalidade}</td>
+      <td>${livre
+        ? `<button class="btn-reservar" onclick="abrirModalReserva(${s.id},'${data}','${s.horaInicio}','${s.horaFim}','${s.descricao}')"><i class="fa fa-plus"></i> Reservar</button>`
+        : r.status === 2
+          ? `<button class="btn-reservar" style="background:#c62828;" onclick="verConflito('${r.id}')"><i class="fa fa-exclamation"></i> Ver</button>`
+          : '<span style="color:#999;">-</span>'
+      }</td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirModalReserva(slotId, data, hI, hF, desc) {
+  document.getElementById('reservaSlotId').value = slotId;
+  document.getElementById('reservaData').value = data;
+  document.getElementById('reservaInfo').innerHTML = `<i class="fa fa-calendar"></i> <strong>${data}</strong> | <strong>${hI} - ${hF}</strong> | ${desc}`;
+  document.getElementById('reservaFinalidade').value = '';
+  document.getElementById('reservaProfessor').value = '';
+  document.getElementById('reservaEmail').value = '';
+  document.getElementById('reservaObs').value = '';
+  document.getElementById('reservaRecorrente').checked = false;
+  document.getElementById('recorrenciaOpts').style.display = 'none';
+  document.getElementById('modalReserva').classList.add('active');
+}
+
+document.getElementById('reservaRecorrente').addEventListener('change', function() {
+  document.getElementById('recorrenciaOpts').style.display = this.checked ? 'block' : 'none';
+});
+
+function confirmarReserva() {
+  const fin = document.getElementById('reservaFinalidade').value.trim();
+  const prof = document.getElementById('reservaProfessor').value.trim();
+  const email = document.getElementById('reservaEmail').value.trim();
+  if (!fin || !prof || !email) { showToast('Preencha todos os campos obrigatórios.', true); return; }
+
+  const data = document.getElementById('reservaData').value;
+  const slotId = parseInt(document.getElementById('reservaSlotId').value);
+  const slots = laboratorios.find(l => l.id === labSelecionado)?.compartilhadoEtec ? [...slotsPadrao, ...slotsEtec] : [...slotsPadrao];
+  const slot = slots.find(s => s.id === slotId);
+  if (!slot) return;
+
+  const rec = document.getElementById('reservaRecorrente').checked;
+  const sem = rec ? parseInt(document.getElementById('reservaSemanas').value) || 1 : 1;
+  if (sem > 4) { showToast('Máximo de 4 semanas para recorrência.', true); return; }
+
+  for (let i = 0; i < sem; i++) {
+    const d = new Date(data + 'T12:00:00');
+    d.setDate(d.getDate() + (i * 7));
+    const ds = d.toISOString().split('T')[0];
+    const ini = ds + 'T' + slot.horaInicio + ':00';
+    const fim = ds + 'T' + slot.horaFim + ':00';
+    if (reservas.some(r => r.laboratorioId === labSelecionado && r.status !== 3 && r.dataInicio < fim && r.dataFim > ini)) {
+      showToast(`Conflito no dia ${d.toLocaleDateString('pt-BR')}: horário já ocupado.`, true); return;
+    }
+    reservas.push({ id: String(Date.now()+i), laboratorioId: labSelecionado, usuarioNome: prof, usuarioEmail: email, finalidade: fin, dataInicio: ini, dataFim: fim, status: 1, observacao: document.getElementById('reservaObs').value });
+    auditorias.unshift({ id: Date.now()+i, usuarioEmail: email, acao: 'CRIACAO_RESERVA', entidadeAfetada: 'Reserva', registroId: String(Date.now()+i), detalhes: `Reserva criada para Lab ${labSelecionado} (${fin}) - ${ds}.`, ipOrigem: '127.0.0.1', dataHoraUtc: new Date().toISOString() });
+  }
+  fecharModal('modalReserva');
+  showToast(`Reserva confirmada!${sem > 1 ? ' ' + sem + ' semanas.' : ''}`);
+  carregarGrade(); renderCoordenador(); renderAuditoria();
+}
+
+function renderCoordenador() {
+  const conflitos = reservas.filter(r => r.status === 2);
+  document.getElementById('conflitosList').innerHTML = conflitos.length === 0
+    ? '<p style="color:#888;text-align:center;padding:30px;">Nenhum conflito pendente.</p>'
+    : conflitos.map(r => {
+      const lab = laboratorios.find(l => l.id === r.laboratorioId);
+      const df = new Date(r.dataInicio).toLocaleDateString('pt-BR');
+      const hf = r.dataInicio.split('T')[1].substring(0,5) + ' - ' + r.dataFim.split('T')[1].substring(0,5);
+      return `<div class="conflict-card">
+        <h4><i class="fa fa-exclamation-triangle"></i> Conflito - ${lab?.nome || 'Lab '+r.laboratorioId}</h4>
+        <p><strong>Professor:</strong> ${r.usuarioNome}</p>
+        <p><strong>Disciplina:</strong> ${r.finalidade}</p>
+        <p><strong>Data:</strong> ${df} | ${hf}</p>
+        <div class="conflict-actions">
+          <button class="btn-approve" onclick="abrirModalConflito('${r.id}','${r.usuarioNome}','${r.finalidade}','${df}')"><i class="fa fa-check"></i> Resolver</button>
+        </div>
+      </div>`;
+    }).join('');
+
+  document.getElementById('reservasTable').innerHTML = reservas.map(r => {
+    const lab = laboratorios.find(l => l.id === r.laboratorioId);
+    const df = new Date(r.dataInicio).toLocaleDateString('pt-BR');
+    const hf = r.dataInicio.split('T')[1].substring(0,5)+' - '+r.dataFim.split('T')[1].substring(0,5);
+    const sm = {1:['Confirmada','status-confirmada'],2:['Conflito','status-conflito'],3:['Cancelada','status-ocupado']};
+    const [st,sc] = sm[r.status]||['?',''];
+    return `<tr><td>${lab?.nome||'Lab '+r.laboratorioId}</td><td>${r.usuarioNome}</td><td>${r.finalidade}</td><td>${df} ${hf}</td><td><span class="status-badge ${sc}">${st}</span></td></tr>`;
+  }).join('');
+}
+
+function verConflito() {
+  if (!coordenadorLogado) { abrirLogin(); return; }
+  showSection('coordenador');
+  setTimeout(()=>document.querySelector('.tab-btn').click(),100);
+}
+
+function abrirModalConflito(id, prof, fin, data) {
+  document.getElementById('conflitoReservaId').value = id;
+  document.getElementById('conflitoInfo').innerHTML = `<strong>${prof}</strong> - ${fin} em ${data}`;
+  document.getElementById('conflitoDecisao').value = '';
+  document.getElementById('conflitoJustificativa').value = '';
+  document.getElementById('modalConflito').classList.add('active');
+}
+
+function resolverConflito() {
+  const id = document.getElementById('conflitoReservaId').value;
+  const dec = document.getElementById('conflitoDecisao').value;
+  const just = document.getElementById('conflitoJustificativa').value.trim();
+  if (!dec || !just) { showToast('Preencha decisão e justificativa.', true); return; }
+  const r = reservas.find(r => r.id === id);
+  if (r) { r.status = parseInt(dec); r.justificativa = just; auditorias.unshift({id:Date.now(),usuarioEmail:'coordenador@fatec.sp.gov.br',acao:'RESOLUCAO_CONFLITO',entidadeAfetada:'Reserva',registroId:id,detalhes:`Conflito resolvido: status ${dec}. ${just}`,ipOrigem:'127.0.0.1',dataHoraUtc:new Date().toISOString()}); }
+  fecharModal('modalConflito');
+  showToast('Conflito resolvido com sucesso!');
+  carregarGrade(); renderCoordenador(); renderAuditoria();
+}
+
+function renderAuditoria() {
+  document.getElementById('auditTable').innerHTML = auditorias.map(a => {
+    const dt = new Date(a.dataHoraUtc).toLocaleString('pt-BR');
+    return `<tr><td>${dt}</td><td>${a.usuarioEmail}</td><td><span class="status-badge status-confirmada">${a.acao}</span></td><td>${a.entidadeAfetada}</td><td>${a.detalhes}</td><td>${a.ipOrigem}</td></tr>`;
+  }).join('');
+}
+
+function showSection(name) {
+  if ((name === 'coordenador' || name === 'auditoria') && !coordenadorLogado) {
+    abrirLogin();
+    return;
+  }
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  document.getElementById('sec-' + name).style.display = 'block';
+  document.querySelectorAll('nav.main-nav a').forEach(a => a.classList.remove('active'));
+  event.target.classList.add('active');
+  if (name === 'coordenador') renderCoordenador();
+  if (name === 'auditoria') renderAuditoria();
+}
+
+function showTab(btn, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function showToast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+restaurarSessao();
+renderLabs(); renderAuditoria(); renderCoordenador(); renderUserBadge();
+
+fetch(API + '/laboratorios', { signal: AbortSignal.timeout(2000) })
+  .then(r => r.json())
+  .then(d => { if (d?.length) { laboratorios.length = 0; d.forEach(l => laboratorios.push(l)); renderLabs(); } })
+  .catch(() => {});
+</script>
+</body>
+</html>

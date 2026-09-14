@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuração do Banco de Dados SQL Server
+// Configuração do Banco de Dados SQLite
 builder.Services.AddDbContext<AgendaFatecDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-        ?? "Server=(localdb)\\mssqllocaldb;Database=AgendaFatecDb;Trusted_Connection=True;MultipleActiveResultSets=true";
-    options.UseSqlServer(connectionString);
+        ?? "Data Source=AgendaFatec.db";
+    options.UseSqlite(connectionString);
 });
 
 // Injeção de Dependência dos Serviços de Aplicação
@@ -47,6 +47,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AgendaFatecDbContext>();
+    db.Database.EnsureCreated();
+}
 
 if (app.Environment.IsDevelopment())
 {

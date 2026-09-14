@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Cores Oficiais Centro Paula Souza (CPS) & Governo de SP */
+  --cps-red: #B20000;
+  --cps-red-dark: #8A0000;
+  --cps-red-light: #FEE2E2;
+  --cps-red-hover: #9E0000;
+  
+  --sp-black: #121212;
+  --sp-blue: #0F2E5C;
+  --sp-blue-light: #E0E7FF;
+
+  --bg-page: #F4F6F9;
+  --bg-surface: #FFFFFF;
+  --bg-card: #FFFFFF;
+
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+
+  --border-light: #E2E8F0;
+  --border-focus: #B20000;
+
+  /* Estados de Disponibilidade */
+  --color-available: #16A34A;
+  --bg-available: #ECFDF5;
+  --border-available: #A7F3D0;
+
+  --color-occupied: #B20000;
+  --bg-occupied: #FEF2F2;
+  --border-occupied: #FECACA;
+
+  --color-conflict: #D97706;
+  --bg-conflict: #FFFBEB;
+  --border-conflict: #FDE68A;
+
+  --color-etec: #4F46E5;
+  --bg-etec: #EEF2FF;
+  --border-etec: #C7D2FE;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+input, select, textarea {
+  font-family: inherit;
+}
