@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, Clock, AlertTriangle, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { X, Calendar, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export function ModalNovaReserva({ slot, labId, labNome, data, usuario, onClose, onSucesso }) {
   const [finalidade, setFinalidade] = useState('');

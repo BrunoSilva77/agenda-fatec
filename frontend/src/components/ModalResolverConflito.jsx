@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldAlert, AlertCircle, Check } from 'lucide-react';
+import { X, ShieldAlert } from 'lucide-react';
 
 export function ModalResolverConflito({ slot, coordenador, onClose, onSucesso }) {
   const [novoStatus, setNovoStatus] = useState(1); // 1 = Confirmada, 3 = Cancelada

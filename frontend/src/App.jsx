@@ -10,7 +10,7 @@ import { ModalNovaReserva } from './components/ModalNovaReserva';
 import { ModalResolverConflito } from './components/ModalResolverConflito';
 import { PainelCoordenador } from './components/PainelCoordenador';
 import { TrilhaAuditoriaLgpd } from './components/TrilhaAuditoriaLgpd';
-import { CheckCircle2, AlertTriangle, Calendar, Info } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 export default function App() {
   const [usuarioAtivo, setUsuarioAtivo] = useState({
@@ -84,7 +84,10 @@ export default function App() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <HeaderCps
         usuarioAtivo={usuarioAtivo}
-        onTrocarUsuario={setUsuarioAtivo}
+        onTrocarUsuario={(u) => {
+          setUsuarioAtivo(u);
+          if (u.perfil !== 2 && tabAtiva === 'coordenacao') setTabAtiva('mapa');
+        }}
         tabAtiva={tabAtiva}
         onMudarTab={setTabAtiva}
       />

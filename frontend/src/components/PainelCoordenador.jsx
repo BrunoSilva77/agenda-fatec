@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, CheckCircle2, Clock, XCircle, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, AlertTriangle } from 'lucide-react';
 
 export function PainelCoordenador({ reservas, onResolverConflito, onCancelarReserva }) {
   const conflitos = reservas.filter(r => r.status === 2);

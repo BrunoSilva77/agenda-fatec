@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, UserCheck, LogOut, RefreshCw, Calendar, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Calendar, CheckCircle2 } from 'lucide-react';
 
 export function HeaderCps({ usuarioAtivo, onTrocarUsuario, tabAtiva, onMudarTab }) {
   const perfis = [
