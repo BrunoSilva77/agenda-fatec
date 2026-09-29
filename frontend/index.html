@@ -160,7 +160,13 @@
     .date-bar input[type="date"]:focus { outline: none; border-color: #8b1a1a; }
 
     /* SCHEDULE TABLE */
-    .schedule-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .schedule-table { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
+    .schedule-table th:nth-child(1), .schedule-table td:nth-child(1) { width: 18%; }
+    .schedule-table th:nth-child(2), .schedule-table td:nth-child(2) { width: 14%; }
+    .schedule-table th:nth-child(3), .schedule-table td:nth-child(3) { width: 14%; }
+    .schedule-table th:nth-child(4), .schedule-table td:nth-child(4) { width: 36%; }
+    .schedule-table th:nth-child(5), .schedule-table td:nth-child(5) { width: 18%; text-align: center; }
+    .schedule-table th:nth-child(5) { text-align: center; }
     .schedule-table th {
       background: #8b1a1a;
       color: #fff;
@@ -955,7 +961,6 @@ function renderCoordenador() {
 }
 
 function verConflito() {
-  if (!coordenadorLogado) { abrirLogin(); return; }
   showSection('coordenador');
   setTimeout(()=>document.querySelector('.tab-btn').click(),100);
 }
@@ -988,14 +993,10 @@ function renderAuditoria() {
 }
 
 function showSection(name) {
-  if ((name === 'coordenador' || name === 'auditoria') && !coordenadorLogado) {
-    abrirLogin();
-    return;
-  }
   document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
   document.getElementById('sec-' + name).style.display = 'block';
-  document.querySelectorAll('nav.main-nav a').forEach(a => a.classList.remove('active'));
-  event.target.classList.add('active');
+  const idx = { agendamento: 0, coordenador: 1, auditoria: 2 }[name];
+  document.querySelectorAll('nav.main-nav a').forEach((a, i) => a.classList.toggle('active', i === idx));
   if (name === 'coordenador') renderCoordenador();
   if (name === 'auditoria') renderAuditoria();
 }
