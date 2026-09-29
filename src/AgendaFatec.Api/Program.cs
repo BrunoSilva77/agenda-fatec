@@ -1,5 +1,7 @@
 using AgendaFatec.Application.Interfaces;
 using AgendaFatec.Application.Services;
+using AgendaFatec.Domain.Entities;
+using AgendaFatec.Domain.Enums;
 using AgendaFatec.Domain.Interfaces;
 using AgendaFatec.Infrastructure.Data;
 using AgendaFatec.Infrastructure.Services.Siga;
@@ -52,6 +54,20 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AgendaFatecDbContext>();
     db.Database.EnsureCreated();
+
+    // Seed de usuários de demonstração (HasData não se aplica a bancos já criados)
+    var usuariosDemo = new[]
+    {
+        new Usuario { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Nome = "Prof. Carlos Eduardo", Email = "carlos.eduardo@fatec.sp.gov.br", SigaId = "SIGA-PROF-1001", Perfil = PerfilUsuario.Professor },
+        new Usuario { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), Nome = "Profa. Juliana Santos", Email = "juliana.santos@fatec.sp.gov.br", SigaId = "SIGA-PROF-1002", Perfil = PerfilUsuario.Professor },
+        new Usuario { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Nome = "Coord. Marcelo Oliveira", Email = "marcelo.oliveira@fatec.sp.gov.br", SigaId = "SIGA-COORD-2001", Perfil = PerfilUsuario.Coordenador }
+    };
+    foreach (var u in usuariosDemo)
+    {
+        if (!db.Usuarios.Any(x => x.Email == u.Email))
+            db.Usuarios.Add(u);
+    }
+    db.SaveChanges();
 }
 
 if (app.Environment.IsDevelopment())
