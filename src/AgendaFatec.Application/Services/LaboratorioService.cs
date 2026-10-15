@@ -72,10 +72,12 @@ public class LaboratorioService : ILaboratorioService
         }
 
         // Caso contrário, retorna a grade padrão global da Fatec
+        // Ordenação em memória: o SQLite não suporta ORDER BY em TimeSpan
         var slotsPadrao = await _context.SlotsHorario
             .Where(s => s.LaboratorioId == null && s.Ativo)
-            .OrderBy(s => s.HoraInicio)
             .ToListAsync();
+
+        slotsPadrao = slotsPadrao.OrderBy(s => s.HoraInicio).ToList();
 
         return slotsPadrao.Select(s => new SlotHorarioDto
         {
