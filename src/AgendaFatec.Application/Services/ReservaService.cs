@@ -61,8 +61,11 @@ public class ReservaService : IReservaService
 
         // Busca os slots aplicáveis: se o laboratório tiver slots próprios (ex: ETEC), usa eles; senão, usa os globais da Fatec
         var slots = laboratorio.SlotsHorario.Any(s => s.Ativo)
-            ? laboratorio.SlotsHorario.Where(s => s.Ativo).OrderBy(s => s.HoraInicio).ToList()
-            : await _context.SlotsHorario.Where(s => s.LaboratorioId == null && s.Ativo).OrderBy(s => s.HoraInicio).ToListAsync();
+            ? laboratorio.SlotsHorario.Where(s => s.Ativo).ToList()
+            : (await _context.SlotsHorario.Where(s => s.LaboratorioId == null && s.Ativo).ToListAsync());
+
+        // Ordenação em memória: o SQLite não suporta ORDER BY em TimeSpan
+        slots = slots.OrderBy(s => s.HoraInicio).ToList();
 
         var inicioDia = data.Date;
         var fimDia = data.Date.AddDays(1);
