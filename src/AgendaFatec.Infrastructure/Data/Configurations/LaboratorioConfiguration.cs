@@ -13,7 +13,7 @@ public class LaboratorioConfiguration : IEntityTypeConfiguration<Laboratorio>
         builder.HasKey(l => l.Id);
         // Desativa identity para permitir IDs fixos definidos pela instituição (1, 2, 9, 10)
         builder.Property(l => l.Id)
-            .ValueGeneratedNever();
+            .UseIdentityColumn();
 
         builder.Property(l => l.Nome)
             .IsRequired()

@@ -2,255 +2,35 @@ import React, { useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, MousePointerClick } from 'lucide-react';
 import { estiloLab } from './labCores';
 
-const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-const NOMES_MESES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
-
-const strData = (d) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const NOMES_MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const strData = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const addDays = (date, n) => { const d = new Date(date); d.setDate(d.getDate()+n); return d; };
+const weekStart = date => addDays(date, -((date.getDay()+6)%7));
+const formatDay = date => date.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
 
 export function CalendarioMes({ laboratorioId, labInfo, reservas, usuarioAtivo, onSelecionarDia }) {
-  const hojeStr = new Date().toISOString().split('T')[0];
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const hojeStr = strData(hoje);
   const cor = estiloLab(laboratorioId);
   const nomeLab = labInfo?.nome || `Laboratório ${laboratorioId}`;
-  const [mesAtual, setMesAtual] = useState(() => {
-    const d = new Date();
-    d.setDate(1);
-    return d;
-  });
-
-  const mudarMes = (delta) => {
-    setMesAtual(new Date(mesAtual.getFullYear(), mesAtual.getMonth() + delta, 1));
-  };
-
-  // Reservas do dia SEM filtro de laboratório: o calendário mostra o resumo
-  // geral do dia (todos os labs, pontinhos coloridos por lab). O filtro de lab
-  // só entra na hora de criar a reserva (ModalNovaReserva → api.criarReserva).
-  const reservasDoDia = (data) =>
-    reservas.filter(
-      (r) => r.status !== 3 && r.dataInicio.startsWith(data)
-    );
-
-  const primeiroDia = new Date(mesAtual.getFullYear(), mesAtual.getMonth(), 1).getDay();
-  const totalDias = new Date(mesAtual.getFullYear(), mesAtual.getMonth() + 1, 0).getDate();
-
-  const celulas = [];
-  for (let i = 0; i < primeiroDia; i++) celulas.push({ vazia: true, key: `vazia-${i}` });
-  for (let d = 1; d <= totalDias; d++) {
-    const data = strData(new Date(mesAtual.getFullYear(), mesAtual.getMonth(), d));
-    celulas.push({ data, dia: d, key: data });
-  }
-
-  return (
-    <div style={{
-      background: '#FFFFFF',
-      borderRadius: 'var(--radius-lg)',
-      border: '1px solid var(--border-light)',
-      overflow: 'hidden',
-      boxShadow: 'var(--shadow-sm)'
-    }}>
-      {/* Cabeçalho do calendário */}
-      <div style={{
-        background: `linear-gradient(to right, ${cor.soft}, #FFFFFF)`,
-        borderBottom: `1px solid ${cor.border}`,
-        padding: '18px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px'
-      }}>
-        <div>
-          <h2 style={{
-            fontSize: '1.1rem',
-            fontWeight: 800,
-            color: cor.text,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span style={{
-              width: 14, height: 14, borderRadius: '4px',
-              background: cor.solid, flexShrink: 0
-            }} />
-            <Calendar size={20} color={cor.solid} /> {nomeLab}
-          </h2>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-            Clique em um dia para reservar sua aula • {usuarioAtivo ? `Logado como ${usuarioAtivo.nome}` : 'Faça login para agendar'}
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
-            onClick={() => mudarMes(-1)}
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid var(--border-light)',
-              borderRadius: 'var(--radius-md)',
-              width: 34, height: 34,
-              cursor: 'pointer',
-              color: 'var(--cps-red)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}
-            title="Mês anterior"
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-primary)', minWidth: 170, textAlign: 'center' }}>
-            {NOMES_MESES[mesAtual.getMonth()]} de {mesAtual.getFullYear()}
-          </span>
-          <button
-            onClick={() => mudarMes(1)}
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid var(--border-light)',
-              borderRadius: 'var(--radius-md)',
-              width: 34, height: 34,
-              cursor: 'pointer',
-              color: 'var(--cps-red)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}
-            title="Próximo mês"
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
-      </div>
-
-      {/* Legenda */}
-      <div style={{
-        display: 'flex', gap: '18px', flexWrap: 'wrap',
-        padding: '12px 24px 0',
-        fontSize: '0.75rem', color: 'var(--text-secondary)'
-      }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <i style={{ width: 9, height: 9, borderRadius: '50%', background: '#10B981', display: 'inline-block' }} /> Livre
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <i style={{ width: 9, height: 9, borderRadius: '50%', background: cor.solid, display: 'inline-block' }} /> Com reserva
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <i style={{ width: 9, height: 9, borderRadius: '50%', background: '#B45309', display: 'inline-block' }} /> Em conflito
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <MousePointerClick size={13} /> Clique no dia para agendar
-        </span>
-      </div>
-
-      {/* Grade do calendário */}
-      <div style={{ padding: '12px 24px 24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
-          {DIAS_SEMANA.map((d) => (
-            <div key={d} style={{
-              textAlign: 'center',
-              fontWeight: 700,
-              fontSize: '0.78rem',
-              color: 'var(--text-secondary)',
-              padding: '6px 0'
-            }}>
-              {d}
-            </div>
-          ))}
-
-          {celulas.map((cel) => {
-            if (cel.vazia) return <div key={cel.key} />;
-
-            const diaSemana = new Date(cel.data + 'T12:00:00').getDay();
-            const ehFimDeSemana = diaSemana === 0 || diaSemana === 6;
-            const ehPassado = cel.data < hojeStr;
-            const ehHoje = cel.data === hojeStr;
-            const clicavel = !ehPassado && !ehFimDeSemana;
-
-            const reservasDia = clicavel ? reservasDoDia(cel.data) : [];
-
-            return (
-              <div
-                key={cel.key}
-                onClick={() => clicavel && onSelecionarDia(cel.data)}
-                title={
-                  clicavel
-                    ? reservasDia.length
-                      ? `${reservasDia.length} reserva(s) neste dia — clique para agendar`
-                      : 'Clique para agendar'
-                    : ehFimDeSemana
-                      ? 'Fim de semana — sem aulas'
-                      : 'Dia já passou'
-                }
-                style={{
-                  minHeight: 82,
-                  borderRadius: 'var(--radius-md)',
-                  border: ehHoje ? `2px solid ${cor.solid}` : '2px solid #F1F6F7',
-                  background: ehHoje ? cor.soft : '#F8FAFC',
-                  padding: '6px 8px',
-                  cursor: clicavel ? 'pointer' : 'not-allowed',
-                  opacity: clicavel ? 1 : 0.45,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  if (clicavel) {
-                    e.currentTarget.style.borderColor = cor.solid;
-                    e.currentTarget.style.background = '#FFFFFF';
-                    e.currentTarget.style.boxShadow = `0 4px 10px ${cor.ring}`;
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = ehHoje ? cor.solid : '#F1F6F7';
-                  e.currentTarget.style.background = ehHoje ? cor.soft : '#F8FAFC';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <span style={{
-                  fontWeight: 800,
-                  fontSize: '0.92rem',
-                  color: ehHoje ? cor.text : 'var(--text-primary)'
-                }}>
-                  {cel.dia}
-                </span>
-
-                <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap' }}>
-                  {clicavel && reservasDia.length === 0 && (
-                    <i style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981' }} />
-                  )}
-                  {reservasDia.map((r, i) => (
-                    <i
-                      key={`${r.id}-${i}`}
-                      title={`${r.usuarioNome} — ${r.finalidade} (Lab ${r.laboratorioId})`}
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: r.status === 2 ? '#B45309' : estiloLab(r.laboratorioId).solid
-                      }}
-                    />
-                  ))}
-                </div>
-
-                {reservasDia.length > 0 && (
-                  <div style={{ marginTop: 'auto', fontSize: '0.62rem', lineHeight: 1.3, color: 'var(--text-secondary)' }}>
-                    {reservasDia.slice(0, 2).map((r, i) => (
-                      <div key={i} style={{
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }} title={`${r.usuarioNome} — ${r.finalidade}`}>
-                        {r.usuarioNome.split(' ').pop()} — {r.finalidade}
-                      </div>
-                    ))}
-                    {reservasDia.length > 2 && (
-                      <div style={{ fontWeight: 700 }}>+{reservasDia.length - 2} reserva(s)</div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
+  const [dataFoco, setDataFoco] = useState(() => new Date());
+  const [visualizacao, setVisualizacao] = useState('mes');
+  const mover = delta => setDataFoco(d => visualizacao === 'mes' ? new Date(d.getFullYear(),d.getMonth()+delta,1) : addDays(d,delta*(visualizacao==='semana'?7:1)));
+  const dias = visualizacao === 'mes'
+    ? Array.from({length:new Date(dataFoco.getFullYear(),dataFoco.getMonth()+1,0).getDate()},(_,i)=>new Date(dataFoco.getFullYear(),dataFoco.getMonth(),i+1))
+    : visualizacao === 'semana' ? Array.from({length:7},(_,i)=>addDays(weekStart(dataFoco),i)) : [dataFoco];
+  const reservasNoDia = date => reservas.filter(r => r.status !== 3 && r.dataInicio.startsWith(strData(date)));
+  const titulo = visualizacao === 'mes' ? `${NOMES_MESES[dataFoco.getMonth()]} de ${dataFoco.getFullYear()}` : visualizacao === 'semana' ? `${strData(dias[0]).split('-').reverse().join('/')} – ${strData(dias[6]).split('-').reverse().join('/')}` : formatDay(dataFoco);
+  return <section style={{background:'#fff',borderRadius:'var(--radius-lg)',border:'1px solid var(--border-light)',overflow:'hidden',boxShadow:'var(--shadow-sm)'}}>
+    <header style={{background:`linear-gradient(to right,${cor.soft},#fff)`,borderBottom:`1px solid ${cor.border}`,padding:'18px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,flexWrap:'wrap'}}>
+      <div><h2 style={{fontSize:'1.1rem',fontWeight:800,color:cor.text,display:'flex',alignItems:'center',gap:8}}><Calendar size={20} color={cor.solid}/>{nomeLab}</h2><p style={{fontSize:'.78rem',color:'var(--text-secondary)',marginTop:4}}>Clique em um dia para reservar • {usuarioAtivo ? `Logado como ${usuarioAtivo.nome}` : 'Faça login para agendar'}</p></div>
+      <div style={{display:'flex',alignItems:'center',gap:8}}><button className="btn-outline" onClick={()=>mover(-1)} aria-label="Período anterior"><ChevronLeft size={18}/></button><strong style={{minWidth:190,textAlign:'center'}}>{titulo}</strong><button className="btn-outline" onClick={()=>mover(1)} aria-label="Próximo período"><ChevronRight size={18}/></button><select aria-label="Visualização do calendário" value={visualizacao} onChange={e=>setVisualizacao(e.target.value)} style={{padding:'9px 12px',border:'1px solid var(--border-light)',borderRadius:'var(--radius-md)',fontWeight:700}}><option value="mes">Mês</option><option value="semana">Semana</option><option value="dia">Dia</option></select></div>
+    </header>
+    <div style={{display:'flex',gap:18,flexWrap:'wrap',padding:'12px 24px',fontSize:'.75rem',color:'var(--text-secondary)'}}><span>🟢 Livre</span><span>🔴 Com reserva</span><span>🟠 Em conflito</span><span><MousePointerClick size={13}/> Clique em um dia para agendar</span></div>
+    {visualizacao !== 'dia' ? <div style={{padding:'4px 20px 20px',display:'grid',gridTemplateColumns:'repeat(7,minmax(0,1fr))',gap:6}}>
+      {['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].map(d=><div key={d} style={{textAlign:'center',fontWeight:700,padding:6,color:'var(--text-secondary)'}}>{d}</div>)}
+      {visualizacao==='mes' && Array.from({length:(new Date(dataFoco.getFullYear(),dataFoco.getMonth(),1).getDay()+6)%7},(_,i)=><div key={`blank${i}`}/>)}
+      {dias.map(date=>{const key=strData(date), list=reservasNoDia(date), past=key<hojeStr, weekend=date.getDay()===0||date.getDay()===6, clickable=!past&&!weekend;return <button key={key} onClick={()=>clickable&&onSelecionarDia(key)} disabled={!clickable} title={clickable?'Clique para consultar os horários':'Sem agendamento neste dia'} style={{minHeight:visualizacao==='mes'?92:130,textAlign:'left',borderRadius:10,border:key===hojeStr?`2px solid ${cor.solid}`:'1px solid #e5e7eb',background:key===hojeStr?cor.soft:'#f8fafc',padding:8,opacity:clickable?1:.45,cursor:clickable?'pointer':'not-allowed',overflow:'hidden'}}><strong>{visualizacao==='mes'?date.getDate():formatDay(date)}</strong>{visualizacao==='mes'&&<div style={{marginTop:5,fontSize:11,color:'var(--text-secondary)'}}>{list.length?`${list.length} reserva(s)`:clickable?'Livre':''}</div>}{list.slice(0,3).map(r=><div key={r.id} style={{fontSize:11,marginTop:4,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',color:r.status===2?'#b45309':cor.text}}>{new Date(r.dataInicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} {r.finalidade}</div>)}</button>})}
+    </div> : <div style={{padding:'12px 24px 24px'}}><h3 style={{marginBottom:12}}>{formatDay(dataFoco)}</h3><button className="btn-cps" disabled={strData(dataFoco)<hojeStr||dataFoco.getDay()===0||dataFoco.getDay()===6} onClick={()=>onSelecionarDia(strData(dataFoco))}>Ver horários para reservar</button>{reservasNoDia(dataFoco).length===0?<p style={{padding:16,color:'var(--text-secondary)'}}>Nenhuma reserva neste dia.</p>:reservasNoDia(dataFoco).map(r=><div key={r.id} style={{padding:12,marginTop:8,border:'1px solid var(--border-light)',borderRadius:8}}>{new Date(r.dataInicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}–{new Date(r.dataFim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · {r.laboratorioNome} · {r.finalidade}</div>)}</div>}
+  </section>;
 }

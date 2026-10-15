@@ -11,6 +11,8 @@ public class LaboratorioDto
     public bool Ativo { get; set; }
 }
 
+public class CriarLaboratorioDto { public string Nome { get; set; } = string.Empty; public bool CompartilhadoEtec { get; set; } public int Capacidade { get; set; } }
+
 public class SlotHorarioDto
 {
     public int Id { get; set; }

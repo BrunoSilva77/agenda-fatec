@@ -12,12 +12,9 @@ let laboratoriosMock = [
 
 let slotsPadraoFatec = [
   // Manhã
-  { id: 1, turno: 1, horaInicio: '07:30', horaFim: '08:20', descricao: 'Manhã - Bloco 1 (07:30 - 08:20)', exclusivoEtec: false },
-  { id: 2, turno: 1, horaInicio: '08:20', horaFim: '09:10', descricao: 'Manhã - Bloco 2 (08:20 - 09:10)', exclusivoEtec: false },
-  { id: 3, turno: 1, horaInicio: '09:20', horaFim: '10:10', descricao: 'Manhã - Bloco 3 (09:20 - 10:10)', exclusivoEtec: false },
-  { id: 4, turno: 1, horaInicio: '10:10', horaFim: '11:00', descricao: 'Manhã - Bloco 4 (10:10 - 11:00)', exclusivoEtec: false },
-  { id: 5, turno: 1, horaInicio: '11:10', horaFim: '12:00', descricao: 'Manhã - Bloco 5 (11:10 - 12:00)', exclusivoEtec: false },
-  { id: 6, turno: 1, horaInicio: '12:00', horaFim: '12:50', descricao: 'Manhã - Bloco 6 (12:00 - 12:50)', exclusivoEtec: false },
+  { id: 1, turno: 1, horaInicio: '07:30', horaFim: '09:10', descricao: 'Manhã - Período 1 (07:30 - 09:10)', exclusivoEtec: false },
+  { id: 2, turno: 1, horaInicio: '09:20', horaFim: '11:00', descricao: 'Manhã - Período 2 (09:20 - 11:00)', exclusivoEtec: false },
+  { id: 3, turno: 1, horaInicio: '11:10', horaFim: '12:50', descricao: 'Manhã - Período 3 (11:10 - 12:50)', exclusivoEtec: false },
   // Noite
   { id: 7, turno: 3, horaInicio: '18:40', horaFim: '19:30', descricao: 'Noite - Bloco 1 (18:40 - 19:30)', exclusivoEtec: false },
   { id: 8, turno: 3, horaInicio: '19:30', horaFim: '20:20', descricao: 'Noite - Bloco 2 (19:30 - 20:20)', exclusivoEtec: false },
@@ -113,6 +110,19 @@ export const api = {
     return laboratoriosMock;
   },
 
+  async criarLaboratorio(dados) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/laboratorios`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados), signal: AbortSignal.timeout(1500) });
+      if (res.ok) return await res.json();
+      const erro = await res.json().catch(() => ({}));
+      throw new Error(erro.mensagem || 'Não foi possível cadastrar o laboratório.');
+    } catch (erro) {
+      if (erro.name !== 'TimeoutError' && erro.name !== 'AbortError' && erro.message !== 'Failed to fetch') throw erro;
+    }
+    const novo = { id: Math.max(0, ...laboratoriosMock.map(l => l.id)) + 1, nome: dados.nome.trim(), capacidade: Number(dados.capacidade), compartilhadoEtec: Boolean(dados.compartilhadoEtec), ativo: true };
+    laboratoriosMock.push(novo);
+    return novo;
+  },
   // Consulta disponibilidade de horários
   async getDisponibilidade(laboratorioId, dataStr) {
     try {

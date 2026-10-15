@@ -13,8 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AgendaFatecDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-        ?? "Data Source=AgendaFatec.db";
-    options.UseSqlite(connectionString);
+        ?? "Server=(localdb)\\MSSQLLocalDB;Database=AgendaFatec;Trusted_Connection=True;TrustServerCertificate=True";
+    options.UseSqlServer(connectionString);
 });
 
 // Injeção de Dependência dos Serviços de Aplicação

@@ -84,6 +84,12 @@ export default function App() {
     setDiaParaReserva({ data, slots: disp.slots });
   };
 
+  const handleAdicionarLaboratorio = async (dados) => {
+    await api.criarLaboratorio(dados);
+    const labs = await api.getLaboratorios();
+    setLaboratorios(labs);
+    exibirNotificacao('Laboratório cadastrado com sucesso.');
+  };
   const handleCriarReserva = async (dados) => {
     await api.criarReserva(dados);
     await carregarDados();
@@ -245,6 +251,7 @@ export default function App() {
             reservas={reservas}
             onResolverConflito={(conflito) => setConflitoParaResolver(conflito)}
             onCancelarReserva={handleCancelarReserva}
+            onAdicionarLaboratorio={handleAdicionarLaboratorio}
           />
         )}
 

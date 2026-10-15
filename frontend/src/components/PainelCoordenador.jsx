@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ShieldAlert, AlertTriangle } from 'lucide-react';
 
-export function PainelCoordenador({ reservas, onResolverConflito, onCancelarReserva }) {
+export function PainelCoordenador({ reservas, onResolverConflito, onCancelarReserva, onAdicionarLaboratorio }) {
+  const [nomeLab, setNomeLab] = useState('');
+  const [capacidadeLab, setCapacidadeLab] = useState(30);
+  const [compartilhadoEtec, setCompartilhadoEtec] = useState(false);
+  const [erroLab, setErroLab] = useState('');
   const conflitos = reservas.filter(r => r.status === 2);
   const confirmadas = reservas.filter(r => r.status === 1);
 
@@ -29,6 +33,16 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
         </div>
       </div>
 
+      <form onSubmit={async e => { e.preventDefault(); setErroLab(''); try { await onAdicionarLaboratorio({ nome: nomeLab, capacidade: Number(capacidadeLab), compartilhadoEtec }); setNomeLab(''); setCapacidadeLab(30); setCompartilhadoEtec(false); } catch (erro) { setErroLab(erro.message); } }} style={{marginBottom:24,padding:16,border:'1px solid var(--border-light)',borderRadius:'var(--radius-md)',background:'#F8FAFC'}}>
+        <h3 style={{fontSize:'.95rem',fontWeight:700,marginBottom:12}}>Adicionar laboratório</h3>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
+          <input required maxLength={100} placeholder="Nome do laboratório" value={nomeLab} onChange={e=>setNomeLab(e.target.value)} style={{padding:9,border:'1px solid var(--border-light)',borderRadius:8}} />
+          <input required type="number" min="1" placeholder="Capacidade" value={capacidadeLab} onChange={e=>setCapacidadeLab(e.target.value)} style={{width:110,padding:9,border:'1px solid var(--border-light)',borderRadius:8}} />
+          <label><input type="checkbox" checked={compartilhadoEtec} onChange={e=>setCompartilhadoEtec(e.target.checked)} /> Compartilhado com ETEC</label>
+          <button className="btn-cps" type="submit">Cadastrar</button>
+        </div>
+        {erroLab && <p role="alert" style={{color:'#b91c1c',marginTop:8}}>{erroLab}</p>}
+      </form>
       {/* Seção de Conflitos para Mediação */}
       <div style={{ marginBottom: '32px' }}>
         <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#B45309', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>

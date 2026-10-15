@@ -29,6 +29,13 @@ public class LaboratoriosController : ControllerBase
     /// <summary>
     /// Obtém os dados de um laboratório pelo número/ID (1, 2, 9 ou 10).
     /// </summary>
+    [HttpPost]
+    [ProducesResponseType(typeof(LaboratorioDto), StatusCodes.Status201Created)]
+    public async Task<IActionResult> Criar([FromBody] CriarLaboratorioDto dto)
+    {
+        try { var laboratorio = await _laboratorioService.CriarAsync(dto); return CreatedAtAction(nameof(ObterPorId), new { id = laboratorio.Id }, laboratorio); }
+        catch (ArgumentException ex) { return BadRequest(new { mensagem = ex.Message }); }
+    }
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(LaboratorioDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

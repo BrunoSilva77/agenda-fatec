@@ -44,12 +44,9 @@ public class SlotHorarioConfiguration : IEntityTypeConfiguration<SlotHorario>
         // Seed da Grade Base Oficial da Fatec Araçatuba
         builder.HasData(
             // Manhã
-            new SlotHorario { Id = 1, Turno = Turno.Manha, HoraInicio = new TimeSpan(7, 30, 0), HoraFim = new TimeSpan(8, 20, 0), Descricao = "Manhã - Bloco 1 (07:30 - 08:20)" },
-            new SlotHorario { Id = 2, Turno = Turno.Manha, HoraInicio = new TimeSpan(8, 20, 0), HoraFim = new TimeSpan(9, 10, 0), Descricao = "Manhã - Bloco 2 (08:20 - 09:10)" },
-            new SlotHorario { Id = 3, Turno = Turno.Manha, HoraInicio = new TimeSpan(9, 20, 0), HoraFim = new TimeSpan(10, 10, 0), Descricao = "Manhã - Bloco 3 (09:20 - 10:10)" },
-            new SlotHorario { Id = 4, Turno = Turno.Manha, HoraInicio = new TimeSpan(10, 10, 0), HoraFim = new TimeSpan(11, 0, 0), Descricao = "Manhã - Bloco 4 (10:10 - 11:00)" },
-            new SlotHorario { Id = 5, Turno = Turno.Manha, HoraInicio = new TimeSpan(11, 10, 0), HoraFim = new TimeSpan(12, 0, 0), Descricao = "Manhã - Bloco 5 (11:10 - 12:00)" },
-            new SlotHorario { Id = 6, Turno = Turno.Manha, HoraInicio = new TimeSpan(12, 0, 0), HoraFim = new TimeSpan(12, 50, 0), Descricao = "Manhã - Bloco 6 (12:00 - 12:50)" },
+            new SlotHorario { Id = 1, Turno = Turno.Manha, HoraInicio = new TimeSpan(7, 30, 0), HoraFim = new TimeSpan(9, 10, 0), Descricao = "Manhã - Período 1 (07:30 - 09:10)" },
+            new SlotHorario { Id = 2, Turno = Turno.Manha, HoraInicio = new TimeSpan(9, 20, 0), HoraFim = new TimeSpan(11, 0, 0), Descricao = "Manhã - Período 2 (09:20 - 11:00)" },
+            new SlotHorario { Id = 3, Turno = Turno.Manha, HoraInicio = new TimeSpan(11, 10, 0), HoraFim = new TimeSpan(12, 50, 0), Descricao = "Manhã - Período 3 (11:10 - 12:50)" },
             // Noite
             new SlotHorario { Id = 7, Turno = Turno.Noite, HoraInicio = new TimeSpan(18, 40, 0), HoraFim = new TimeSpan(19, 30, 0), Descricao = "Noite - Bloco 1 (18:40 - 19:30)" },
             new SlotHorario { Id = 8, Turno = Turno.Noite, HoraInicio = new TimeSpan(19, 30, 0), HoraFim = new TimeSpan(20, 20, 0), Descricao = "Noite - Bloco 2 (19:30 - 20:20)" },

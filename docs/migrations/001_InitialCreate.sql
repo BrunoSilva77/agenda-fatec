@@ -38,7 +38,7 @@ BEGIN
 
     -- 2. Tabela de Laboratórios
     CREATE TABLE [Laboratorios] (
-        [Id] int NOT NULL,
+        [Id] int NOT NULL IDENTITY(1, 1),
         [Nome] nvarchar(100) NOT NULL,
         [CompartilhadoEtec] bit NOT NULL,
         [Capacidade] int NOT NULL,
@@ -95,6 +95,7 @@ BEGIN
     );
 
     -- Seed de Laboratórios Institucionais
+    SET IDENTITY_INSERT [Laboratorios] ON;
     INSERT INTO [Laboratorios] ([Id], [Ativo], [Capacidade], [CompartilhadoEtec], [Nome])
     VALUES 
         (1, CAST(1 AS bit), 30, CAST(1 AS bit), N'Laboratório 1'),
@@ -102,16 +103,15 @@ BEGIN
         (9, CAST(1 AS bit), 35, CAST(0 AS bit), N'Laboratório 9'),
         (10, CAST(1 AS bit), 35, CAST(0 AS bit), N'Laboratório 10');
 
+    SET IDENTITY_INSERT [Laboratorios] OFF;
+
     -- Seed dos Blocos Padrão de Horário (Fatec Araçatuba)
     SET IDENTITY_INSERT [SlotsHorario] ON;
     INSERT INTO [SlotsHorario] ([Id], [Ativo], [Descricao], [HoraFim], [HoraInicio], [LaboratorioId], [Turno])
     VALUES 
-        (1, CAST(1 AS bit), N'Manhã - Bloco 1 (07:30 - 08:20)', '08:20:00', '07:30:00', NULL, 1),
-        (2, CAST(1 AS bit), N'Manhã - Bloco 2 (08:20 - 09:10)', '09:10:00', '08:20:00', NULL, 1),
-        (3, CAST(1 AS bit), N'Manhã - Bloco 3 (09:20 - 10:10)', '10:10:00', '09:20:00', NULL, 1),
-        (4, CAST(1 AS bit), N'Manhã - Bloco 4 (10:10 - 11:00)', '11:00:00', '10:10:00', NULL, 1),
-        (5, CAST(1 AS bit), N'Manhã - Bloco 5 (11:10 - 12:00)', '12:00:00', '11:10:00', NULL, 1),
-        (6, CAST(1 AS bit), N'Manhã - Bloco 6 (12:00 - 12:50)', '12:50:00', '12:00:00', NULL, 1),
+        (1, CAST(1 AS bit), N'Manhã - Período 1 (07:30 - 09:10)', '09:10:00', '07:30:00', NULL, 1),
+        (2, CAST(1 AS bit), N'Manhã - Período 2 (09:20 - 11:00)', '11:00:00', '09:20:00', NULL, 1),
+        (3, CAST(1 AS bit), N'Manhã - Período 3 (11:10 - 12:50)', '12:50:00', '11:10:00', NULL, 1),
         (7, CAST(1 AS bit), N'Noite - Bloco 1 (18:40 - 19:30)', '19:30:00', '18:40:00', NULL, 3),
         (8, CAST(1 AS bit), N'Noite - Bloco 2 (19:30 - 20:20)', '20:20:00', '19:30:00', NULL, 3),
         (9, CAST(1 AS bit), N'Noite - Bloco 3 (20:20 - 21:10)', '21:10:00', '20:20:00', NULL, 3),

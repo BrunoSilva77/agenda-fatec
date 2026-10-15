@@ -46,6 +46,16 @@ public class LaboratorioService : ILaboratorioService
         };
     }
 
+    public async Task<LaboratorioDto> CriarAsync(CriarLaboratorioDto dto)
+    {
+        var nome = dto.Nome?.Trim();
+        if (string.IsNullOrWhiteSpace(nome)) throw new ArgumentException("Informe o nome do laboratório.");
+        if (dto.Capacidade < 1) throw new ArgumentException("A capacidade deve ser maior que zero.");
+        var laboratorio = new AgendaFatec.Domain.Entities.Laboratorio { Nome = nome, Capacidade = dto.Capacidade, CompartilhadoEtec = dto.CompartilhadoEtec, Ativo = true };
+        _context.Laboratorios.Add(laboratorio);
+        await _context.SaveChangesAsync();
+        return new LaboratorioDto { Id = laboratorio.Id, Nome = laboratorio.Nome, Capacidade = laboratorio.Capacidade, CompartilhadoEtec = laboratorio.CompartilhadoEtec, Ativo = laboratorio.Ativo };
+    }
     public async Task<IEnumerable<SlotHorarioDto>> ObterGradeLaboratorioAsync(int laboratorioId)
     {
         var lab = await _context.Laboratorios
