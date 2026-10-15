@@ -4,42 +4,43 @@ import './styles/cps-theme.css';
 import { api } from './services/api';
 import { HeaderCps } from './components/HeaderCps';
 import { FooterCps } from './components/FooterCps';
-import { SeletorLaboratorio } from './components/SeletorLaboratorio';
-import { GradeHorarios } from './components/GradeHorarios';
+import { FiltroLaboratorios } from './components/FiltroLaboratorios';
+import { CalendarioMes } from './components/CalendarioMes';
+import { ModalLoginProfessor } from './components/ModalLoginProfessor';
 import { ModalNovaReserva } from './components/ModalNovaReserva';
 import { ModalResolverConflito } from './components/ModalResolverConflito';
 import { PainelCoordenador } from './components/PainelCoordenador';
 import { TrilhaAuditoriaLgpd } from './components/TrilhaAuditoriaLgpd';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, CalendarCheck, LogOut } from 'lucide-react';
+
+// Restaura a sessão do professor salva (se válida — 24h)
+function restaurarSessaoProfessor() {
+  try {
+    const salvo = JSON.parse(localStorage.getItem('fatec_prof') || 'null');
+    const loginTime = parseInt(localStorage.getItem('fatec_prof_login_time') || '0', 10);
+    if (salvo && loginTime && Date.now() - loginTime < 24 * 60 * 60 * 1000) return salvo;
+  } catch {}
+  return null;
+}
 
 export default function App() {
-  const [usuarioAtivo, setUsuarioAtivo] = useState({
-    id: '11111111-1111-1111-1111-111111111111',
-    nome: 'Prof. Carlos Eduardo',
-    email: 'carlos.eduardo@fatec.sp.gov.br',
-    perfil: 1, // 1 = Professor, 2 = Coordenador
-    sigaId: 'SIGA-PROF-1001'
-  });
+  const [usuarioAtivo, setUsuarioAtivo] = useState(restaurarSessaoProfessor);
+  const [loginAberto, setLoginAberto] = useState(false);
 
   const [tabAtiva, setTabAtiva] = useState('mapa');
   const [laboratorios, setLaboratorios] = useState([]);
   const [labSelecionadoId, setLabSelecionadoId] = useState(1);
-  const [dataSelecionada, setDataSelecionada] = useState(new Date().toISOString().split('T')[0]);
-  const [disponibilidade, setDisponibilidade] = useState(null);
   const [reservas, setReservas] = useState([]);
   const [auditorias, setAuditorias] = useState([]);
 
   // Modais
-  const [slotParaReserva, setSlotParaReserva] = useState(null);
+  const [diaParaReserva, setDiaParaReserva] = useState(null); // { data, slots }
   const [conflitoParaResolver, setConflitoParaResolver] = useState(null);
   const [mensagemSucesso, setMensagemSucesso] = useState('');
 
   const carregarDados = async () => {
     const labs = await api.getLaboratorios();
     setLaboratorios(labs);
-
-    const disp = await api.getDisponibilidade(labSelecionadoId, dataSelecionada);
-    setDisponibilidade(disp);
 
     const todasReservas = await api.getReservas();
     setReservas(todasReservas);
@@ -50,17 +51,43 @@ export default function App() {
 
   useEffect(() => {
     carregarDados();
-  }, [labSelecionadoId, dataSelecionada]);
+  }, []);
 
   const exibirNotificacao = (msg) => {
     setMensagemSucesso(msg);
     setTimeout(() => setMensagemSucesso(''), 5000);
   };
 
+  const handleLogin = (usuario) => {
+    localStorage.setItem('fatec_prof_login_time', String(Date.now()));
+    setUsuarioAtivo(usuario);
+    setLoginAberto(false);
+    exibirNotificacao(`Bem-vindo(a), ${usuario.nome}! Clique em um dia do calendário para agendar.`);
+  };
+
+  const handleLogout = () => {
+    setUsuarioAtivo(null);
+    localStorage.removeItem('fatec_prof');
+    localStorage.removeItem('fatec_prof_login_time');
+    if (tabAtiva === 'coordenacao') setTabAtiva('mapa');
+    exibirNotificacao('Você saiu da área do professor.');
+  };
+
+  // Clique num dia do calendário → busca horários livres e abre o popup
+  const handleSelecionarDia = async (data) => {
+    if (!usuarioAtivo) {
+      setLoginAberto(true);
+      exibirNotificacao('Faça login como professor para agendar.');
+      return;
+    }
+    const disp = await api.getDisponibilidade(labSelecionadoId, data);
+    setDiaParaReserva({ data, slots: disp.slots });
+  };
+
   const handleCriarReserva = async (dados) => {
     await api.criarReserva(dados);
     await carregarDados();
-    exibirNotificacao(`Reserva confirmada com sucesso para ${dados.finalidade}!`);
+    exibirNotificacao(`Reserva confirmada para ${dados.finalidade}!`);
   };
 
   const handleResolverConflito = async (reservaId, dados) => {
@@ -78,16 +105,16 @@ export default function App() {
   };
 
   const labAtual = laboratorios.find(l => l.id === labSelecionadoId);
-  const minhasReservas = reservas.filter(r => r.usuarioEmail === usuarioAtivo.email);
+  const minhasReservas = usuarioAtivo
+    ? reservas.filter(r => r.usuarioEmail === usuarioAtivo.email)
+    : [];
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <HeaderCps
         usuarioAtivo={usuarioAtivo}
-        onTrocarUsuario={(u) => {
-          setUsuarioAtivo(u);
-          if (u.perfil !== 2 && tabAtiva === 'coordenacao') setTabAtiva('mapa');
-        }}
+        onLogin={() => setLoginAberto(true)}
+        onLogout={handleLogout}
         tabAtiva={tabAtiva}
         onMudarTab={setTabAtiva}
       />
@@ -112,24 +139,46 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 1: MAPA DE SALAS E HORÁRIOS */}
+        {/* TAB 1: CALENDÁRIO DE AGENDAMENTO */}
         {tabAtiva === 'mapa' && (
           <div>
-            <SeletorLaboratorio
+            {/* Calendário sempre visível; filtro de labs coloridos no topo */}
+            <FiltroLaboratorios
               laboratorios={laboratorios}
               labSelecionadoId={labSelecionadoId}
               onSelecionarLab={setLabSelecionadoId}
             />
 
-            <GradeHorarios
-              disponibilidade={disponibilidade}
-              dataSelecionada={dataSelecionada}
-              onMudarData={setDataSelecionada}
-              onAbrirReserva={(slot) => setSlotParaReserva(slot)}
-              onResolverConflito={(slot) => setConflitoParaResolver(slot)}
-              onCancelarReserva={handleCancelarReserva}
+            <CalendarioMes
+              laboratorioId={labSelecionadoId}
+              labInfo={labAtual}
+              reservas={reservas}
               usuarioAtivo={usuarioAtivo}
+              onSelecionarDia={handleSelecionarDia}
             />
+
+            {!usuarioAtivo && (
+              <div style={{
+                marginTop: '16px',
+                background: '#FFFBFB',
+                border: '1px solid #FEE2E2',
+                borderRadius: 'var(--radius-md)',
+                padding: '14px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                flexWrap: 'wrap'
+              }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  <CalendarCheck size={16} color="var(--cps-red)" style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                  Entre com seu login SIGA para agendar — seu nome e e-mail são puxados automaticamente do cadastro.
+                </span>
+                <button className="btn-cps" style={{ padding: '8px 16px', fontSize: '0.82rem' }} onClick={() => setLoginAberto(true)}>
+                  Entrar (SIGA)
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -140,12 +189,20 @@ export default function App() {
               Minhas Reservas Solicitadas
             </h2>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
-              Histórico de solicitações registradas sob seu e-mail institucional ({usuarioAtivo.email}).
+              {usuarioAtivo
+                ? `Histórico de solicitações registradas sob seu e-mail institucional (${usuarioAtivo.email}).`
+                : 'Faça login para visualizar suas reservas.'}
             </p>
 
-            {minhasReservas.length === 0 ? (
+            {!usuarioAtivo ? (
               <div style={{ padding: '36px', textAlign: 'center', color: 'var(--text-secondary)', background: '#F8FAFC', borderRadius: 'var(--radius-md)' }}>
-                Você ainda não possui reservas registradas. Acesse o Mapa de Salas para agendar.
+                <button className="btn-cps" onClick={() => setLoginAberto(true)}>
+                  <LogOut size={16} style={{ transform: 'rotate(180deg)' }} /> Entrar (SIGA)
+                </button>
+              </div>
+            ) : minhasReservas.length === 0 ? (
+              <div style={{ padding: '36px', textAlign: 'center', color: 'var(--text-secondary)', background: '#F8FAFC', borderRadius: 'var(--radius-md)' }}>
+                Você ainda não possui reservas registradas. Acesse o Calendário para agendar.
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -183,7 +240,7 @@ export default function App() {
         )}
 
         {/* TAB 3: PAINEL DA COORDENAÇÃO */}
-        {tabAtiva === 'coordenacao' && usuarioAtivo.perfil === 2 && (
+        {tabAtiva === 'coordenacao' && usuarioAtivo?.perfil === 2 && (
           <PainelCoordenador
             reservas={reservas}
             onResolverConflito={(conflito) => setConflitoParaResolver(conflito)}
@@ -198,19 +255,26 @@ export default function App() {
       </main>
 
       {/* Modais */}
-      {slotParaReserva && (
+      {loginAberto && (
+        <ModalLoginProfessor
+          onClose={() => setLoginAberto(false)}
+          onSucesso={handleLogin}
+        />
+      )}
+
+      {diaParaReserva && usuarioAtivo && (
         <ModalNovaReserva
-          slot={slotParaReserva}
+          data={diaParaReserva.data}
+          slots={diaParaReserva.slots}
           labId={labSelecionadoId}
           labNome={labAtual?.nome || `Laboratório ${labSelecionadoId}`}
-          data={dataSelecionada}
           usuario={usuarioAtivo}
-          onClose={() => setSlotParaReserva(null)}
+          onClose={() => setDiaParaReserva(null)}
           onSucesso={handleCriarReserva}
         />
       )}
 
-      {conflitoParaResolver && (
+      {conflitoParaResolver && usuarioAtivo && (
         <ModalResolverConflito
           slot={conflitoParaResolver}
           coordenador={usuarioAtivo}
