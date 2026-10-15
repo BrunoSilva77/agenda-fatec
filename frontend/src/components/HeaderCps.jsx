@@ -1,7 +1,7 @@
 import React from 'react';
-import { ShieldCheck, Calendar, CalendarCheck, LogIn, LogOut } from 'lucide-react';
+import { ShieldCheck, Calendar, CalendarCheck } from 'lucide-react';
 
-export function HeaderCps({ usuarioAtivo, onLogin, onLogout, tabAtiva, onMudarTab }) {
+export function HeaderCps({ usuarioAtivo, tabAtiva, onMudarTab }) {
   return (
     <header className="cps-header-root">
       {/* Faixa Oficial do Governo do Estado de São Paulo */}
@@ -74,44 +74,7 @@ export function HeaderCps({ usuarioAtivo, onLogin, onLogout, tabAtiva, onMudarTa
             </button>
           </nav>
 
-          {/* Dados do Usuário Autenticado no SIGA */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {usuarioAtivo ? (
-              <>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {usuarioAtivo.nome}
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                    {usuarioAtivo.perfil === 2 ? (
-                      <span style={{ color: 'var(--cps-red)', fontWeight: 700 }}>Coordenador (Admin)</span>
-                    ) : (
-                      <span style={{ color: 'var(--sp-blue)', fontWeight: 600 }}>Professor Solicitante</span>
-                    )}
-                    {' • '}{usuarioAtivo.sigaId}
-                  </div>
-                </div>
-
-                <button
-                  className="btn-outline"
-                  onClick={onLogout}
-                  style={{ fontSize: '0.78rem', padding: '8px 14px', color: '#DC2626', borderColor: '#FECACA' }}
-                  title="Sair da conta SIGA"
-                >
-                  <LogOut size={14} /> Sair
-                </button>
-              </>
-            ) : (
-              <button
-                className="btn-cps"
-                onClick={onLogin}
-                style={{ fontSize: '0.82rem', padding: '9px 18px' }}
-                title="Entrar com seu login SIGA"
-              >
-                <LogIn size={15} /> Entrar (SIGA)
-              </button>
-            )}
-          </div>
+          <div style={{fontSize:".8rem",color:"var(--text-secondary)"}}>{usuarioAtivo ? usuarioAtivo.nome : "Identidade fornecida pelo SIGA"}</div>
         </div>
       </div>
     </header>

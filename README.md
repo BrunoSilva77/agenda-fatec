@@ -23,8 +23,8 @@ Na raiz do projeto, execute um dos scripts:
 
 Depois acesse:
 
-- **Frontend (HTML principal):** http://localhost:5173
-- **Frontend (versão React):** http://localhost:5173/react.html
+- **Frontend:** http://localhost:5173 (React)
+- **Entrada React alternativa:** http://localhost:5173/react.html
 - **Backend / Swagger:** http://localhost:5000/swagger
 
 Na primeira execução o `start-all.bat` roda `npm install` automaticamente.
@@ -36,13 +36,13 @@ agenda-fatec-main/
 ├── src/
 │   ├── AgendaFatec.Domain/           # Entidades e regras de domínio
 │   ├── AgendaFatec.Application/      # Services e DTOs
-│   ├── AgendaFatec.Infrastructure/   # EF Core (SQLite), seed e mock SIGA
+│   ├── AgendaFatec.Infrastructure/   # EF Core (SQL Server)
 │   └── AgendaFatec.Api/              # Web API (porta 5000)
 ├── tests/
 │   └── AgendaFatec.UnitTests/        # Testes xUnit
 ├── frontend/
-│   ├── index.html                    # Front HTML/JS principal (entry do Vite)
-│   ├── react.html                    # Entrada da versão React
+│   ├── index.html                    # Aplicação React (entrada principal)
+│   ├── react.html                    # Entrada React alternativa
 │   └── src/                          # App React (componentes, services, CSS)
 ├── docs/                             # Especificação do projeto
 ├── start-all.bat
@@ -63,18 +63,15 @@ dotnet build          # backend
 cd frontend && npm run build   # frontend
 ```
 
-## Login de demonstração (Coordenador)
+## Integração com SIGA
 
-- **E-mail:** `coordenador@fatec.sp.gov.br`
-- **Senha:** `123456`
-
-> A autenticação hoje é um **mock** (`MockSigaAuthService`) — ver "Limitações conhecidas".
+O login próprio e as credenciais de demonstração foram removidos. O portal SIGA deve fornecer a identidade autenticada do professor; a integração técnica ainda depende do contrato de dados/SSO do portal. Agendamentos e recursos restritos ficam indisponíveis até essa conexão ser configurada.
 
 ## Limitações conhecidas (pendências para produção)
 
-1. **Autenticação é mock** — senhas fixas no código e registrada sem checagem de ambiente; não há JWT/sessão real nem `[Authorize]` nos endpoints.
+1. **Integração SIGA pendente** — ainda falta definir como o portal entrega uma identidade autenticada à aplicação e API.
 2. **Identidade vem do payload** — `UsuarioId`/`CoordenadorId` são enviados pelo cliente (risco de spoof); precisa de token autenticado.
 3. **Frontend × API parcialmente integrado** — cancelar reserva, resolver conflito, listar reservas e auditoria LGPD ainda rodam com dados locais (mock) no React; a API não expõe endpoint de auditoria.
-4. **Sem migrations EF Core** — usa `EnsureCreated()`; mudanças de schema em banco existente exigem deletar o `AgendaFatec.db` (ou migrar para migrations).
+4. **Sem migrations EF Core** — usa `EnsureCreated()`; mudanças de schema em bancos existentes exigem uma migração explícita.
 5. **Origem CORS** fixa em `fatecaracatuba.edu.br` + `localhost:3000/5173` — confirmar domínio real do portal.
-6. **`docs/` desatualizado** — especificação ainda menciona SQL Server; o código usa SQLite.
+6. **`docs/` pode precisar de revisão** — confirmar especificações institucionais e contrato do SIGA.

@@ -6,26 +6,15 @@ import { HeaderCps } from './components/HeaderCps';
 import { FooterCps } from './components/FooterCps';
 import { FiltroLaboratorios } from './components/FiltroLaboratorios';
 import { CalendarioMes } from './components/CalendarioMes';
-import { ModalLoginProfessor } from './components/ModalLoginProfessor';
 import { ModalNovaReserva } from './components/ModalNovaReserva';
 import { ModalResolverConflito } from './components/ModalResolverConflito';
 import { PainelCoordenador } from './components/PainelCoordenador';
 import { TrilhaAuditoriaLgpd } from './components/TrilhaAuditoriaLgpd';
-import { CheckCircle2, CalendarCheck, LogOut } from 'lucide-react';
-
-// Restaura a sessão do professor salva (se válida — 24h)
-function restaurarSessaoProfessor() {
-  try {
-    const salvo = JSON.parse(localStorage.getItem('fatec_prof') || 'null');
-    const loginTime = parseInt(localStorage.getItem('fatec_prof_login_time') || '0', 10);
-    if (salvo && loginTime && Date.now() - loginTime < 24 * 60 * 60 * 1000) return salvo;
-  } catch {}
-  return null;
-}
+import { CheckCircle2 } from 'lucide-react';
 
 export default function App() {
-  const [usuarioAtivo, setUsuarioAtivo] = useState(restaurarSessaoProfessor);
-  const [loginAberto, setLoginAberto] = useState(false);
+  // Ponto de integração: receber a identidade autenticada fornecida pelo portal SIGA.
+  const usuarioAtivo = null;
 
   const [tabAtiva, setTabAtiva] = useState('mapa');
   const [laboratorios, setLaboratorios] = useState([]);
@@ -58,26 +47,10 @@ export default function App() {
     setTimeout(() => setMensagemSucesso(''), 5000);
   };
 
-  const handleLogin = (usuario) => {
-    localStorage.setItem('fatec_prof_login_time', String(Date.now()));
-    setUsuarioAtivo(usuario);
-    setLoginAberto(false);
-    exibirNotificacao(`Bem-vindo(a), ${usuario.nome}! Clique em um dia do calendário para agendar.`);
-  };
-
-  const handleLogout = () => {
-    setUsuarioAtivo(null);
-    localStorage.removeItem('fatec_prof');
-    localStorage.removeItem('fatec_prof_login_time');
-    if (tabAtiva === 'coordenacao') setTabAtiva('mapa');
-    exibirNotificacao('Você saiu da área do professor.');
-  };
-
   // Clique num dia do calendário → busca horários livres e abre o popup
   const handleSelecionarDia = async (data) => {
     if (!usuarioAtivo) {
-      setLoginAberto(true);
-      exibirNotificacao('Faça login como professor para agendar.');
+      exibirNotificacao('A identificação do professor será fornecida pelo portal SIGA.');
       return;
     }
     const disp = await api.getDisponibilidade(labSelecionadoId, data);
@@ -119,8 +92,6 @@ export default function App() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <HeaderCps
         usuarioAtivo={usuarioAtivo}
-        onLogin={() => setLoginAberto(true)}
-        onLogout={handleLogout}
         tabAtiva={tabAtiva}
         onMudarTab={setTabAtiva}
       />
@@ -163,28 +134,7 @@ export default function App() {
               onSelecionarDia={handleSelecionarDia}
             />
 
-            {!usuarioAtivo && (
-              <div style={{
-                marginTop: '16px',
-                background: '#FFFBFB',
-                border: '1px solid #FEE2E2',
-                borderRadius: 'var(--radius-md)',
-                padding: '14px 20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '12px',
-                flexWrap: 'wrap'
-              }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  <CalendarCheck size={16} color="var(--cps-red)" style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                  Entre com seu login SIGA para agendar — seu nome e e-mail são puxados automaticamente do cadastro.
-                </span>
-                <button className="btn-cps" style={{ padding: '8px 16px', fontSize: '0.82rem' }} onClick={() => setLoginAberto(true)}>
-                  Entrar (SIGA)
-                </button>
-              </div>
-            )}
+            {!usuarioAtivo && <p style={{marginTop:16,padding:14,background:"#F8FAFC",borderRadius:"var(--radius-md)",color:"var(--text-secondary)"}}>A autenticação é feita pela plataforma SIGA. A integração que fornece a identidade do usuário a esta página ainda precisa ser conectada.</p>}
           </div>
         )}
 
@@ -197,15 +147,11 @@ export default function App() {
             <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
               {usuarioAtivo
                 ? `Histórico de solicitações registradas sob seu e-mail institucional (${usuarioAtivo.email}).`
-                : 'Faça login para visualizar suas reservas.'}
+                : 'As reservas pessoais aparecerão após a integração de identidade do SIGA.'}
             </p>
 
             {!usuarioAtivo ? (
-              <div style={{ padding: '36px', textAlign: 'center', color: 'var(--text-secondary)', background: '#F8FAFC', borderRadius: 'var(--radius-md)' }}>
-                <button className="btn-cps" onClick={() => setLoginAberto(true)}>
-                  <LogOut size={16} style={{ transform: 'rotate(180deg)' }} /> Entrar (SIGA)
-                </button>
-              </div>
+              <div style={{ padding: '36px', textAlign: 'center', color: 'var(--text-secondary)', background: '#F8FAFC', borderRadius: 'var(--radius-md)' }}>A identificação será fornecida pela plataforma SIGA quando a integração estiver conectada.</div>
             ) : minhasReservas.length === 0 ? (
               <div style={{ padding: '36px', textAlign: 'center', color: 'var(--text-secondary)', background: '#F8FAFC', borderRadius: 'var(--radius-md)' }}>
                 Você ainda não possui reservas registradas. Acesse o Calendário para agendar.
@@ -262,13 +208,6 @@ export default function App() {
       </main>
 
       {/* Modais */}
-      {loginAberto && (
-        <ModalLoginProfessor
-          onClose={() => setLoginAberto(false)}
-          onSucesso={handleLogin}
-        />
-      )}
-
       {diaParaReserva && usuarioAtivo && (
         <ModalNovaReserva
           data={diaParaReserva.data}
