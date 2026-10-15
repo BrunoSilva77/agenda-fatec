@@ -1,0 +1,200 @@
+.grade-horarios {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.grade-horarios h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+}
+
+.grade-horarios .filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.grade-horarios .filter-controls button {
+  padding: 8px 16px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grade-horarios .filter-controls button:hover {
+  opacity: 0.9;
+}
+
+.grade-horarios .filter-controls button.active {
+  background-color: var(--cps-red);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.grade-horarios .calendar-input {
+  width: 200px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  font-weight: 600;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.grade-horarios .date-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.grade-horarios .date-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grade-horarios .date-btn:hover {
+  background-color: var(--cps-red);
+  color: white;
+}
+
+.grade-horarios .shift-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.grade-horarios .shift-btn {
+  padding: 8px 16px;
+  font-size: 0.78rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grade-horarios .shift-btn:hover {
+  background-color: var(--cps-red);
+  color: white;
+}
+
+.grade-horarios .slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.grade-horarios .slot-card {
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  border: 1px solid var(--border-light);
+}
+
+.grade-horarios .slot-card__time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: var(--radius-md);
+}
+
+.grade-horarios .slot-card__time span {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.grade-horarios .slot-card__time .time-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.grade-horarios .slot-info {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.grade-horarios .slot-info .slot-desc {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.grade-horarios .slot-info .slot-dispo {
+  font-size: 0.78rem;
+  color: var(--cps-red);
+  font-weight: 600;
+}
+
+.grade-horarios .slot-info .slot-owner {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.grade-horarios .slot-conflict {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.grade-horarios .slot-conflict .alert-icon {
+  color: var(--color-conflict);
+  font-size: 1rem;
+}
+
+.grade-horarios .slot-conflict .conflict-text {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.grade-horarios .action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.grade-horarios .action-btn {
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grade-horarios .action-btn:first-child {
+  background-color: var(--cps-red);
+  color: white;
+}
+
+.grade-horarios .action-btn:last-child {
+  background-color: #f0f0f0;
+  color: var(--text-primary);
+}
+
+.grade-horarios .action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.grade-horarios .action-btn:active {
+  transform: translateY(0);
+}

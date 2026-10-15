@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Lock, FileText, Globe } from 'lucide-react';
+import { ShieldCheck, Lock, FileText } from 'lucide-react';
 
 export function TrilhaAuditoriaLgpd({ auditorias }) {
   return (

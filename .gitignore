@@ -19,6 +19,15 @@ publish/
 *.tmp
 TestResults/
 
+# Banco de dados SQLite (nunca versionar)
+*.db
+*.db-shm
+*.db-wal
+
+# Segredos / configs locais
+.env
+.env.*
+
 # OS Specific
 .DS_Store
 Thumbs.db
