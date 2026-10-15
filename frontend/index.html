@@ -159,6 +159,152 @@
     }
     .date-bar input[type="date"]:focus { outline: none; border-color: #8b1a1a; }
 
+    /* CHIPS DE LABORATÓRIO (filtro colorido) */
+    .lab-chips { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; }
+    .lab-chip {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:9px 16px; border-radius:999px;
+      border:2px solid #e4e5e6; background:#fff; color:#757575;
+      font-size:14px; font-weight:600; cursor:pointer;
+      transition:all .15s ease; font-family:inherit;
+    }
+    .lab-chip:hover { border-color:var(--lab-border); color:var(--lab-text); }
+    .lab-chip.selected {
+      border-color:var(--lab-solid); background:var(--lab-soft); color:var(--lab-text);
+      font-weight:700; box-shadow:0 0 0 3px var(--lab-ring);
+    }
+    .lab-chip .chip-dot {
+      width:12px; height:12px; border-radius:50%;
+      background:var(--lab-solid); flex-shrink:0;
+    }
+    .lab-chip .chip-cap { font-size:11px; opacity:.75; font-weight:600; }
+    .lab-chip .chip-etec {
+      font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px;
+      background:#fdeede; color:#b45309; border:1px solid #f5d0a9;
+    }
+    /* Badges de perfil de cadastro */
+    .lab-chip .chip-perfil {
+      font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px;
+      background:#eef2f7; color:#64748b; border:1px solid #dde3ea;
+    }
+    .lab-chip .chip-etec-ambos {
+      font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px;
+      background:#e7f6ee; color:#15803d; border:1px solid #b7e4cd;
+    }
+    .lab-chip.chip-bloqueado { opacity:.55; }
+    .lab-chip.chip-bloqueado .chip-dot { filter:grayscale(.7); }
+
+    /* PAINEL DO ADMIN (modal) */
+    .adm-form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0 12px; align-items:end; }
+    .adm-lista { display:flex; flex-direction:column; gap:8px; }
+    .adm-linha {
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      padding:10px 12px; border:1px solid #e4e5e6; border-radius:4px; background:#f8fafb;
+    }
+    .adm-linha .adm-dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+    .adm-linha .adm-nome { font-weight:700; color:#232323; font-size:14px; }
+    .adm-linha .adm-meta { color:#757575; font-size:12.5px; }
+    .adm-linha .adm-acoes { margin-left:auto; display:flex; gap:6px; }
+    .btn-mini {
+      border:none; border-radius:3px; padding:5px 12px; font-size:12px;
+      font-weight:700; cursor:pointer; font-family:inherit; transition:background .15s;
+    }
+    .btn-editar { background:#e8f0fe; color:#1d4ed8; }
+    .btn-editar:hover { background:#d3e3fd; }
+    .btn-excluir { background:#fdecec; color:#b91c1c; }
+    .btn-excluir:hover { background:#fadcdc; }
+    .btn-perfil {
+      font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px;
+      background:#eef2f7; color:#64748b; border:1px solid #dde3ea; white-space:nowrap;
+    }
+    .btn-perfil.p-etec { background:#fdeede; color:#b45309; border-color:#f5d0a9; }
+    .btn-perfil.p-ambos { background:#e7f6ee; color:#15803d; border-color:#b7e4cd; }
+    .btn-perfil.p-admin { background:#ede9fe; color:#6d28d9; border-color:#ddd6fe; }
+    .adm-vazio { text-align:center; color:#888; padding:22px; font-size:13.5px; }
+
+    /* CALENDÁRIO MENSAL */
+    .cal-nav-btn {
+      background: #fff;
+      border: 1px solid #e4e5e6;
+      border-radius: 3px;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      color: #8b1a1a;
+      font-size: 14px;
+      transition: all .2s;
+    }
+    .cal-nav-btn:hover { background: #cc3b3b; color: #fff; border-color: #cc3b3b; }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .cal-weekday {
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      color: #757575;
+      padding: 6px 0;
+      text-transform: capitalize;
+    }
+    .cal-day {
+      min-height: 78px;
+      background: #f8f9fa;
+      border: 2px solid #f1f6f7;
+      border-radius: 4px;
+      padding: 6px 8px;
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cal-day:hover { border-color: #cc3b3b; background: #fff; box-shadow: 0 4px 10px rgba(204,59,59,.12); }
+    .cal-day.empty { background: transparent; border-color: transparent; cursor: default; }
+    .cal-day.empty:hover { box-shadow: none; background: transparent; }
+    .cal-day.outro-mes .cal-day-num { color: #bbb; }
+    .cal-day.past { opacity: .45; cursor: not-allowed; }
+    .cal-day.past:hover { border-color: #f1f6f7; box-shadow: none; background: #f8f9fa; }
+    .cal-day.hoje { border-color: #cc3b3b; background: #fff; }
+    .cal-day-num { font-weight: 700; font-size: 15px; color: #232323; }
+    .cal-day.hoje .cal-day-num { color: #cc3b3b; }
+    .cal-day-status { display: flex; flex-wrap: wrap; gap: 3px; margin-top: auto; }
+    .cal-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .cal-dot-livre { background: #e4e5e6; }
+    .cal-dot-ocupado { background: #c62828; }
+    .cal-dot-conflito { background: #8b1a1a; }
+    .cal-dot-hoje { background: #cc3b3b; border: 2px solid #f8b4b4; }
+    .cal-ocupacao-resumo {
+      font-size: 11px;
+      color: #757575;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cal-legend {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #757575;
+    }
+    .cal-legend span { display: flex; align-items: center; gap: 6px; }
+    .campo-travado {
+      background: #f1f6f7 !important;
+      color: #757575 !important;
+      border: 1px dashed #e4e5e6 !important;
+      cursor: not-allowed;
+    }
+
     /* SCHEDULE TABLE */
     .schedule-table { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
     .schedule-table th:nth-child(1), .schedule-table td:nth-child(1) { width: 18%; }
@@ -383,12 +529,13 @@
 
     /* RESPONSIVE */
     @media (max-width: 992px) {
-      .lab-grid { grid-template-columns: repeat(2, 1fr); }
+      .lab-chips { gap: 8px; }
+      .lab-chip { flex: 1 1 45%; justify-content: center; }
       .footer .container { grid-template-columns: 1fr 1fr; }
       nav.main-nav { display: none; }
     }
     @media (max-width: 576px) {
-      .lab-grid { grid-template-columns: 1fr; }
+      .lab-chip { flex: 1 1 100%; }
       .hero h2 { font-size: 28px; }
       .schedule-table { font-size: 12px; }
       .footer .container { grid-template-columns: 1fr; }
@@ -441,6 +588,7 @@
     <ul>
       <li><i class="fa fa-clock-o"></i> Seg à Sex 7h30-11h30, 13h-17h</li>
       <li><i class="fa fa-phone"></i> (18) 3625-9914</li>
+      <li id="professorArea"><button class="buttonLogin" style="background:#8b1a1a;" onclick="abrirLoginProfessor()"><i class="fa fa-user-graduate"></i> Área do Professor</button></li>
       <li id="loginArea"><button class="buttonLogin" onclick="abrirLogin()"><i class="fa fa-sign-in"></i> Login Coordenador</button></li>
     </ul>
   </div>
@@ -458,7 +606,7 @@
     </div>
     <nav class="main-nav">
       <a href="#" class="active" onclick="showSection('agendamento')">Agendamento</a>
-      <a href="#" onclick="showSection('coordenador')">Coordenador</a>
+      <a href="#" onclick="acessoCoordenador()">Coordenador</a>
       <a href="#" onclick="showSection('auditoria')">Auditoria LGPD</a>
     </nav>
   </div>
@@ -477,33 +625,32 @@
   <div class="container">
     <div class="section-title">
       <small>Bem vindo a Fatec Araçatuba</small>
-      <h3>Selecione o Laboratório</h3>
+      <h3>Laboratórios</h3>
       <hr>
     </div>
-    <div class="lab-grid" id="labGrid"></div>
+    <div class="lab-chips" id="labGrid"></div>
 
-    <div class="date-bar" id="dateBar" style="display:none;">
-      <label><i class="fa fa-calendar"></i> Data:</label>
-      <input type="date" id="inputDate" onchange="carregarGrade()">
-      <span id="dateInfo" style="color:#757575; font-size:14px;"></span>
-    </div>
-
-    <div id="gradeContainer" style="display:none;">
+    <div id="calendarioContainer">
       <div class="card">
-        <div class="card-header"><i class="fa fa-table"></i> Grade de Horários - <span id="labNomeGrade"></span></div>
-        <div class="card-body" style="overflow-x:auto;">
-          <table class="schedule-table" id="scheduleTable">
-            <thead>
-              <tr>
-                <th>Horário</th>
-                <th>Turno</th>
-                <th>Status</th>
-                <th>Ocupação</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="scheduleBody"></tbody>
-          </table>
+        <div class="card-header" id="calHeader">
+          <i class="fa fa-calendar"></i> Calendário de Agendamento
+          <span style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+            <button class="cal-nav-btn" onclick="mudarMes(-1)" title="Mês anterior"><i class="fa fa-chevron-left"></i></button>
+            <span id="calTituloMes" style="font-size:15px; min-width:160px; text-align:center;"></span>
+            <button class="cal-nav-btn" onclick="mudarMes(1)" title="Próximo mês"><i class="fa fa-chevron-right"></i></button>
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="cal-legend">
+            <span><i class="cal-dot cal-dot-livre"></i> Disponível</span>
+            <span><i class="cal-dot cal-dot-ocupado"></i> Com reserva</span>
+            <span><i class="cal-dot cal-dot-conflito"></i> Em conflito</span>
+            <span><i class="cal-dot cal-dot-hoje"></i> Hoje</span>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+          <p style="margin-top:16px; color:#757575; font-size:13px;">
+            <i class="fa fa-info-circle"></i> Clique em um dia do calendário para agendar sua aula. Se o horário já estiver ocupado, a coordenação será notificada para mediação.
+          </p>
         </div>
       </div>
     </div>
@@ -575,15 +722,21 @@
       <button class="modal-close" onclick="fecharModal('modalReserva')">&times;</button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="reservaSlotId">
       <input type="hidden" id="reservaData">
       <p id="reservaInfo" style="background:#fce4ec; padding:12px; border-radius:4px; font-size:14px; margin-bottom:16px; border-left:4px solid #cc3b3b;"></p>
-      <label>Finalidade / Disciplina *</label>
+      <label>Matéria / Disciplina *</label>
       <input type="text" id="reservaFinalidade" placeholder="Ex: Estruturas de Dados">
-      <label>Nome do Professor *</label>
-      <input type="text" id="reservaProfessor" placeholder="Ex: Prof. Carlos Eduardo">
-      <label>E-mail Institucional *</label>
-      <input type="email" id="reservaEmail" placeholder="Ex: carlos.eduardo@fatec.sp.gov.br">
+      <label>Horário da Aula *</label>
+      <select id="reservaSlot"></select>
+      <label id="reservaLabelProf">Professor (puxado do cadastro SIGA)</label>
+      <input type="text" id="reservaProfessor" class="campo-travado" readonly tabindex="-1">
+      <label>E-mail Institucional</label>
+      <input type="email" id="reservaEmail" class="campo-travado" readonly tabindex="-1">
+      <p id="reservaDicaSiga" style="display:none; background:#fff8e1; padding:9px 12px; border-radius:4px; font-size:12.5px; margin-top:-6px; border-left:4px solid #f59e0b;">
+        <i class="fa fa-info-circle"></i> Preencha seu nome e e-mail acima, ou
+        <a href="#" onclick="abrirLoginProfessor(); return false;" style="color:#8b1a1a; font-weight:700;">entre com o SIGA</a>
+        para puxar do cadastro automaticamente.
+      </p>
       <label>Observação</label>
       <textarea id="reservaObs" rows="2" placeholder="Ex: Necessita projetor"></textarea>
       <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
@@ -642,7 +795,114 @@
       <label>Senha *</label>
       <input type="password" id="loginSenha" placeholder="Digite sua senha">
       <button class="btn-primary" style="width:100%; margin-top:8px;" onclick="fazerLogin()"><i class="fa fa-sign-in"></i> Entrar</button>
-      <p class="login-hint">Para teste: <strong>coordenador@fatec.sp.gov.br</strong> / <strong>123456</strong></p>
+      <p class="login-hint">Para teste: <strong>coordenador@fatec.sp.gov.br</strong> / <strong>123456</strong><br>Admin: <strong>admin@fatec.sp.gov.br</strong> / <strong>admin</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LOGIN PROFESSOR (SIGA) -->
+<div class="modal-overlay" id="modalLoginProf">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header" style="background:#8b1a1a;">
+      <h3><i class="fa fa-user-graduate"></i> Área do Professor</h3>
+      <button class="modal-close" onclick="fecharModal('modalLoginProf')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="login-icon"><i class="fa fa-graduation-cap"></i></div>
+      <div class="login-error" id="loginProfError">E-mail ou senha inválidos.</div>
+      <label>E-mail SIGA *</label>
+      <input type="email" id="loginProfEmail" placeholder="Ex: carlos.eduardo@fatec.sp.gov.br">
+      <label>Senha *</label>
+      <input type="password" id="loginProfSenha" placeholder="Digite sua senha do SIGA">
+      <button class="btn-primary" style="width:100%; margin-top:8px; background:#8b1a1a;" onclick="fazerLoginProfessor()"><i class="fa fa-sign-in"></i> Entrar</button>
+      <p class="login-hint">Para teste: <strong>carlos.eduardo@fatec.sp.gov.br</strong> / <strong>123456</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PAINEL DO ADMIN -->
+<div class="modal-overlay" id="modalAdmin">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-header" style="background:#4c1d95;">
+      <h3><i class="fa fa-user-secret"></i> Painel do Admin</h3>
+      <button class="modal-close" onclick="fecharModal('modalAdmin')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab(this,'tab-adm-salas','modalAdmin')">Salas</button>
+        <button class="tab-btn" onclick="showTab(this,'tab-adm-professores','modalAdmin')">Professores</button>
+        <button class="tab-btn" onclick="showTab(this,'tab-adm-paineis','modalAdmin')">Painéis</button>
+      </div>
+
+      <!-- ABA: SALAS -->
+      <div class="tab-content active" id="tab-adm-salas" style="background:transparent; padding:18px 0 0;">
+        <div id="admLabEditInfo" style="display:none; background:#ede9fe; color:#5b21b6; border-left:4px solid #7c3aed; padding:8px 12px; border-radius:4px; font-size:13px; font-weight:700; margin-bottom:12px;">
+          <i class="fa fa-pencil"></i> Editando sala existente...
+        </div>
+        <label>Nome da sala *</label>
+        <input id="admLabNome" placeholder="Ex: Laboratório 3">
+        <div class="adm-form-grid">
+          <div>
+            <label>Capacidade *</label>
+            <input type="number" id="admLabCap" min="1" value="30">
+          </div>
+          <div>
+            <label>Perfil de uso</label>
+            <select id="admLabPerfil"></select>
+          </div>
+          <div style="display:flex; gap:8px; padding-bottom:16px;">
+            <button class="btn-primary" id="admLabBtn" onclick="salvarLabAdmin()"><i class="fa fa-save"></i> Cadastrar</button>
+            <button class="btn-secondary" id="admLabCancel" style="display:none;" onclick="cancelarEdicaoLab()">Cancelar</button>
+          </div>
+        </div>
+        <p style="font-size:12px; color:#757575; margin:0 0 14px; line-height:1.5;">
+          Perfis: <b>Fatec</b> (só professores Fatec) · <b>ETEC</b> (só ETEC) · <b>Fatec/ETEC</b> (ambos). Só quem tem o perfil compatível consegue reservar a sala.
+        </p>
+        <div class="adm-lista" id="admListaLabs"></div>
+      </div>
+
+      <!-- ABA: PROFESSORES -->
+      <div class="tab-content" id="tab-adm-professores" style="background:transparent; padding:18px 0 0;">
+        <div class="adm-form-grid">
+          <div>
+            <label>Nome *</label>
+            <input id="admProfNome" placeholder="Ex: Prof. Ana Souza">
+          </div>
+          <div>
+            <label>E-mail institucional *</label>
+            <input type="email" id="admProfEmail" placeholder="nome@fatec.sp.gov.br">
+          </div>
+          <div>
+            <label>Senha *</label>
+            <input type="password" id="admProfSenha" placeholder="Senha de acesso">
+          </div>
+          <div>
+            <label>Perfil *</label>
+            <select id="admProfPerfil"></select>
+          </div>
+        </div>
+        <button class="btn-primary" style="margin-bottom:14px;" onclick="salvarProfAdmin()"><i class="fa fa-user-plus"></i> Cadastrar professor</button>
+        <div class="adm-lista" id="admListaProfs"></div>
+      </div>
+
+      <!-- ABA: PAINÉIS -->
+      <div class="tab-content" id="tab-adm-paineis" style="background:transparent; padding:18px 0 0;">
+        <div class="adm-linha" style="flex-direction:column; align-items:flex-start; gap:8px;">
+          <span class="adm-nome"><i class="fa fa-gavel"></i> Painel do Coordenador</span>
+          <span class="adm-meta">Conflitos pendentes, todas as reservas e decisão sobre conflitos.</span>
+          <button class="btn-mini btn-editar" onclick="fecharModal('modalAdmin'); showSection('coordenador');">Abrir Painel do Coordenador</button>
+        </div>
+        <div class="adm-linha" style="flex-direction:column; align-items:flex-start; gap:8px;">
+          <span class="adm-nome"><i class="fa fa-clipboard"></i> Auditoria LGPD</span>
+          <span class="adm-meta">Trilha de auditoria com todas as ações registradas no sistema.</span>
+          <button class="btn-mini btn-editar" onclick="fecharModal('modalAdmin'); showSection('auditoria');">Abrir Auditoria</button>
+        </div>
+        <div class="adm-linha" style="flex-direction:column; align-items:flex-start; gap:8px;">
+          <span class="adm-nome"><i class="fa fa-calendar"></i> Agendamento</span>
+          <span class="adm-meta">Voltar ao calendário mensal de reservas.</span>
+          <button class="btn-mini btn-editar" onclick="fecharModal('modalAdmin'); showSection('agendamento');">Voltar ao Calendário</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -689,12 +949,73 @@
 <script>
 const API = 'http://localhost:5000/api';
 
-const laboratorios = [
-  { id: 1, nome: 'Laboratório 1', compartilhadoEtec: true, capacidade: 30, ativo: true },
-  { id: 2, nome: 'Laboratório 2', compartilhadoEtec: true, capacidade: 30, ativo: true },
-  { id: 9, nome: 'Laboratório 9', compartilhadoEtec: false, capacidade: 35, ativo: true },
-  { id: 10, nome: 'Laboratório 10', compartilhadoEtec: false, capacidade: 35, ativo: true },
+// Perfis de cadastro: professor/sala é Fatec, ETEC, Fatec/ETEC ou Admin
+const PERFIS_CADASTRO = ['Fatec', 'ETEC', 'Fatec/ETEC', 'Admin'];
+const PERFIS_LAB = ['Fatec', 'ETEC', 'Fatec/ETEC'];
+
+// Cadastro base de salas (sobrescrito pelo que o admin salvar no popup)
+const laboratoriosBase = [
+  { id: 1, nome: 'Laboratório 1', compartilhadoEtec: true, capacidade: 30, ativo: true, perfil: 'Fatec/ETEC' },
+  { id: 2, nome: 'Laboratório 2', compartilhadoEtec: true, capacidade: 30, ativo: true, perfil: 'Fatec/ETEC' },
+  { id: 9, nome: 'Laboratório 9', compartilhadoEtec: false, capacidade: 35, ativo: true, perfil: 'Fatec' },
+  { id: 10, nome: 'Laboratório 10', compartilhadoEtec: false, capacidade: 35, ativo: true, perfil: 'Fatec' },
 ];
+
+const laboratorios = [];
+let laboratoriosRemovidos = [];
+
+// Perfil de uso de uma sala (compatível com cadastros antigos sem `perfil`)
+function perfilLab(l) {
+  if (!l) return 'Fatec';
+  return l.perfil || (l.compartilhadoEtec ? 'Fatec/ETEC' : 'Fatec');
+}
+
+// Um professor só reserva salas do próprio perfil (Fatec/ETEC e Admin usam todas)
+function podeReservarLab(l) {
+  if (!professorLogado) return true; // sem login, o fluxo de reserva é livre
+  const pp = professorLogado.perfil || 'Fatec/ETEC';
+  if (pp === 'Admin' || pp === 'Fatec/ETEC') return true;
+  const lp = perfilLab(l);
+  return lp === 'Fatec/ETEC' || lp === pp;
+}
+
+function persistirLabs() {
+  localStorage.setItem('fatec_labs', JSON.stringify(laboratorios));
+  localStorage.setItem('fatec_labs_removidos', JSON.stringify(laboratoriosRemovidos));
+}
+
+function carregarLabsPersistidos() {
+  try {
+    laboratoriosRemovidos = JSON.parse(localStorage.getItem('fatec_labs_removidos') || '[]');
+    const salvos = JSON.parse(localStorage.getItem('fatec_labs') || 'null');
+    const lista = Array.isArray(salvos) && salvos.length ? salvos : laboratoriosBase;
+    laboratorios.length = 0;
+    lista.forEach(l => laboratorios.push(l));
+  } catch (e) {
+    laboratorios.length = 0;
+    laboratoriosBase.forEach(l => laboratorios.push(l));
+  }
+}
+
+// Cada laboratório tem sua cor de identificação (mesmo padrão da versão React)
+const CORES_LAB = {
+  1:  { hue: '0'    }, // vermelho (padrão CPS)
+  2:  { hue: '217'  }, // azul
+  9:  { hue: '152'  }, // verde
+  10: { hue: '282'  }, // roxo
+};
+
+function estiloLab(id) {
+  // Salas novas (cadastradas pelo admin) ganham uma cor automática pelo id
+  const hue = CORES_LAB[id] ? CORES_LAB[id].hue : String((Number(id) * 53) % 360);
+  return {
+    solid:  `hsl(${hue} 68% 45%)`,
+    soft:   `hsl(${hue} 72% 96%)`,
+    border: `hsl(${hue} 62% 80%)`,
+    text:   `hsl(${hue} 58% 32%)`,
+    ring:   `hsl(${hue} 70% 90%)`,
+  };
+}
 
 const slotsPadrao = [
   { id: 1, turno: 'Manhã', horaInicio: '07:30', horaFim: '08:20', descricao: 'Manhã - Bloco 1' },
@@ -737,6 +1058,36 @@ const usuariosCoord = [
   { email: 'coordenador@fatec.sp.gov.br', senha: '123456', nome: 'Prof. Marcelo Oliveira', perfil: 'Coordenador' },
   { email: 'admin@fatec.sp.gov.br', senha: 'admin', nome: 'Admin Sistema', perfil: 'Administrador' },
 ];
+
+// Professores mock (simula cadastro SIGA) — senha padrão: 123456
+// Professores mock (simula cadastro SIGA) — senha padrão: 123456
+// Cada professor tem perfil de cadastro: Fatec, ETEC, Fatec/ETEC ou Admin
+const usuariosProfBase = [
+  { email: 'carlos.eduardo@fatec.sp.gov.br', senha: '123456', nome: 'Prof. Carlos Eduardo', sigaId: 'SIGA-PROF-1001', perfil: 'Fatec' },
+  { email: 'juliana.santos@fatec.sp.gov.br', senha: '123456', nome: 'Profa. Juliana Santos', sigaId: 'SIGA-PROF-1002', perfil: 'Fatec/ETEC' },
+  { email: 'paulo.mendonca@fatec.sp.gov.br', senha: '123456', nome: 'Prof. Paulo Mendonça', sigaId: 'SIGA-PROF-1003', perfil: 'ETEC' },
+];
+
+const usuariosProf = [];
+
+function persistirProfessores() {
+  localStorage.setItem('fatec_users_prof', JSON.stringify(usuariosProf));
+}
+
+function carregarProfessoresPersistidos() {
+  try {
+    const salvos = JSON.parse(localStorage.getItem('fatec_users_prof') || 'null');
+    const lista = Array.isArray(salvos) && salvos.length ? salvos : usuariosProfBase;
+    usuariosProf.length = 0;
+    lista.forEach(u => usuariosProf.push(u));
+  } catch (e) {
+    usuariosProf.length = 0;
+    usuariosProfBase.forEach(u => usuariosProf.push(u));
+  }
+}
+
+let professorLogado = null; // { nome, email, sigaId }
+let mesAtual = new Date();  // mês exibido no calendário
 
 function hojeStr() { return new Date().toISOString().split('T')[0]; }
 
@@ -794,10 +1145,15 @@ function fazerLogin() {
   coordenadorEmail = user.email;
   fecharModal('modalLogin');
   renderUserBadge();
-  showToast(`Bem-vindo, ${user.nome}!`);
   showSection('coordenador');
   document.querySelectorAll('nav.main-nav a').forEach(a => a.classList.remove('active'));
   document.querySelectorAll('nav.main-nav a')[1].classList.add('active');
+  if (user.perfil === 'Administrador') {
+    showToast(`Bem-vindo, ${user.nome}! Painel do Admin aberto.`);
+    abrirModalAdmin();
+  } else {
+    showToast(`Bem-vindo, ${user.nome}!`);
+  }
 }
 
 function logout() {
@@ -816,7 +1172,9 @@ function renderUserBadge() {
   const area = document.getElementById('loginArea');
   if (coordenadorLogado) {
     const user = usuariosCoord.find(u => u.email === coordenadorEmail);
-    area.innerHTML = `<span class="user-badge"><i class="fa fa-user-shield"></i> ${user?.nome || coordenadorEmail} <button class="btn-logout" onclick="logout()" title="Sair"><i class="fa fa-sign-out"></i></button></span>`;
+    const isAdmin = user?.perfil === 'Administrador';
+    const tagAdmin = isAdmin ? '<small style="background:#4c1d95; color:#fff; border-radius:999px; padding:1px 8px; font-size:10px; font-weight:800;">Admin</small>' : '';
+    area.innerHTML = `<span class="user-badge"><i class="fa fa-user-shield"></i> ${user?.nome || coordenadorEmail} ${tagAdmin} <button class="btn-logout" onclick="logout()" title="Sair"><i class="fa fa-sign-out"></i></button></span>`;
   } else {
     const emailSalvo = localStorage.getItem('fatec_email');
     const label = emailSalvo ? 'Entrar' : 'Login Coordenador';
@@ -827,67 +1185,446 @@ function renderUserBadge() {
 // Enter no login
 document.getElementById('loginSenha').addEventListener('keydown', function(e) { if (e.key === 'Enter') fazerLogin(); });
 
+// === LOGIN PROFESSOR (SIGA) ===
+function abrirLoginProfessor() {
+  document.getElementById('loginProfEmail').value = localStorage.getItem('fatec_prof_email') || '';
+  document.getElementById('loginProfSenha').value = '';
+  document.getElementById('loginProfError').classList.remove('show');
+  document.getElementById('modalLoginProf').classList.add('active');
+  setTimeout(() => {
+    const salvo = localStorage.getItem('fatec_prof_email');
+    if (salvo) document.getElementById('loginProfSenha').focus();
+    else document.getElementById('loginProfEmail').focus();
+  }, 100);
+}
+
+function fazerLoginProfessor() {
+  const email = document.getElementById('loginProfEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('loginProfSenha').value;
+  const prof = usuariosProf.find(u => u.email === email && u.senha === senha);
+
+  if (!prof) {
+    document.getElementById('loginProfError').classList.add('show');
+    return;
+  }
+
+  localStorage.setItem('fatec_prof_email', email);
+  localStorage.setItem('fatec_prof', JSON.stringify(prof));
+  localStorage.setItem('fatec_prof_login_time', String(Date.now()));
+
+  professorLogado = { nome: prof.nome, email: prof.email, sigaId: prof.sigaId, perfil: prof.perfil || 'Fatec' };
+  fecharModal('modalLoginProf');
+  renderProfessorBadge();
+  renderLabs();
+
+  // Se o popup de reserva estava aberto, reabre com nome/e-mail travados
+  if (document.getElementById('modalReserva').classList.contains('active') && ultimaDataClicada) {
+    abrirModalReservaDia(ultimaDataClicada);
+  }
+  showToast(`Bem-vindo, ${prof.nome}!`);
+}
+
+function logoutProfessor() {
+  professorLogado = null;
+  localStorage.removeItem('fatec_prof');
+  localStorage.removeItem('fatec_prof_login_time');
+  renderProfessorBadge();
+  renderLabs();
+  showToast('Você saiu da área do professor.');
+}
+
+function restaurarSessaoProfessor() {
+  const loginTime = localStorage.getItem('fatec_prof_login_time');
+  if (!loginTime || Date.now() - parseInt(loginTime) > SESSAO_DURACAO) {
+    localStorage.removeItem('fatec_prof');
+    localStorage.removeItem('fatec_prof_login_time');
+    return;
+  }
+  const prof = JSON.parse(localStorage.getItem('fatec_prof') || 'null');
+  if (prof) professorLogado = { nome: prof.nome, email: prof.email, sigaId: prof.sigaId, perfil: prof.perfil || 'Fatec' };
+}
+
+function renderProfessorBadge() {
+  const area = document.getElementById('professorArea');
+  if (professorLogado) {
+    const p = professorLogado.perfil || 'Fatec';
+    const corPerfil = p === 'Admin' ? '#6d28d9' : p === 'ETEC' ? '#b45309' : p === 'Fatec/ETEC' ? '#15803d' : '#64748b';
+    area.innerHTML = `<span class="user-badge" style="background:#f1f6f7; color:#8b1a1a;"><i class="fa fa-user-graduate"></i> ${professorLogado.nome} <small style="background:${corPerfil}; color:#fff; border-radius:999px; padding:1px 8px; font-size:10px; font-weight:800;">${p}</small> <button class="btn-logout" onclick="logoutProfessor()" title="Sair"><i class="fa fa-sign-out"></i></button></span>`;
+  } else {
+    area.innerHTML = `<button class="buttonLogin" style="background:#8b1a1a;" onclick="abrirLoginProfessor()"><i class="fa fa-user-graduate"></i> Área do Professor</button>`;
+  }
+}
+
+document.getElementById('loginProfSenha').addEventListener('keydown', function(e) { if (e.key === 'Enter') fazerLoginProfessor(); });
+
+// === PAINEL DO ADMIN (popup) ===
+let editandoLabId = null;
+
+function ehAdminLogado() {
+  if (!coordenadorLogado) return false;
+  const user = usuariosCoord.find(u => u.email === coordenadorEmail);
+  return user?.perfil === 'Administrador';
+}
+
+// Menu "Coordenador": admin abre o painel, coordenador vê a seção, sem login pede login
+function acessoCoordenador() {
+  if (!coordenadorLogado) { abrirLogin(); return; }
+  if (ehAdminLogado()) abrirModalAdmin();
+  else showSection('coordenador');
+}
+
+function abrirModalAdmin() {
+  if (!ehAdminLogado()) {
+    showToast('Acesso restrito ao administrador.', true);
+    abrirLogin();
+    return;
+  }
+  document.getElementById('admLabPerfil').innerHTML =
+    PERFIS_LAB.map(p => `<option value="${p}">${p}</option>`).join('');
+  document.getElementById('admProfPerfil').innerHTML =
+    PERFIS_CADASTRO.map(p => `<option value="${p}">${p}</option>`).join('');
+  renderAdminSalas();
+  renderAdminProfessores();
+  document.getElementById('modalAdmin').classList.add('active');
+}
+
+function renderAdminSalas() {
+  const box = document.getElementById('admListaLabs');
+  if (!box) return;
+  if (laboratorios.length === 0) {
+    box.innerHTML = '<div class="adm-vazio">Nenhuma sala cadastrada.</div>';
+    return;
+  }
+  box.innerHTML = laboratorios.map(l => {
+    const c = estiloLab(l.id);
+    const lp = perfilLab(l);
+    const cls = lp === 'ETEC' ? 'p-etec' : lp === 'Fatec/ETEC' ? 'p-ambos' : '';
+    return `<div class="adm-linha">
+      <span class="adm-dot" style="background:${c.solid}"></span>
+      <span class="adm-nome">${l.nome}</span>
+      <span class="adm-meta"><i class="fa fa-user"></i> ${l.capacidade} alunos</span>
+      <span class="btn-perfil ${cls}">${lp}</span>
+      <span class="adm-acoes">
+        <button class="btn-mini btn-editar" onclick="editarLabAdmin(${l.id})"><i class="fa fa-pencil"></i> Editar</button>
+        <button class="btn-mini btn-excluir" onclick="excluirLabAdmin(${l.id})"><i class="fa fa-trash"></i> Excluir</button>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function salvarLabAdmin() {
+  const nome = document.getElementById('admLabNome').value.trim();
+  const cap = parseInt(document.getElementById('admLabCap').value);
+  const perfil = document.getElementById('admLabPerfil').value;
+
+  if (!nome) { showToast('Informe o nome da sala.', true); return; }
+  if (!cap || cap < 1) { showToast('Informe a capacidade da sala.', true); return; }
+
+  if (editandoLabId !== null) {
+    const l = laboratorios.find(x => x.id === editandoLabId);
+    if (l) {
+      l.nome = nome;
+      l.capacidade = cap;
+      l.perfil = perfil;
+      l.compartilhadoEtec = perfil !== 'Fatec';
+    }
+    showToast(`Sala "${nome}" atualizada (${perfil}).`);
+    cancelarEdicaoLab();
+  } else {
+    const novoId = laboratorios.reduce((m, l) => Math.max(m, l.id), 0) + 1;
+    laboratorios.push({ id: novoId, nome: nome, capacidade: cap, perfil: perfil, compartilhadoEtec: perfil !== 'Fatec', ativo: true });
+    showToast(`Sala "${nome}" cadastrada no perfil ${perfil}.`);
+    document.getElementById('admLabNome').value = '';
+    document.getElementById('admLabCap').value = '30';
+  }
+
+  persistirLabs();
+  renderAdminSalas();
+  renderLabs();
+  aplicarCorCalendario();
+  renderCalendario();
+}
+
+function editarLabAdmin(id) {
+  const l = laboratorios.find(x => x.id === id);
+  if (!l) return;
+  editandoLabId = id;
+  document.getElementById('admLabNome').value = l.nome;
+  document.getElementById('admLabCap').value = l.capacidade;
+  document.getElementById('admLabPerfil').value = perfilLab(l);
+  document.getElementById('admLabBtn').innerHTML = '<i class="fa fa-save"></i> Salvar alterações';
+  document.getElementById('admLabCancel').style.display = 'inline-block';
+  document.getElementById('admLabEditInfo').style.display = 'block';
+  document.getElementById('admLabNome').focus();
+}
+
+function cancelarEdicaoLab() {
+  editandoLabId = null;
+  document.getElementById('admLabNome').value = '';
+  document.getElementById('admLabCap').value = '30';
+  document.getElementById('admLabBtn').innerHTML = '<i class="fa fa-save"></i> Cadastrar';
+  document.getElementById('admLabCancel').style.display = 'none';
+  document.getElementById('admLabEditInfo').style.display = 'none';
+}
+
+function excluirLabAdmin(id) {
+  const l = laboratorios.find(x => x.id === id);
+  if (!l) return;
+  if (!confirm(`Excluir a sala "${l.nome}"?`)) return;
+
+  laboratorios.splice(laboratorios.findIndex(x => x.id === id), 1);
+  if (!laboratoriosRemovidos.includes(id)) laboratoriosRemovidos.push(id);
+  if (editandoLabId === id) cancelarEdicaoLab();
+  if (labSelecionado === id) labSelecionado = laboratorios[0]?.id ?? null;
+
+  persistirLabs();
+  renderAdminSalas();
+  renderLabs();
+  aplicarCorCalendario();
+  renderCalendario();
+  showToast(`Sala "${l.nome}" excluída.`);
+}
+
+function renderAdminProfessores() {
+  const box = document.getElementById('admListaProfs');
+  if (!box) return;
+  if (usuariosProf.length === 0) {
+    box.innerHTML = '<div class="adm-vazio">Nenhum professor cadastrado.</div>';
+    return;
+  }
+  box.innerHTML = usuariosProf.map((u, i) => {
+    const p = u.perfil || 'Fatec';
+    const cls = p === 'Admin' ? 'p-admin' : p === 'ETEC' ? 'p-etec' : p === 'Fatec/ETEC' ? 'p-ambos' : '';
+    const logado = professorLogado && professorLogado.email === u.email;
+    return `<div class="adm-linha">
+      <span class="adm-nome">${u.nome}</span>
+      <span class="adm-meta"><i class="fa fa-envelope"></i> ${u.email}</span>
+      <span class="btn-perfil ${cls}">${p}</span>
+      <span class="adm-acoes">
+        ${logado
+          ? '<span class="adm-meta"><i class="fa fa-circle" style="color:#10b981;"></i> sessão ativa</span>'
+          : `<button class="btn-mini btn-excluir" onclick="excluirProfAdmin(${i})"><i class="fa fa-trash"></i> Remover</button>`}
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function salvarProfAdmin() {
+  const nome = document.getElementById('admProfNome').value.trim();
+  const email = document.getElementById('admProfEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('admProfSenha').value;
+  const perfil = document.getElementById('admProfPerfil').value;
+
+  if (!nome || !email || !senha) { showToast('Preencha nome, e-mail e senha.', true); return; }
+  if (usuariosProf.some(u => u.email === email)) { showToast('Já existe um professor com este e-mail.', true); return; }
+
+  usuariosProf.push({ email: email, senha: senha, nome: nome, sigaId: 'CAD-' + Date.now(), perfil: perfil });
+  persistirProfessores();
+
+  document.getElementById('admProfNome').value = '';
+  document.getElementById('admProfEmail').value = '';
+  document.getElementById('admProfSenha').value = '';
+  renderAdminProfessores();
+  showToast(`${nome} cadastrado no perfil ${perfil}.`);
+}
+
+function excluirProfAdmin(idx) {
+  const u = usuariosProf[idx];
+  if (!u) return;
+  if (!confirm(`Remover o cadastro de ${u.nome}?`)) return;
+  usuariosProf.splice(idx, 1);
+  persistirProfessores();
+  renderAdminProfessores();
+  showToast(`Cadastro de ${u.nome} removido.`);
+}
+
+// Badge do perfil da sala no chip
+function badgePerfilLab(l) {
+  const lp = perfilLab(l);
+  if (lp === 'ETEC') return '<span class="chip-etec">ETEC</span>';
+  if (lp === 'Fatec/ETEC') return '<span class="chip-etec-ambos">Fatec + ETEC</span>';
+  return '<span class="chip-perfil">Fatec</span>';
+}
+
 function renderLabs() {
-  document.getElementById('labGrid').innerHTML = laboratorios.map(l => `
-    <div class="lab-card ${labSelecionado === l.id ? 'selected' : ''}" onclick="selecionarLab(${l.id})">
-      <div class="lab-icon"><i class="fa fa-desktop"></i></div>
-      <h4>${l.nome}</h4>
-      <p>Capacidade: ${l.capacidade} alunos</p>
-      ${l.compartilhadoEtec ? '<span class="badge-etec">Compartilhado ETEC</span>' : ''}
-    </div>
-  `).join('');
+  document.getElementById('labGrid').innerHTML = laboratorios.map(l => {
+    const c = estiloLab(l.id);
+    const vars = `--lab-solid:${c.solid};--lab-soft:${c.soft};--lab-border:${c.border};--lab-text:${c.text};--lab-ring:${c.ring};`;
+    const lp = perfilLab(l);
+    const bloqueado = !podeReservarLab(l);
+    const titulo = bloqueado
+      ? `${l.nome} — exclusivo para perfil ${lp}. Seu perfil (${professorLogado?.perfil}) não pode reservar aqui.`
+      : `Ver calendário do ${l.nome} · perfil ${lp}`;
+    return `
+    <button type="button" class="lab-chip ${labSelecionado === l.id ? 'selected' : ''} ${bloqueado ? 'chip-bloqueado' : ''}" style="${vars}" onclick="selecionarLab(${l.id})" title="${titulo}">
+      <span class="chip-dot"></span>
+      ${l.nome}
+      <span class="chip-cap"><i class="fa fa-user"></i> ${l.capacidade}</span>
+      ${badgePerfilLab(l)}
+      ${bloqueado ? '<span class="chip-cap" title="Sem permissão"><i class="fa fa-lock"></i></span>' : ''}
+    </button>`;
+  }).join('');
 }
 
 function selecionarLab(id) {
   labSelecionado = id;
   renderLabs();
-  document.getElementById('dateBar').style.display = 'flex';
-  document.getElementById('gradeContainer').style.display = 'none';
-  document.getElementById('inputDate').value = hojeStr();
-  carregarGrade();
+  aplicarCorCalendario();
+  renderCalendario();
 }
 
-function carregarGrade() {
-  if (!labSelecionado) return;
-  const data = document.getElementById('inputDate').value;
-  if (!data) return;
+// Pinta o cabeçalho e a legenda do calendário com a cor do lab selecionado
+function aplicarCorCalendario() {
+  const c = estiloLab(labSelecionado);
+  const card = document.querySelector('#calendarioContainer .card');
+  const header = document.querySelector('#calendarioContainer .card-header');
+  const legenda = document.querySelector('#calendarioContainer .cal-legend .cal-dot-ocupado');
+  if (header) {
+    header.style.background = c.solid;
+    header.style.setProperty('--lab-solid', c.solid);
+  }
+  if (card) card.style.borderColor = c.border;
+  if (legenda) legenda.style.background = c.solid;
+}
+
+// === CALENDÁRIO MENSAL ===
+function strData(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function slotsDoLab() {
   const lab = laboratorios.find(l => l.id === labSelecionado);
-  let slots = [...slotsPadrao];
-  if (lab.compartilhadoEtec) slots = [...slots, ...slotsEtec];
+  return lab?.compartilhadoEtec ? [...slotsPadrao, ...slotsEtec] : [...slotsPadrao];
+}
 
-  document.getElementById('gradeContainer').style.display = 'block';
-  document.getElementById('labNomeGrade').textContent = lab.nome;
-  document.getElementById('dateInfo').textContent = new Date(data + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+function reservasDoDia(data) {
+  return reservas.filter(r => r.status !== 3 && r.dataInicio.startsWith(data));
+}
 
-  document.getElementById('scheduleBody').innerHTML = slots.map(s => {
+function mudarMes(delta) {
+  mesAtual = new Date(mesAtual.getFullYear(), mesAtual.getMonth() + delta, 1);
+  renderCalendario();
+}
+
+function renderCalendario() {
+  const grid = document.getElementById('calendarGrid');
+  const hoje = hojeStr();
+
+  document.getElementById('calTituloMes').textContent =
+    mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+  const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  let html = diasSemana.map(d => `<div class="cal-weekday">${d}</div>`).join('');
+
+  const primeiroDia = new Date(mesAtual.getFullYear(), mesAtual.getMonth(), 1).getDay();
+  const totalDias = new Date(mesAtual.getFullYear(), mesAtual.getMonth() + 1, 0).getDate();
+
+  for (let i = 0; i < primeiroDia; i++) html += '<div class="cal-day empty"></div>';
+
+  for (let d = 1; d <= totalDias; d++) {
+    const data = strData(new Date(mesAtual.getFullYear(), mesAtual.getMonth(), d));
+    const diaDate = new Date(data + 'T12:00:00');
+    const diaSemana = diaDate.getDay();
+    const ehFimDeSemana = diaSemana === 0 || diaSemana === 6;
+    const ehPassado = data < hoje;
+    const ehHoje = data === hoje;
+
+    const reservasDia = ehPassado ? [] : reservasDoDia(data);
+
+    const classes = ['cal-day'];
+    if (ehHoje) classes.push('hoje');
+    if (ehPassado || ehFimDeSemana) classes.push('past');
+    const clicavel = !ehPassado && !ehFimDeSemana;
+
+    let resumo = '';
+    if (reservasDia.length > 0) {
+      resumo = reservasDia.slice(0, 2).map(r =>
+        `<span class="cal-ocupacao-resumo">${r.usuarioNome.split(' ').pop()} — ${r.finalidade}</span>`
+      ).join('');
+      if (reservasDia.length > 2) resumo += `<span class="cal-ocupacao-resumo">+${reservasDia.length - 2} reserva(s)</span>`;
+    } else if (clicavel) {
+      resumo = '<span class="cal-ocupacao-resumo" style="color:#2e7d32;">Disponível</span>';
+    }
+
+    const pontos = clicavel
+      ? (reservasDia.length === 0
+        ? '<i class="cal-dot cal-dot-livre"></i>'
+        : reservasDia.slice(0, 4).map(r => {
+            const rc = r.status === 2 ? null : estiloLab(r.laboratorioId);
+            return `<i class="cal-dot" title="${r.usuarioNome} — ${r.finalidade} (Lab ${r.laboratorioId})" style="background:${rc ? rc.solid : '#b45309'}"></i>`;
+          }).join(''))
+      : '';
+
+    html += `<div class="${classes.join(' ')}" ${clicavel ? `onclick="abrirModalReservaDia('${data}')"` : ''}
+        title="${clicavel ? (reservasDia.length ? `${reservasDia.length} reserva(s) neste dia — clique para agendar` : 'Clique para agendar') : (ehFimDeSemana ? 'Fim de semana — sem aulas' : 'Dia já passou')}">
+      <span class="cal-day-num">${d}</span>
+      <div class="cal-day-status">${pontos}</div>
+      ${resumo}
+    </div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+// === RESERVA PELO CALENDÁRIO ===
+let ultimaDataClicada = null;
+
+function abrirModalReservaDia(data) {
+  const lab = laboratorios.find(l => l.id === labSelecionado);
+  if (!lab) { showToast('Nenhuma sala selecionada.', true); return; }
+
+  // Perfil do professor x perfil da sala (Fatec / ETEC / Fatec/ETEC)
+  if (!podeReservarLab(lab)) {
+    showToast(`Sala do perfil ${perfilLab(lab)}: seu perfil (${professorLogado?.perfil}) não pode reservar aqui.`, true);
+    return;
+  }
+
+  ultimaDataClicada = data;
+  const reservasDia = reservasDoDia(data);
+
+  document.getElementById('reservaData').value = data;
+  document.getElementById('reservaInfo').innerHTML =
+    `<i class="fa fa-calendar"></i> <strong>${new Date(data + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}</strong> | ${lab.nome} · perfil ${perfilLab(lab)}`;
+
+  const inpProf = document.getElementById('reservaProfessor');
+  const inpEmail = document.getElementById('reservaEmail');
+  const dica = document.getElementById('reservaDicaSiga');
+  document.getElementById('reservaLabelProf').textContent = professorLogado
+    ? `Professor (puxado do cadastro SIGA — perfil ${professorLogado.perfil || 'Fatec'})`
+    : 'Seu nome *';
+
+  if (professorLogado) {
+    // Logado: nome e e-mail puxados do cadastro (SIGA) — travados
+    inpProf.value = professorLogado.nome;
+    inpEmail.value = professorLogado.email;
+    inpProf.readOnly = true; inpEmail.readOnly = true;
+    inpProf.classList.add('campo-travado'); inpEmail.classList.add('campo-travado');
+    dica.style.display = 'none';
+  } else {
+    // Sem login: abre direto, campos livres para preencher
+    inpProf.value = ''; inpEmail.value = '';
+    inpProf.readOnly = false; inpEmail.readOnly = false;
+    inpProf.classList.remove('campo-travado'); inpEmail.classList.remove('campo-travado');
+    dica.style.display = 'block';
+  }
+
+  // Preenche o seletor de horários com os blocos livres do dia
+  const sel = document.getElementById('reservaSlot');
+  const livres = slotsDoLab().filter(s => {
     const ini = data + 'T' + s.horaInicio + ':00';
     const fim = data + 'T' + s.horaFim + ':00';
-    const r = reservas.find(r => r.laboratorioId === labSelecionado && r.status !== 3 && r.dataInicio < fim && r.dataFim > ini);
-    const livre = !r;
-    const sClass = livre ? 'status-livre' : (r.status === 2 ? 'status-conflito' : 'status-ocupado');
-    const sText = livre ? 'Livre' : (r.status === 2 ? 'Conflito' : 'Ocupado');
-    return `<tr>
-      <td><strong>${s.horaInicio} - ${s.horaFim}</strong></td>
-      <td>${s.turno}</td>
-      <td><span class="status-badge ${sClass}">${sText}</span></td>
-      <td>${livre ? '-' : r.usuarioNome + ' - ' + r.finalidade}</td>
-      <td>${livre
-        ? `<button class="btn-reservar" onclick="abrirModalReserva(${s.id},'${data}','${s.horaInicio}','${s.horaFim}','${s.descricao}')"><i class="fa fa-plus"></i> Reservar</button>`
-        : r.status === 2
-          ? `<button class="btn-reservar" style="background:#c62828;" onclick="verConflito('${r.id}')"><i class="fa fa-exclamation"></i> Ver</button>`
-          : '<span style="color:#999;">-</span>'
-      }</td>
-    </tr>`;
-  }).join('');
-}
+    return !reservasDia.some(r => r.dataInicio < fim && r.dataFim > ini);
+  });
 
-function abrirModalReserva(slotId, data, hI, hF, desc) {
-  document.getElementById('reservaSlotId').value = slotId;
-  document.getElementById('reservaData').value = data;
-  document.getElementById('reservaInfo').innerHTML = `<i class="fa fa-calendar"></i> <strong>${data}</strong> | <strong>${hI} - ${hF}</strong> | ${desc}`;
+  if (livres.length === 0) {
+    sel.innerHTML = '<option value="">— Todos os horários ocupados —</option>';
+  } else {
+    sel.innerHTML = '<option value="">Selecione o horário...</option>' + livres.map(s =>
+      `<option value="${s.id}">${s.horaInicio} - ${s.horaFim} (${s.descricao})</option>`
+    ).join('');
+  }
+
   document.getElementById('reservaFinalidade').value = '';
-  document.getElementById('reservaProfessor').value = '';
-  document.getElementById('reservaEmail').value = '';
   document.getElementById('reservaObs').value = '';
   document.getElementById('reservaRecorrente').checked = false;
   document.getElementById('recorrenciaOpts').style.display = 'none';
@@ -900,15 +1637,24 @@ document.getElementById('reservaRecorrente').addEventListener('change', function
 
 function confirmarReserva() {
   const fin = document.getElementById('reservaFinalidade').value.trim();
-  const prof = document.getElementById('reservaProfessor').value.trim();
-  const email = document.getElementById('reservaEmail').value.trim();
-  if (!fin || !prof || !email) { showToast('Preencha todos os campos obrigatórios.', true); return; }
-
+  const slotId = parseInt(document.getElementById('reservaSlot').value);
   const data = document.getElementById('reservaData').value;
-  const slotId = parseInt(document.getElementById('reservaSlotId').value);
-  const slots = laboratorios.find(l => l.id === labSelecionado)?.compartilhadoEtec ? [...slotsPadrao, ...slotsEtec] : [...slotsPadrao];
-  const slot = slots.find(s => s.id === slotId);
+
+  if (!fin) { showToast('Informe a matéria/disciplina da aula.', true); return; }
+  if (!slotId) { showToast('Selecione o horário da aula.', true); return; }
+
+  const slot = slotsDoLab().find(s => s.id === slotId);
   if (!slot) return;
+
+  // Logado → dados travados do SIGA; sem login → usa o que foi digitado no popup
+  const prof = professorLogado || {
+    nome: document.getElementById('reservaProfessor').value.trim(),
+    email: document.getElementById('reservaEmail').value.trim(),
+  };
+
+  if (!prof.nome || !prof.email) {
+    showToast('Informe seu nome e e-mail institucional.', true); return;
+  }
 
   const rec = document.getElementById('reservaRecorrente').checked;
   const sem = rec ? parseInt(document.getElementById('reservaSemanas').value) || 1 : 1;
@@ -917,18 +1663,18 @@ function confirmarReserva() {
   for (let i = 0; i < sem; i++) {
     const d = new Date(data + 'T12:00:00');
     d.setDate(d.getDate() + (i * 7));
-    const ds = d.toISOString().split('T')[0];
+    const ds = strData(d);
     const ini = ds + 'T' + slot.horaInicio + ':00';
     const fim = ds + 'T' + slot.horaFim + ':00';
     if (reservas.some(r => r.laboratorioId === labSelecionado && r.status !== 3 && r.dataInicio < fim && r.dataFim > ini)) {
       showToast(`Conflito no dia ${d.toLocaleDateString('pt-BR')}: horário já ocupado.`, true); return;
     }
-    reservas.push({ id: String(Date.now()+i), laboratorioId: labSelecionado, usuarioNome: prof, usuarioEmail: email, finalidade: fin, dataInicio: ini, dataFim: fim, status: 1, observacao: document.getElementById('reservaObs').value });
-    auditorias.unshift({ id: Date.now()+i, usuarioEmail: email, acao: 'CRIACAO_RESERVA', entidadeAfetada: 'Reserva', registroId: String(Date.now()+i), detalhes: `Reserva criada para Lab ${labSelecionado} (${fin}) - ${ds}.`, ipOrigem: '127.0.0.1', dataHoraUtc: new Date().toISOString() });
+    reservas.push({ id: String(Date.now()+i), laboratorioId: labSelecionado, usuarioNome: prof.nome, usuarioEmail: prof.email, finalidade: fin, dataInicio: ini, dataFim: fim, status: 1, observacao: document.getElementById('reservaObs').value });
+    auditorias.unshift({ id: Date.now()+i, usuarioEmail: prof.email, acao: 'CRIACAO_RESERVA', entidadeAfetada: 'Reserva', registroId: String(Date.now()+i), detalhes: `Reserva criada para Lab ${labSelecionado} (${fin}) - ${ds}.`, ipOrigem: '127.0.0.1', dataHoraUtc: new Date().toISOString() });
   }
   fecharModal('modalReserva');
-  showToast(`Reserva confirmada!${sem > 1 ? ' ' + sem + ' semanas.' : ''}`);
-  carregarGrade(); renderCoordenador(); renderAuditoria();
+  showToast(`Reserva confirmada para ${prof.nome}!${sem > 1 ? ' ' + sem + ' semanas.' : ''}`);
+  renderCalendario(); renderCoordenador(); renderAuditoria();
 }
 
 function renderCoordenador() {
@@ -982,7 +1728,7 @@ function resolverConflito() {
   if (r) { r.status = parseInt(dec); r.justificativa = just; auditorias.unshift({id:Date.now(),usuarioEmail:'coordenador@fatec.sp.gov.br',acao:'RESOLUCAO_CONFLITO',entidadeAfetada:'Reserva',registroId:id,detalhes:`Conflito resolvido: status ${dec}. ${just}`,ipOrigem:'127.0.0.1',dataHoraUtc:new Date().toISOString()}); }
   fecharModal('modalConflito');
   showToast('Conflito resolvido com sucesso!');
-  carregarGrade(); renderCoordenador(); renderAuditoria();
+  renderCalendario(); renderCoordenador(); renderAuditoria();
 }
 
 function renderAuditoria() {
@@ -1001,9 +1747,11 @@ function showSection(name) {
   if (name === 'auditoria') renderAuditoria();
 }
 
-function showTab(btn, tabId) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+function showTab(btn, tabId, scopeId) {
+  // scopeId: restringe a troca de abas a um container (ex.: modal do admin)
+  const root = scopeId ? document.getElementById(scopeId) : document;
+  root.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  root.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(tabId).classList.add('active');
 }
@@ -1017,12 +1765,28 @@ function showToast(msg, err) {
   setTimeout(() => t.className = 'toast', 3500);
 }
 
+carregarLabsPersistidos();
+carregarProfessoresPersistidos();
 restaurarSessao();
-renderLabs(); renderAuditoria(); renderCoordenador(); renderUserBadge();
+restaurarSessaoProfessor();
+labSelecionado = laboratorios[0]?.id || null;
+renderLabs(); renderAuditoria(); renderCoordenador(); renderUserBadge(); renderProfessorBadge();
+aplicarCorCalendario(); renderCalendario();
 
 fetch(API + '/laboratorios', { signal: AbortSignal.timeout(2000) })
   .then(r => r.json())
-  .then(d => { if (d?.length) { laboratorios.length = 0; d.forEach(l => laboratorios.push(l)); renderLabs(); } })
+  .then(d => {
+    if (!d?.length) return;
+    // O cadastro do admin (local) prevalece: só adiciona salas que ainda não existem
+    d.forEach(apiLab => {
+      if (laboratoriosRemovidos.includes(apiLab.id)) return;
+      if (laboratorios.some(l => l.id === apiLab.id)) return;
+      laboratorios.push({ ...apiLab, perfil: apiLab.compartilhadoEtec ? 'Fatec/ETEC' : 'Fatec' });
+    });
+    if (!laboratorios.some(l => l.id === labSelecionado)) labSelecionado = laboratorios[0]?.id || null;
+    renderLabs(); aplicarCorCalendario(); renderCalendario();
+    if (document.getElementById('modalAdmin').classList.contains('active')) renderAdminSalas();
+  })
   .catch(() => {});
 </script>
 </body>
