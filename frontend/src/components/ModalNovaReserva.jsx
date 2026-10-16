@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Calendar, Clock, AlertTriangle, ShieldCheck, User } from 'lucide-react';
+import { dentroDoPrazo, dataLimite, ehAdmin, strData, datasRecorrencia, LIMITE_DIAS_AGENDAMENTO } from '../utils/regrasAgendamento';
 
 export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose, onSucesso }) {
   const [finalidade, setFinalidade] = useState('');
@@ -12,6 +13,12 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Regra institucional: janela de 14 dias (professores); coordenação/admin (perfil 2) sem limite.
+    // Na recorrência, valida a ÚLTIMA data gerada (marca + 7*N) — senão a regra furava.
+    if (!dentroDoPrazo(ultimaDataCriacao, usuario)) {
+      setErro(`Regra de ${LIMITE_DIAS_AGENDAMENTO} dias: professores (Fatec e ETEC) só podem agendar com até ${LIMITE_DIAS_AGENDAMENTO} dias de antecedência${recorrente ? ' — reduza o período da recorrência' : ''}.`);
+      return;
+    }
     if (!finalidade.trim()) {
       setErro('Informe a matéria/disciplina da aula.');
       return;
@@ -30,14 +37,20 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
     setCarregando(true);
     setErro('');
 
+    // O mock devolve horário "HH:MM" e a API real "HH:MM:SS" — normaliza para "HH:MM:SS"
+    // antes de montar o ISO local, senão vira data inválida (ex: "07:30:00:00").
+    const horaInicio = String(slot.horaInicio);
+    const horaFim = String(slot.horaFim);
+
     try {
       await onSucesso({
         laboratorioId: labId,
         usuarioId: usuario.id,
         usuarioNome: usuario.nome,
         usuarioEmail: usuario.email,
-        dataInicio: `${data}T${slot.horaInicio}:00`,
-        dataFim: `${data}T${slot.horaFim}:00`,
+        usuarioPerfil: usuario.perfil,
+        dataInicio: `${data}T${horaInicio.length === 5 ? `${horaInicio}:00` : horaInicio}`,
+        dataFim: `${data}T${horaFim.length === 5 ? `${horaFim}:00` : horaFim}`,
         finalidade,
         observacao,
         recorrente,
@@ -51,7 +64,22 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
     }
   };
 
-  const slotsLivres = slots.filter((s) => s.disponivel);
+  // Horários do dia de hoje cujo início já passou não podem mais ser agendados —
+  // aparecem desabilitados no select, igual aos horários ocupados.
+  const agora = new Date();
+  const ehHoje = data === strData(agora);
+  const inicioPassado = (s) => {
+    if (!ehHoje) return false;
+    const hora = String(s.horaInicio).length === 5 ? `${s.horaInicio}:00` : s.horaInicio;
+    return new Date(`${data}T${hora}`) <= agora;
+  };
+
+  const slotsLivres = slots.filter((s) => s.disponivel && !inicioPassado(s));
+
+  // Datas que serão efetivamente criadas (mesma regra do backend) — exibidas no form
+  const datasCriacao = recorrente ? datasRecorrencia(data, quantidadeSemanas) : [data];
+  const ultimaDataCriacao = datasCriacao[datasCriacao.length - 1] || data;
+  const foraDaJanela = !dentroDoPrazo(ultimaDataCriacao, usuario);
 
   return (
     <div className="cps-modal-overlay">
@@ -95,6 +123,50 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
               </span>
             </div>
           </div>
+
+          {/* Regra de janela de 14 dias (admin fica isento) */}
+          {ehAdmin(usuario) ? (
+            <div style={{
+              display: 'flex',
+              gap: 8,
+              alignItems: 'flex-start',
+              background: '#ECFDF5',
+              border: '1px solid #A7F3D0',
+              borderRadius: 'var(--radius-md)',
+              padding: '10px 14px',
+              marginBottom: '18px',
+              fontSize: '0.78rem',
+              color: '#065F46',
+              lineHeight: 1.5
+            }}>
+              <ShieldCheck size={15} color="#047857" style={{ flexShrink: 0, marginTop: 1 }} />
+              <span>
+                <strong>Cargo de admin (Coordenação):</strong> sem limite de antecedência —
+                pode agendar qualquer data futura.
+              </span>
+            </div>
+          ) : (
+            <div style={{
+              display: 'flex',
+              gap: 8,
+              alignItems: 'flex-start',
+              background: '#FFFBEB',
+              border: '1px solid #FDE68A',
+              borderRadius: 'var(--radius-md)',
+              padding: '10px 14px',
+              marginBottom: '18px',
+              fontSize: '0.78rem',
+              color: '#92400E',
+              lineHeight: 1.5
+            }}>
+              <ShieldCheck size={15} color="#B45309" style={{ flexShrink: 0, marginTop: 1 }} />
+              <span>
+                <strong>Regra de {LIMITE_DIAS_AGENDAMENTO} dias:</strong> professores (Fatec e ETEC) só podem reservar com até{' '}
+                {LIMITE_DIAS_AGENDAMENTO} dias de antecedência — última data aceita:{' '}
+                {dataLimite(usuario).toLocaleDateString('pt-BR')}.
+              </span>
+            </div>
+          )}
 
           {/* Matéria / Disciplina */}
           <div style={{ marginBottom: '16px' }}>
@@ -141,14 +213,16 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
             >
               <option value="">Selecione o horário...</option>
               {slots.map((s) => (
-                <option key={s.slotId} value={s.slotId} disabled={!s.disponivel}>
-                  {s.horaInicio} às {s.horaFim} ({s.descricao}){!s.disponivel ? ' — Ocupado' : ''}
+                <option key={s.slotId} value={s.slotId} disabled={!s.disponivel || inicioPassado(s)}>
+                  {s.horaInicio} às {s.horaFim} ({s.descricao}){inicioPassado(s) ? ' — Horário já passado' : !s.disponivel ? ' — Ocupado' : ''}
                 </option>
               ))}
             </select>
             {slotsLivres.length === 0 && (
               <p style={{ fontSize: '0.75rem', color: '#991B1B', marginTop: '6px', fontWeight: 600 }}>
-                Todos os horários deste dia já estão ocupados. Tente outro dia no calendário.
+                {ehHoje
+                  ? 'Todos os horários deste dia já passaram ou estão ocupados. Escolha outro dia no calendário.'
+                  : 'Todos os horários deste dia já estão ocupados. Tente outro dia no calendário.'}
               </p>
             )}
           </div>
@@ -189,7 +263,7 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
             />
           </div>
 
-          {/* Opção de Agendamento Recorrente com Limite Institucional de 1 Mês */}
+          {/* Opção de Agendamento Recorrente — Limite de 2 semanas (janela de 14 dias) */}
           <div style={{
             background: '#FFFBFB',
             border: '1px solid #FEE2E2',
@@ -204,13 +278,13 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
                 onChange={(e) => setRecorrente(e.target.checked)}
                 style={{ width: 16, height: 16, accentColor: 'var(--cps-red)' }}
               />
-              Deseja agendamento semanal recorrente?
+              Deseja repetir este horário nos dias úteis (seg–sex)?
             </label>
 
             {recorrente && (
               <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed #FECACA' }}>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
-                  Período da Recorrência (Limite Máximo: 4 semanas / 1 mês):
+                  Período da Recorrência (Limite Máximo: 2 semanas):
                 </label>
                 <select
                   value={quantidadeSemanas}
@@ -224,16 +298,36 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
                     fontWeight: 600
                   }}
                 >
-                  <option value="1">1 semana (apenas esta semana)</option>
-                  <option value="2">2 semanas consecutivas</option>
-                  <option value="3">3 semanas consecutivas</option>
-                  <option value="4">4 semanas (1 mês completo - Limite Máximo)</option>
+                  <option value="1">1 semana (até o mesmo dia da próxima semana)</option>
+                  <option value="2">2 semanas (até +14 dias — limite máximo)</option>
                 </select>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: '6px',
+                  flexWrap: 'wrap',
+                  fontSize: '0.78rem',
+                  marginTop: '8px',
+                  padding: '6px 10px',
+                  background: '#FEF2F2',
+                  borderRadius: 'var(--radius-sm)'
+                }}>
+                  <strong style={{ color: 'var(--cps-red)' }}>Sua aula será agendada em:</strong>
+                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {datasCriacao.map((d) => new Date(`${d}T12:00:00`).toLocaleDateString('pt-BR')).join('  •  ')}
+                  </span>
+                </div>
+                {foraDaJanela && (
+                  <div style={{ fontSize: '0.75rem', color: '#991B1B', fontWeight: 700, marginTop: '6px' }}>
+                    ⚠ Estas datas ultrapassam a janela de {LIMITE_DIAS_AGENDAMENTO} dias — reduza o período da recorrência.
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#991B1B', marginTop: '6px' }}>
                   <ShieldCheck size={14} />
                   <span>
-                    Regra Institucional: Para evitar monopólio de laboratórios, o sistema limita a reserva a no máximo 1 mês.
+                    Regra Institucional: professores podem agendar com até {LIMITE_DIAS_AGENDAMENTO} dias de antecedência — por isso o agendamento recorrente é limitado a 2 semanas.
                   </span>
                 </div>
               </div>

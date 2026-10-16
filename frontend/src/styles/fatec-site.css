@@ -1,0 +1,890 @@
+/* ==========================================================================
+   LAYOUT INSTITUCIONAL FATEC ARAÇATUBA
+   Portado do index.html estático (commit 7de8873) para o app React.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,600,700');
+
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 26px;
+  color: #000;
+  background: #fff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #232323;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+/* CONTAINER */
+.container {
+  max-width: 1170px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* TOPBAR - idêntico ao site */
+.topbar {
+  border-bottom: 1px solid #eee;
+  background-color: #fff;
+  padding: 9px 15px;
+}
+.topbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.topbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar li,
+.topbar a {
+  color: #757575;
+  font-size: 13px;
+  font-weight: 400;
+}
+.topbar li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.topbar a {
+  display: inline-flex;
+  align-items: center;
+}
+.topbar .rede-facebook { color: #3b5998; }
+.topbar .rede-instagram { color: #e1306c; }
+.topbar .rede-tiktok { color: #000; }
+.topbar svg { display: block; }
+
+/* HEADER - idêntico ao site */
+.site-header {
+  padding: 20px 0;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+}
+.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-area img {
+  height: 75px;
+  width: 120px;
+  object-fit: contain;
+}
+.logo-text h1 {
+  font-size: 22px;
+  color: #8b1a1a;
+  margin: 0;
+  line-height: 1.1;
+  font-weight: 600;
+}
+.logo-text small {
+  font-size: 12px;
+  color: #757575;
+}
+nav.main-nav {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+nav.main-nav a {
+  color: #cc3b3b;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 22px;
+  border: 2px solid #f1cccc;
+  border-radius: 999px;
+  background: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+nav.main-nav a:hover {
+  border-color: #cc3b3b;
+  background: #fdf3f3;
+  color: #8b1a1a;
+}
+nav.main-nav a.active {
+  background: #cc3b3b;
+  border-color: #cc3b3b;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(204, 59, 59, 0.28);
+}
+nav.main-nav a.active:hover {
+  background: #a02e2e;
+  border-color: #a02e2e;
+  color: #fff;
+}
+
+/* HERO / SPOTLIGHT - estilo Fatec */
+.hero {
+  background: url('https://fatecaracatuba.edu.br/novo/resources/img/fatec2.jpg') center/cover no-repeat;
+  position: relative;
+  padding: 120px 0;
+  text-align: center;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(204, 59, 59, 0.85);
+}
+.hero .container {
+  position: relative;
+  z-index: 1;
+}
+.hero h2 {
+  color: #fff;
+  font-size: 42px;
+  font-weight: 300;
+  margin-bottom: 10px;
+}
+.hero p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 18px;
+  max-width: 650px;
+  margin: 0 auto 20px;
+}
+
+/* SECTIONS */
+.section {
+  padding: 80px 0;
+  background: #fff;
+}
+.section.lb {
+  background: #f1f6f7;
+}
+.section-title {
+  text-align: center;
+  margin-bottom: 42px;
+}
+.section-title small {
+  font-size: 16px;
+  color: #767676;
+  display: block;
+  margin-bottom: 4px;
+}
+.section-title h3 {
+  font-size: 34px;
+  font-weight: 300;
+  margin: 0 0 10px;
+  line-height: 1;
+}
+.section-title hr {
+  width: 80px;
+  margin: 10px auto 0;
+  border: 1px dotted #ccc;
+}
+
+/* CHIPS DE LABORATÓRIO (filtro colorido) */
+.lab-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.lab-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 2px solid #e4e5e6;
+  background: #fff;
+  color: #757575;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.lab-chip:hover {
+  border-color: var(--lab-border);
+  color: var(--lab-text);
+}
+.lab-chip.selected {
+  border-color: var(--lab-solid);
+  background: var(--lab-soft);
+  color: var(--lab-text);
+  font-weight: 700;
+  box-shadow: 0 0 0 3px var(--lab-ring);
+}
+.lab-chip .chip-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--lab-solid);
+  flex-shrink: 0;
+}
+.lab-chip .chip-cap {
+  font-size: 11px;
+  opacity: 0.75;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.lab-chip .chip-perfil {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #64748b;
+  border: 1px solid #dde3ea;
+}
+.lab-chip .chip-etec {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #fdeede;
+  color: #b45309;
+  border: 1px solid #f5d0a9;
+}
+.lab-chip .chip-etec-ambos {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #e7f6ee;
+  color: #15803d;
+  border: 1px solid #b7e4cd;
+}
+
+/* Chip: cadastrar nova sala (admin) */
+.lab-chip.nova-sala {
+  border-style: dashed;
+  border-color: #e8b4b4;
+  color: #cc3b3b;
+  background: #fff;
+}
+.lab-chip.nova-sala:hover {
+  border-color: #cc3b3b;
+  border-style: solid;
+  background: #fdf3f3;
+  color: #8b1a1a;
+}
+
+/* CARD */
+.card {
+  background: #fff;
+  border: 1px solid #e9ebee;
+  border-radius: 4px;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.10), 0 10px 24px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+.card-header {
+  background: #cc3b3b;
+  color: #fff;
+  padding: 16px 24px;
+  font-weight: 600;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-header .cal-header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-header .cal-titulo {
+  font-size: 15px;
+  min-width: 160px;
+  text-align: center;
+  font-weight: 600;
+}
+.card-body {
+  padding: 24px;
+}
+
+/* CALENDÁRIO MENSAL */
+.cal-nav-btn {
+  background: #fff;
+  border: 1px solid #e4e5e6;
+  border-radius: 3px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  color: #8b1a1a;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cal-nav-btn:hover {
+  background: #cc3b3b;
+  color: #fff;
+  border-color: #cc3b3b;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  /* Altura fixa e igual para todas as linhas do mês (células proporcionais) */
+  grid-auto-rows: 92px;
+  gap: 6px;
+}
+.cal-weekday {
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #55606b;
+  padding: 6px 0 8px;
+  text-transform: capitalize;
+  border-bottom: 2px solid #eceff1;
+  margin-bottom: 4px;
+}
+.cal-day {
+  /* Tamanho fixo igual para todos os dias — o conteúdo (reservas) não deforma a célula */
+  height: 92px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #d7dce1;
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  font-family: inherit;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  /* Contorno dos dias na cor da sala selecionada no chip */
+  border-color: var(--lab-border, #d7dce1);
+}
+.cal-day:hover {
+  border-color: var(--lab-solid, #cc3b3b);
+  background: #fff;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--lab-solid, #cc3b3b) 20%, transparent);
+}
+.cal-day.empty {
+  background: transparent;
+  border-color: transparent;
+  cursor: default;
+  box-shadow: none;
+}
+.cal-day.empty:hover {
+  box-shadow: none;
+  background: transparent;
+}
+.cal-day.past {
+  opacity: 0.45;
+  cursor: pointer;
+}
+.cal-day.past:hover {
+  border-color: var(--lab-border, #d7dce1);
+  box-shadow: none;
+  background: #f8f9fa;
+}
+/* Dia fora da janela institucional de 14 dias (só professores são limitados) */
+.cal-day.fora-limite {
+  opacity: 0.75;
+  cursor: pointer;
+  background-color: #f6f7f8;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 9px,
+    rgba(199, 204, 209, 0.4) 9px 11px
+  );
+}
+.cal-day.fora-limite:hover {
+  box-shadow: none;
+  background-color: #f6f7f8;
+}
+.cal-day.fora-limite .cal-day-num {
+  color: #8a9199;
+}
+/* Dia passado/fora do prazo COM reserva: legível (histórico p/ organização) */
+.cal-day.past.historico {
+  opacity: 1;
+  background: #f2f4f7;
+}
+.cal-day.past.historico:hover {
+  background: #f2f4f7;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+.cal-day.past.historico .cal-day-num {
+  color: #5b6570;
+}
+.cal-day.hoje {
+  border: 2px solid var(--lab-solid, #cc3b3b);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--lab-ring, rgba(204, 59, 59, 0.18));
+}
+/* Dia que o professor abriu para agendar: contorno na cor da sala + fundo destacado */
+.cal-day.selecionado {
+  border: 2px solid var(--lab-solid, #cc3b3b);
+  background: var(--lab-soft, #fff);
+  box-shadow: 0 0 0 4px var(--lab-ring, rgba(204, 59, 59, 0.18));
+}
+.cal-day.selecionado .cal-day-num {
+  color: var(--lab-text, #cc3b3b);
+}
+.cal-day-num {
+  font-weight: 700;
+  font-size: 15px;
+  color: #232323;
+}
+.cal-day.hoje .cal-day-num {
+  color: var(--lab-solid, #cc3b3b);
+}
+.cal-day-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  margin-top: auto;
+  border-top: 1px dashed #e0e4e8;
+  padding-top: 5px;
+}
+.cal-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.cal-dot-livre { background: #16a34a; }
+.cal-dot-ocupado { background: #c62828; }
+.cal-dot-conflito { background: #8b1a1a; }
+.cal-dot-hoje {
+  background: #fff;
+  border: 2px solid var(--lab-solid, #cc3b3b);
+}
+.cal-dot-limite { background: #c7ccd1; }
+.cal-ocupacao-resumo {
+  font-size: 11px;
+  color: #4b5563;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+/* Dia livre: "Disponível" em verde de disponibilidade */
+.cal-ocupacao-resumo.livre {
+  color: #15803d;
+}
+.cal-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #757575;
+}
+.cal-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-info {
+  margin-top: 16px;
+  color: #757575;
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.cal-info svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+/* NOTA SIGA */
+.siga-note {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: #f8f9fa;
+  border-left: 4px solid #e4e5e6;
+  border-radius: 3px;
+  font-size: 13px;
+  color: #757575;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* CALLOUT */
+.callout {
+  padding: 30px;
+  background-color: #fff;
+  box-shadow: 10px 10px 5px 0px rgba(226, 228, 229, 1);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.callout p {
+  font-size: 22px;
+  margin: 0;
+  flex: 1;
+}
+.btn-transparent {
+  display: inline-block;
+  border: 2px solid #cc3b3b;
+  color: #cc3b3b;
+  padding: 10px 30px;
+  border-radius: 3px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+.btn-transparent:hover {
+  background: #cc3b3b;
+  color: #fff;
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal {
+  background: #fff;
+  border-radius: 4px;
+  width: 90%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+.modal-header {
+  background: #cc3b3b;
+  color: #fff;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h3 {
+  font-size: 17px;
+  margin: 0;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+  display: inline-flex;
+}
+.modal-body {
+  padding: 24px;
+}
+.modal-body label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #232323;
+  font-size: 14px;
+}
+.modal-body label.check-etec {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+.modal-body label.check-etec input {
+  width: auto;
+  margin: 0;
+}
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+  width: 100%;
+  border: 1px solid #e4e5e6;
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  margin-bottom: 16px;
+  background: #f1f6f7;
+}
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+  outline: none;
+  border-color: #8b1a1a;
+  background: #fff;
+}
+.modal-footer {
+  padding: 0 24px 24px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.btn-primary {
+  background: #cc3b3b;
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 3px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary:hover { background: #a02e2e; }
+.btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+.btn-secondary {
+  background: #e4e5e6;
+  color: #232323;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 3px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+}
+.btn-secondary:hover { background: #d0d0d0; }
+.login-error {
+  background: #fce4ec;
+  color: #c62828;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  border-left: 4px solid #c62828;
+}
+.modal-dica {
+  font-size: 12px;
+  color: #757575;
+  line-height: 1.5;
+  margin: -12px 0 16px;
+}
+
+/* Seletor de cor da sala (cadastrado pelo coordenador) */
+.cor-swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.cor-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #d0d5dd;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s;
+}
+.cor-swatch:hover { transform: scale(1.12); }
+.cor-swatch.ativa {
+  box-shadow: 0 0 0 2px #232323;
+  transform: scale(1.12);
+}
+.cor-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #757575;
+}
+.cor-custom input[type="color"] {
+  width: 44px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid #e4e5e6;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+.cor-preview { margin-top: 10px; }
+.cor-picker + .modal-dica { margin-top: 8px; } /* sem margem negativa após a prévia */
+.cor-preview .mini-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1.5px solid;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #cc3b3b;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 4px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  max-width: 420px;
+}
+.toast.show {
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* FOOTER - idêntico ao site */
+.footer {
+  background: #232323;
+  color: #ccc;
+  padding: 40px 0 20px;
+}
+.footer .container {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  gap: 30px;
+}
+.footer h4 {
+  color: #fff;
+  font-size: 16px;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+.footer p,
+.footer li {
+  font-size: 14px;
+  line-height: 2;
+  color: #999;
+}
+.footer ul {
+  list-style: none;
+  padding: 0;
+}
+.footer a {
+  color: #999;
+  text-decoration: none;
+}
+.footer a:hover {
+  color: #fff;
+}
+.footer p {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.footer p svg {
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+.footer-bottom {
+  text-align: center;
+  border-top: 1px solid #333;
+  margin-top: 24px;
+  padding-top: 16px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* MODO TESTE — painel provisório de identidade (remover na integração SIGA) */
+.modo-teste {
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #cbb994;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
+  font-size: 12px;
+  color: #334155;
+}
+.modo-teste-badge {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  font-size: 10px;
+  color: #7c2d12;
+  background: #ffedd5;
+  border: 1px solid #fdba74;
+  border-radius: 4px;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+.modo-teste label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modo-teste-label {
+  font-weight: 600;
+}
+.modo-teste select {
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #fff;
+  color: #1e293b;
+  cursor: pointer;
+}
+.modo-teste select:focus {
+  outline: 2px solid #15803d;
+  outline-offset: 1px;
+}
+@media (max-width: 576px) {
+  .modo-teste { left: 8px; right: 8px; bottom: 8px; justify-content: center; }
+}
+
+/* RESPONSIVO */
+@media (max-width: 992px) {
+  .lab-chips { gap: 8px; }
+  .lab-chip { flex: 1 1 45%; justify-content: center; }
+  .footer .container { grid-template-columns: 1fr 1fr; }
+  nav.main-nav { display: none; }
+}
+@media (max-width: 576px) {
+  .lab-chip { flex: 1 1 100%; }
+  .hero h2 { font-size: 28px; }
+  .hero { padding: 70px 0; }
+  .footer .container { grid-template-columns: 1fr; }
+  .section { padding: 48px 0; }
+}

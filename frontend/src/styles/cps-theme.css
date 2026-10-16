@@ -228,7 +228,10 @@
   max-width: 540px;
   width: 100%;
   box-shadow: var(--shadow-lg);
-  overflow: hidden;
+  /* Modal sempre utilizável: rola internamente quando o conteúdo (ex.: lista de
+     datas da recorrência) cresce além da altura da tela. */
+  max-height: calc(100vh - 32px);
+  overflow: auto;
   border: 1px solid var(--border-light);
   animation: modalIn 0.25s ease-out;
 }

@@ -1,13 +1,14 @@
 // Cliente HTTP com suporte a API real ASP.NET Core e fallback offline
+import { dentroDoPrazo, dataLimite, strData, datasRecorrencia, LIMITE_DIAS_AGENDAMENTO } from '../utils/regrasAgendamento';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
 // Dados simulados sincronizados com o banco e seeds do EF Core
 let laboratoriosMock = [
-  { id: 1, nome: 'Laboratório 1', compartilhadoEtec: true, capacidade: 30, ativo: true },
-  { id: 2, nome: 'Laboratório 2', compartilhadoEtec: true, capacidade: 30, ativo: true },
-  { id: 9, nome: 'Laboratório 9', compartilhadoEtec: false, capacidade: 35, ativo: true },
-  { id: 10, nome: 'Laboratório 10', compartilhadoEtec: false, capacidade: 35, ativo: true },
+  { id: 1, nome: 'Laboratório 1', perfil: 'Fatec/ETEC', cor: null, compartilhadoEtec: true, capacidade: 30, ativo: true },
+  { id: 2, nome: 'Laboratório 2', perfil: 'Fatec/ETEC', cor: null, compartilhadoEtec: true, capacidade: 30, ativo: true },
+  { id: 9, nome: 'Laboratório 9', perfil: 'Fatec', cor: null, compartilhadoEtec: false, capacidade: 35, ativo: true },
+  { id: 10, nome: 'Laboratório 10', perfil: 'Fatec', cor: null, compartilhadoEtec: false, capacidade: 35, ativo: true },
 ];
 
 let slotsPadraoFatec = [
@@ -28,6 +29,14 @@ let slotsEtecCustom = [
   { id: 102, turno: 2, horaInicio: '14:05', horaFim: '14:55', descricao: 'ETEC Tarde - Bloco 2 (14:05 - 14:55)', exclusivoEtec: true },
   { id: 103, turno: 2, horaInicio: '15:10', horaFim: '16:00', descricao: 'ETEC Tarde - Bloco 3 (15:10 - 16:00)', exclusivoEtec: true }
 ];
+
+// Data local (AAAA-MM-DD) com deslocamento de dias — reservas de demonstração
+// usam data local do navegador (não UTC) para não deslocarem perto da meia-noite.
+const dataDeslocada = (dias) => {
+  const d = new Date();
+  d.setDate(d.getDate() + dias);
+  return strData(d);
+};
 
 let reservasMock = [
   {
@@ -72,6 +81,52 @@ let reservasMock = [
     finalidade: 'Inteligência Artificial',
     status: 2, // EmConflito
     justificativa: 'Horário solicitado simultaneamente por outro docente para reposição de aula.',
+    observacao: null,
+    criadoEm: new Date().toISOString()
+  },
+  // ---- Histórico (dias passados): aparecem no calendário só para consulta ----
+  {
+    id: 'a1b2c3d4-0004-0000-0000-000000000004',
+    laboratorioId: 1,
+    laboratorioNome: 'Laboratório 1',
+    usuarioId: '11111111-1111-1111-1111-111111111111',
+    usuarioNome: 'Prof. Carlos Eduardo',
+    usuarioEmail: 'carlos.eduardo@fatec.sp.gov.br',
+    dataInicio: dataDeslocada(-1) + 'T08:20:00',
+    dataFim: dataDeslocada(-1) + 'T09:10:00',
+    finalidade: 'Banco de Dados',
+    status: 1,
+    justificativa: null,
+    observacao: 'Aula registrada — histórico para organização',
+    criadoEm: new Date().toISOString()
+  },
+  {
+    id: 'a1b2c3d4-0005-0000-0000-000000000005',
+    laboratorioId: 9,
+    laboratorioNome: 'Laboratório 9',
+    usuarioId: '22222222-2222-2222-2222-222222222222',
+    usuarioNome: 'Profa. Juliana Santos',
+    usuarioEmail: 'juliana.santos@fatec.sp.gov.br',
+    dataInicio: dataDeslocada(-3) + 'T19:30:00',
+    dataFim: dataDeslocada(-3) + 'T20:20:00',
+    finalidade: 'Redes de Computadores',
+    status: 1,
+    justificativa: null,
+    observacao: null,
+    criadoEm: new Date().toISOString()
+  },
+  {
+    id: 'a1b2c3d4-0006-0000-0000-000000000006',
+    laboratorioId: 2,
+    laboratorioNome: 'Laboratório 2',
+    usuarioId: '33333333-3333-3333-3333-333333333333',
+    usuarioNome: 'Coord. Marcelo Oliveira',
+    usuarioEmail: 'marcelo.oliveira@fatec.sp.gov.br',
+    dataInicio: dataDeslocada(-6) + 'T18:40:00',
+    dataFim: dataDeslocada(-6) + 'T19:30:00',
+    finalidade: 'Reunião de Coordenação',
+    status: 1,
+    justificativa: null,
     observacao: null,
     criadoEm: new Date().toISOString()
   }
@@ -119,7 +174,7 @@ export const api = {
     } catch (erro) {
       if (erro.name !== 'TimeoutError' && erro.name !== 'AbortError' && erro.message !== 'Failed to fetch') throw erro;
     }
-    const novo = { id: Math.max(0, ...laboratoriosMock.map(l => l.id)) + 1, nome: dados.nome.trim(), capacidade: Number(dados.capacidade), compartilhadoEtec: Boolean(dados.compartilhadoEtec), ativo: true };
+    const novo = { id: Math.max(0, ...laboratoriosMock.map(l => l.id)) + 1, nome: dados.nome.trim(), capacidade: Number(dados.capacidade), perfil: dados.perfil || (dados.compartilhadoEtec ? 'Fatec/ETEC' : 'Fatec'), cor: dados.cor || null, compartilhadoEtec: Boolean(dados.compartilhadoEtec), ativo: true };
     laboratoriosMock.push(novo);
     return novo;
   },
@@ -173,11 +228,22 @@ export const api = {
     };
   },
 
-  // Cria uma nova reserva com validação de concorrência e limite de 1 mês
+  // Cria uma nova reserva com validação de concorrência, janela de 14 dias e limite de 2 semanas na recorrência
   async criarReserva(dados) {
-    // Validação estrita de negócio (1 mês máximo)
-    if (dados.recorrente && dados.quantidadeSemanas > 4) {
-      throw new Error('Regra Institucional Fatec: O agendamento recorrente é limitado a 4 semanas (1 mês).');
+    // Regra Institucional: professores (Fatec/ETEC) agendam com até 14 dias; coordenação/admin (perfil 2) sem limite
+    const solicitante = { perfil: dados.usuarioPerfil };
+    const totalSemanas = dados.recorrente ? Number(dados.quantidadeSemanas) || 1 : 1;
+
+    // Valida a ÚLTIMA data gerada pela recorrência (marca + 7*N, inclusive)
+    const ultimaOcorrencia = new Date(dados.dataInicio);
+    if (dados.recorrente) ultimaOcorrencia.setDate(ultimaOcorrencia.getDate() + totalSemanas * 7);
+
+    if (!dentroDoPrazo(strData(ultimaOcorrencia), solicitante)) {
+      throw new Error(`Regra Institucional Fatec: professores só podem agendar com até ${LIMITE_DIAS_AGENDAMENTO} dias de antecedência (até ${dataLimite(solicitante).toLocaleDateString('pt-BR')}).`);
+    }
+    // Validação estrita de negócio (2 semanas máximo na recorrência)
+    if (dados.recorrente && totalSemanas > 2) {
+      throw new Error('Regra Institucional Fatec: o agendamento recorrente é limitado a 2 semanas.');
     }
 
     try {
@@ -188,26 +254,29 @@ export const api = {
         signal: AbortSignal.timeout(1500)
       });
       if (res.ok) return await res.json();
-      if (res.status === 409) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem || 'Conflito de concorrência: Este horário acabou de ser reservado.');
-      }
+      const erro = await res.json().catch(() => ({}));
+      // Erro de regra/conflito vindo da API é repassado ao usuário (não cai no modo simulado)
+      throw new Error(erro.mensagem || `Falha ao criar a reserva (HTTP ${res.status}).`);
     } catch (e) {
-      if (e.message.includes('Regra Institucional') || e.message.includes('Conflito')) {
-        throw e;
-      }
+      const semRede = e.name === 'TimeoutError' || e.name === 'AbortError' || e.message === 'Failed to fetch';
+      if (!semRede) throw e;
     }
 
-    // Fallback Simulado
-    const totalSemanas = dados.recorrente ? dados.quantidadeSemanas : 1;
+    // Fallback Simulado — mesma regra do backend: dias úteis até marca + 7*N
     const novas = [];
     const grupoId = dados.recorrente ? crypto.randomUUID() : null;
+    const origem = new Date(dados.dataInicio);
+    const datasCriadas = dados.recorrente
+      ? datasRecorrencia(strData(origem), totalSemanas)
+      : [strData(origem)];
+    const duracao = new Date(dados.dataFim) - origem;
 
-    for (let i = 0; i < totalSemanas; i++) {
-      const dInicio = new Date(dados.dataInicio);
-      dInicio.setDate(dInicio.getDate() + (i * 7));
-      const dFim = new Date(dados.dataFim);
-      dFim.setDate(dFim.getDate() + (i * 7));
+    for (const dataStr of datasCriadas) {
+      const hh = String(origem.getHours()).padStart(2, '0');
+      const mm = String(origem.getMinutes()).padStart(2, '0');
+      const ss = String(origem.getSeconds()).padStart(2, '0');
+      const dInicio = new Date(`${dataStr}T${hh}:${mm}:${ss}`);
+      const dFim = new Date(dInicio.getTime() + duracao);
 
       // Verifica se há colisão
       const conflito = reservasMock.some(r =>
@@ -217,7 +286,9 @@ export const api = {
         r.dataFim > dInicio.toISOString()
       );
 
-      if (conflito) {
+      // Reserva simples em horário ocupado → recusa; na recorrência dias ocupados
+      // entram como "Em conflito" (status 2) para mediação da coordenação.
+      if (conflito && !dados.recorrente) {
         throw new Error(`Conflito de horário no dia ${dInicio.toLocaleDateString('pt-BR')}: Horário já ocupado.`);
       }
 
@@ -231,7 +302,7 @@ export const api = {
         dataInicio: dInicio.toISOString(),
         dataFim: dFim.toISOString(),
         finalidade: dados.finalidade,
-        status: 1,
+        status: conflito ? 2 : 1,
         recorrenciaGrupoId: grupoId,
         justificativa: null,
         observacao: dados.observacao || null,
@@ -249,7 +320,7 @@ export const api = {
       acao: 'CRIACAO_RESERVA',
       entidadeAfetada: 'Reserva',
       registroId: novas[0].id,
-      detalhes: `Reserva criada para Lab ${dados.laboratorioId} (${dados.finalidade}) - ${totalSemanas} instância(s).`,
+      detalhes: `Reserva criada para Lab ${dados.laboratorioId} (${dados.finalidade}) - ${novas.length} instância(s).`,
       ipOrigem: '127.0.0.1 (Frontend)',
       dataHoraUtc: new Date().toISOString()
     });
@@ -259,6 +330,31 @@ export const api = {
 
   // Resolver conflito (Coordenador)
   async resolverConflito(reservaId, dados) {
+    const corpo = {
+      coordenadorId: dados.coordenadorId,
+      novoUsuarioId: dados.novoUsuarioId ?? null,
+      novoStatus: Number(dados.novoStatus),
+      justificativa: dados.justificativa
+    };
+
+    let rede = false;
+    try {
+      const res = await fetch(`${API_BASE_URL}/reservas/${reservaId}/resolver-conflito`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(corpo),
+        signal: AbortSignal.timeout(2000)
+      });
+      rede = true;
+      if (res.ok) return await res.json();
+      const erro = await res.json().catch(() => ({}));
+      throw new Error(erro.mensagem || 'Não foi possível registrar a deliberação da Coordenação.');
+    } catch (erro) {
+      if (rede) throw erro;
+      if (erro.name !== 'TimeoutError' && erro.name !== 'AbortError' && erro.message !== 'Failed to fetch') throw erro;
+    }
+
+    // Modo simulado (API indisponível): aplica no mock
     const reserva = reservasMock.find(r => r.id === reservaId);
     if (!reserva) throw new Error('Reserva não encontrada.');
 
@@ -282,31 +378,60 @@ export const api = {
     return reserva;
   },
 
-  // Cancelar reserva
+  // Cancelar reserva (DELETE na API; sem API, altera o mock)
   async cancelarReserva(reservaId, solicitante) {
+    const params = new URLSearchParams();
+    if (solicitante?.id) params.set('solicitanteId', solicitante.id);
+    if (solicitante?.justificativa) params.set('justificativa', solicitante.justificativa);
+    const qs = params.toString();
+
+    let rede = false;
+    try {
+      const res = await fetch(`${API_BASE_URL}/reservas/${reservaId}${qs ? `?${qs}` : ''}`, {
+        method: 'DELETE',
+        signal: AbortSignal.timeout(2000)
+      });
+      rede = true;
+      if (res.ok || res.status === 204) return;
+      const erro = await res.json().catch(() => ({}));
+      throw new Error(erro.mensagem || 'Não foi possível cancelar a reserva.');
+    } catch (erro) {
+      if (rede) throw erro;
+      if (erro.name !== 'TimeoutError' && erro.name !== 'AbortError' && erro.message !== 'Failed to fetch') throw erro;
+    }
+
+    // Modo simulado (API indisponível): altera no mock
     const index = reservasMock.findIndex(r => r.id === reservaId);
     if (index !== -1) {
       reservasMock[index].status = 3; // Cancelada
       auditoriasMock.unshift({
         id: Date.now(),
-        usuarioEmail: solicitante.email,
+        usuarioEmail: solicitante?.email,
         acao: 'CANCELAMENTO_RESERVA',
         entidadeAfetada: 'Reserva',
         registroId: reservaId,
-        detalhes: `Cancelamento efetuado por ${solicitante.nome} (${solicitante.perfil === 2 ? 'Coordenador' : 'Professor'}).`,
+        detalhes: `Cancelamento efetuado por ${solicitante?.nome} (${solicitante?.perfil === 2 ? 'Coordenador' : 'Professor'}).`,
         ipOrigem: '127.0.0.1',
         dataHoraUtc: new Date().toISOString()
       });
     }
   },
 
-  // Lista auditorias LGPD
+  // Lista auditorias LGPD (API real; fallback para o mock offline)
   async getAuditoriasLgpd() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auditorias`, { signal: AbortSignal.timeout(1500) });
+      if (res.ok) return await res.json();
+    } catch {}
     return auditoriasMock;
   },
 
-  // Lista todas as reservas
+  // Lista todas as reservas (API real; fallback para o mock offline)
   async getReservas() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/reservas`, { signal: AbortSignal.timeout(1500) });
+      if (res.ok) return await res.json();
+    } catch {}
     return reservasMock;
   }
 };
