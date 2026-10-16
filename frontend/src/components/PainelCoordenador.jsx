@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { ShieldAlert, AlertTriangle } from 'lucide-react';
+import { PALETA_LABS } from './labCores';
 
 export function PainelCoordenador({ reservas, onResolverConflito, onCancelarReserva, onAdicionarLaboratorio }) {
   const [nomeLab, setNomeLab] = useState('');
   const [capacidadeLab, setCapacidadeLab] = useState(30);
   const [compartilhadoEtec, setCompartilhadoEtec] = useState(false);
+  const [corLab, setCorLab] = useState(PALETA_LABS[1]);
   const [erroLab, setErroLab] = useState('');
   const conflitos = reservas.filter(r => r.status === 2);
   const confirmadas = reservas.filter(r => r.status === 1);
@@ -33,12 +35,15 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
         </div>
       </div>
 
-      <form onSubmit={async e => { e.preventDefault(); setErroLab(''); try { await onAdicionarLaboratorio({ nome: nomeLab, capacidade: Number(capacidadeLab), compartilhadoEtec }); setNomeLab(''); setCapacidadeLab(30); setCompartilhadoEtec(false); } catch (erro) { setErroLab(erro.message); } }} style={{marginBottom:24,padding:16,border:'1px solid var(--border-light)',borderRadius:'var(--radius-md)',background:'#F8FAFC'}}>
+      <form onSubmit={async e => { e.preventDefault(); setErroLab(''); try { await onAdicionarLaboratorio({ nome: nomeLab, capacidade: Number(capacidadeLab), compartilhadoEtec, cor: corLab }); setNomeLab(''); setCapacidadeLab(30); setCompartilhadoEtec(false); setCorLab(PALETA_LABS[1]); } catch (erro) { setErroLab(erro.message); } }} style={{marginBottom:24,padding:16,border:'1px solid var(--border-light)',borderRadius:'var(--radius-md)',background:'#F8FAFC'}}>
         <h3 style={{fontSize:'.95rem',fontWeight:700,marginBottom:12}}>Adicionar laboratório</h3>
         <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
           <input required maxLength={100} placeholder="Nome do laboratório" value={nomeLab} onChange={e=>setNomeLab(e.target.value)} style={{padding:9,border:'1px solid var(--border-light)',borderRadius:8}} />
           <input required type="number" min="1" placeholder="Capacidade" value={capacidadeLab} onChange={e=>setCapacidadeLab(e.target.value)} style={{width:110,padding:9,border:'1px solid var(--border-light)',borderRadius:8}} />
           <label><input type="checkbox" checked={compartilhadoEtec} onChange={e=>setCompartilhadoEtec(e.target.checked)} /> Compartilhado com ETEC</label>
+          <label style={{display:'flex',alignItems:'center',gap:6,fontSize:'.82rem'}}>Cor da sala
+            <input type="color" value={corLab} onChange={e=>setCorLab(e.target.value)} title="Escolher cor da sala" style={{width:44,height:34,padding:2,border:'1px solid var(--border-light)',borderRadius:8,background:'#fff',cursor:'pointer'}} />
+          </label>
           <button className="btn-cps" type="submit">Cadastrar</button>
         </div>
         {erroLab && <p role="alert" style={{color:'#b91c1c',marginTop:8}}>{erroLab}</p>}
