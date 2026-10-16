@@ -5,7 +5,7 @@ namespace AgendaFatec.Infrastructure.Data;
 
 /// <summary>
 /// Contexto principal do Entity Framework Core para o Sistema de Agendamento Fatec.
-/// Suporta SQL Server e mapeia todas as entidades institucionais, regras de concorrência e auditoria.
+/// Suporta MySQL e mapeia todas as entidades institucionais, regras de concorrência e auditoria.
 /// </summary>
 public class AgendaFatecDbContext : DbContext
 {

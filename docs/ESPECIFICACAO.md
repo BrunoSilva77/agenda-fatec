@@ -9,7 +9,7 @@ A aplicação será integrada ao portal institucional da Fatec, exigindo aderên
 
 ## 2. Stack Tecnológica (Ecossistema Centro Paula Souza / SIGA)
 * **Backend:** C# com ASP.NET Core (Web API) estruturado em **Clean Architecture**.
-* **ORM:** Entity Framework Core com SQL Server (padrão corporativo do ecossistema Microsoft / SIGA).
+* **ORM:** Entity Framework Core com MySQL (padrão de banco do projeto).
 * **Frontend:** React.js ou Blazor (WebAssembly/Server), com design responsivo (Bootstrap ou Material UI).
 * **Autenticação:** Integração via OAuth/SSO ou API de integração com o sistema **SIGA** (credenciais institucionais `@fatec.sp.gov.br`).
 
@@ -33,7 +33,7 @@ Como a solução será integrada ao site institucional da Fatec:
 * **Professor (Solicitante):**
   - Autentica-se com credenciais institucionais do SIGA.
   - Consulta a disponibilidade de horários dos laboratórios.
-  - Solicita agendamentos pontuais ou recorrentes (com limite de 1 mês).
+  - Solicita agendamentos pontuais ou recorrentes com até **14 dias de antecedência** (recorrência limitada a **2 semanas**).
 * **Coordenador (Administrador):**
   - Autentica-se com credenciais institucionais do SIGA.
   - Visualiza mapa completo de ocupação.
@@ -56,10 +56,15 @@ O escopo cobre os laboratórios de informática da unidade:
    - A garantia inicial da vaga ocorre por ordem de solicitação, com controle de concorrência a nível de banco de dados (`RowVersion`/Token de Concorrência) para impedir reservas sobrepostas no mesmo instante.
 2. **Resolução de Conflitos pelo Coordenador:**
    - Em caso de necessidade institucional, o Coordenador pode alterar a titularidade da reserva ou cancelar uma reserva existente, registrando a devida justificativa e notificação.
-3. **Limite Máximo de Recorrência (1 Mês):**
-   - Agendamentos recorrentes (ex: semanais) possuem teto máximo de **1 (um) mês** a partir da data inicial.
+3. **Janela de Antecedência de 14 Dias:**
+   - Professores (Fatec e ETEC) só podem reservar com até **14 (quatorze) dias** de antecedência — validada no frontend e no backend.
+   - O Coordenador/Administrador (perfil 2) **não possui limite de data**: pode agendar qualquer data futura.
+4. **Limite Máximo de Recorrência (2 Semanas):**
+   - Agendamentos recorrentes (ex: semanais) possuem teto máximo de **2 (duas) semanas** a partir da data inicial, respeitando a janela de 14 dias até a última ocorrência.
    - O sistema bloqueia tentativas de reserva para um semestre inteiro de forma contínua, prevenindo monopólio de salas.
-4. **Slots Customizados para ETEC (Laboratórios 1 e 2):**
+5. **Cadastro de Salas Restrito à Coordenação:**
+   - Apenas usuários com perfil Coordenador/Administrador podem cadastrar novas salas (validação no cliente e na API via `SolicitanteId`), definindo perfil de uso (`Fatec`, `ETEC`, `Fatec/ETEC`) e cor de identificação.
+6. **Slots Customizados para ETEC (Laboratórios 1 e 2):**
    - A modelagem suporta grades de horários parametrizadas por laboratório (`SlotHorario`), permitindo que as salas 1 e 2 operem com os blocos horários divergentes da ETEC sem quebrar a grade padrão da Fatec.
 
 ---
@@ -85,7 +90,7 @@ O escopo cobre os laboratórios de informática da unidade:
 
 ## 8. Arquitetura de Dados (Models / Entity Framework Core)
 * **`Usuario`:** Identificador institucional (`SigaId`), Nome, E-mail, Perfil (`Professor`, `Coordenador`), Status (`Ativo`).
-* **`Laboratorio`:** Identificador, Nome, Capacidade, Indicador `CompartilhadoEtec`, Associação com slots de horário.
+* **`Laboratorio`:** Identificador, Nome, Capacidade, Indicador `CompartilhadoEtec`, Perfil de uso (`Fatec`, `ETEC`, `Fatec/ETEC`), Cor de identificação (`Cor`, hex), Associação com slots de horário.
 * **`SlotHorario`:** Turno, Hora de Início, Hora de Término, Descrição, Associação com Laboratório específico (para ETEC) ou genérico (para Fatec).
 * **`Reserva`:** Laboratório, Usuário, Intervalo (Data/Hora Início e Fim), Status (`Confirmada`, `EmConflito`, `Cancelada`, `PendenteCoordenacao`), Chave de Agrupamento de Recorrência (`RecorrenciaGrupoId`), Token de Concorrência (`RowVersion`).
 * **`AuditoriaLgpd`:** Registro de trilha para ações sensíveis de agendamento e gerenciamento, garantindo rastreabilidade e conformidade legal.

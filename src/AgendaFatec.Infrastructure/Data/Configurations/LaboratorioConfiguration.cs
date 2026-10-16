@@ -11,9 +11,10 @@ public class LaboratorioConfiguration : IEntityTypeConfiguration<Laboratorio>
         builder.ToTable("Laboratorios");
 
         builder.HasKey(l => l.Id);
-        // Desativa identity para permitir IDs fixos definidos pela instituição (1, 2, 9, 10)
+        // Identity automático (AUTO_INCREMENT no MySQL) — os seeds fixos (1, 2, 9, 10)
+        // são inseridos com valores explícitos pelo EnsureCreated/HasData.
         builder.Property(l => l.Id)
-            .UseIdentityColumn();
+            .ValueGeneratedOnAdd();
 
         builder.Property(l => l.Nome)
             .IsRequired()
@@ -24,6 +25,12 @@ public class LaboratorioConfiguration : IEntityTypeConfiguration<Laboratorio>
 
         builder.Property(l => l.Capacidade)
             .IsRequired();
+
+        builder.Property(l => l.Perfil)
+            .HasMaxLength(20);
+
+        builder.Property(l => l.Cor)
+            .HasMaxLength(7);
 
         builder.Property(l => l.Ativo)
             .IsRequired()
@@ -37,6 +44,7 @@ public class LaboratorioConfiguration : IEntityTypeConfiguration<Laboratorio>
                 Nome = "Laboratório 1",
                 CompartilhadoEtec = true,
                 Capacidade = 30,
+                Perfil = "Fatec/ETEC",
                 Ativo = true
             },
             new Laboratorio
@@ -45,6 +53,7 @@ public class LaboratorioConfiguration : IEntityTypeConfiguration<Laboratorio>
                 Nome = "Laboratório 2",
                 CompartilhadoEtec = true,
                 Capacidade = 30,
+                Perfil = "Fatec/ETEC",
                 Ativo = true
             },
             new Laboratorio
@@ -53,6 +62,7 @@ public class LaboratorioConfiguration : IEntityTypeConfiguration<Laboratorio>
                 Nome = "Laboratório 9",
                 CompartilhadoEtec = false,
                 Capacidade = 35,
+                Perfil = "Fatec",
                 Ativo = true
             },
             new Laboratorio
@@ -61,6 +71,7 @@ public class LaboratorioConfiguration : IEntityTypeConfiguration<Laboratorio>
                 Nome = "Laboratório 10",
                 CompartilhadoEtec = false,
                 Capacidade = 35,
+                Perfil = "Fatec",
                 Ativo = true
             }
         );

@@ -52,7 +52,12 @@ public class SlotHorarioConfiguration : IEntityTypeConfiguration<SlotHorario>
             new SlotHorario { Id = 8, Turno = Turno.Noite, HoraInicio = new TimeSpan(19, 30, 0), HoraFim = new TimeSpan(20, 20, 0), Descricao = "Noite - Bloco 2 (19:30 - 20:20)" },
             new SlotHorario { Id = 9, Turno = Turno.Noite, HoraInicio = new TimeSpan(20, 20, 0), HoraFim = new TimeSpan(21, 10, 0), Descricao = "Noite - Bloco 3 (20:20 - 21:10)" },
             new SlotHorario { Id = 10, Turno = Turno.Noite, HoraInicio = new TimeSpan(21, 20, 0), HoraFim = new TimeSpan(22, 10, 0), Descricao = "Noite - Bloco 4 (21:20 - 22:10)" },
-            new SlotHorario { Id = 11, Turno = Turno.Noite, HoraInicio = new TimeSpan(22, 10, 0), HoraFim = new TimeSpan(23, 0, 0), Descricao = "Noite - Bloco 5 (22:10 - 23:00)" }
+            new SlotHorario { Id = 11, Turno = Turno.Noite, HoraInicio = new TimeSpan(22, 10, 0), HoraFim = new TimeSpan(23, 0, 0), Descricao = "Noite - Bloco 5 (22:10 - 23:00)" },
+            // Tarde (ETEC) — aparecem só nas salas compartilhadas (CompartilhadoEtec: Labs 1 e 2);
+            // o filtro é feito na leitura (LaboratorioService/ReservaService).
+            new SlotHorario { Id = 101, Turno = Turno.Tarde, HoraInicio = new TimeSpan(13, 15, 0), HoraFim = new TimeSpan(14, 5, 0), Descricao = "ETEC Tarde - Bloco 1 (13:15 - 14:05)", ExclusivoEtec = true },
+            new SlotHorario { Id = 102, Turno = Turno.Tarde, HoraInicio = new TimeSpan(14, 5, 0), HoraFim = new TimeSpan(14, 55, 0), Descricao = "ETEC Tarde - Bloco 2 (14:05 - 14:55)", ExclusivoEtec = true },
+            new SlotHorario { Id = 103, Turno = Turno.Tarde, HoraInicio = new TimeSpan(15, 10, 0), HoraFim = new TimeSpan(16, 0, 0), Descricao = "ETEC Tarde - Bloco 3 (15:10 - 16:00)", ExclusivoEtec = true }
         );
     }
 }

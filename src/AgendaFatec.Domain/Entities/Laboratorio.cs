@@ -28,6 +28,18 @@ public class Laboratorio
     public int Capacidade { get; set; }
 
     /// <summary>
+    /// Perfil de uso da sala cadastrado pela Coordenação (ex: "Fatec", "ETEC", "Fatec/ETEC").
+    /// Null em salas antigas — o front usa CompartilhadoEtec como fallback.
+    /// </summary>
+    public string? Perfil { get; set; }
+
+    /// <summary>
+    /// Cor de identificação da sala em hexadecimal (#rrggbb), escolhida pela Coordenação.
+    /// Null = cor institucional fixa do laboratório.
+    /// </summary>
+    public string? Cor { get; set; }
+
+    /// <summary>
     /// Indica se o laboratório está ativo para novos agendamentos.
     /// </summary>
     public bool Ativo { get; set; } = true;

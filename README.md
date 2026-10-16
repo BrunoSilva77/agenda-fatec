@@ -36,7 +36,7 @@ agenda-fatec-main/
 ├── src/
 │   ├── AgendaFatec.Domain/           # Entidades e regras de domínio
 │   ├── AgendaFatec.Application/      # Services e DTOs
-│   ├── AgendaFatec.Infrastructure/   # EF Core (SQL Server)
+│   ├── AgendaFatec.Infrastructure/   # EF Core (MySQL)
 │   └── AgendaFatec.Api/              # Web API (porta 5000)
 ├── tests/
 │   └── AgendaFatec.UnitTests/        # Testes xUnit

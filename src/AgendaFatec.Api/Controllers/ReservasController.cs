@@ -69,7 +69,8 @@ public class ReservasController : ControllerBase
     }
 
     /// <summary>
-    /// Realiza uma solicitação de reserva (pontual ou recorrente até 1 mês).
+    /// Realiza uma solicitação de reserva (pontual ou recorrente até 2 semanas).
+    /// Professores: até 14 dias de antecedência. Coordenadores: sem limite de data.
     /// Aplica First-Come First-Served e controle de concorrência.
     /// </summary>
     [HttpPost]
