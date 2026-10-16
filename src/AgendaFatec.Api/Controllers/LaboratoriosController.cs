@@ -35,6 +35,7 @@ public class LaboratoriosController : ControllerBase
     {
         try { var laboratorio = await _laboratorioService.CriarAsync(dto); return CreatedAtAction(nameof(ObterPorId), new { id = laboratorio.Id }, laboratorio); }
         catch (ArgumentException ex) { return BadRequest(new { mensagem = ex.Message }); }
+        catch (UnauthorizedAccessException ex) { return StatusCode(StatusCodes.Status403Forbidden, new { mensagem = ex.Message }); }
     }
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(LaboratorioDto), StatusCodes.Status200OK)]

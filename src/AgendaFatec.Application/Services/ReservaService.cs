@@ -9,6 +9,10 @@ namespace AgendaFatec.Application.Services;
 
 public class ReservaService : IReservaService
 {
+    // Regras institucionais de agendamento
+    private const int LimiteDiasAgendamento = 14;    // janela de antecedência dos professores (coordenação é isenta)
+    private const int LimiteSemanasRecorrencia = 2;  // teto da reserva recorrente
+
     private readonly AgendaFatecDbContext _context;
 
     public ReservaService(AgendaFatecDbContext context)
@@ -59,10 +63,14 @@ public class ReservaService : IReservaService
             .FirstOrDefaultAsync(l => l.Id == laboratorioId)
             ?? throw new KeyNotFoundException($"Laboratório {laboratorioId} não encontrado.");
 
-        // Busca os slots aplicáveis: se o laboratório tiver slots próprios (ex: ETEC), usa eles; senão, usa os globais da Fatec
+        // Busca os slots aplicáveis: se o laboratório tiver slots próprios (ex: ETEC), usa eles;
+        // senão, usa os globais — incluindo os blocos ETEC da tarde apenas quando a sala é compartilhada
         var slots = laboratorio.SlotsHorario.Any(s => s.Ativo)
             ? laboratorio.SlotsHorario.Where(s => s.Ativo).ToList()
-            : (await _context.SlotsHorario.Where(s => s.LaboratorioId == null && s.Ativo).ToListAsync());
+            : (await _context.SlotsHorario
+                .Where(s => s.LaboratorioId == null && s.Ativo &&
+                            (!s.ExclusivoEtec || laboratorio.CompartilhadoEtec))
+                .ToListAsync());
 
         // Ordenação em memória: o SQLite não suporta ORDER BY em TimeSpan
         slots = slots.OrderBy(s => s.HoraInicio).ToList();
@@ -119,15 +127,35 @@ public class ReservaService : IReservaService
         if (dto.DataInicio >= dto.DataFim)
             throw new InvalidOperationException("A data/hora de início deve ser anterior à data/hora de término.");
 
-        if (dto.DataInicio < DateTime.UtcNow.AddMinutes(-5))
+        // DateTime.Now (horário local): as datas chegam em horário local; comparar com
+        // UtcNow criaria uma folga de fuso (~3h) aceitando horários já passados.
+        if (dto.DataInicio < DateTime.Now.AddMinutes(-5))
             throw new InvalidOperationException("Não é permitido agendar reservas para datas ou horários passados.");
-
-        // 2. Regra de Recorrência Máxima de 1 Mês (4 semanas)
-        if (dto.Recorrente && (dto.QuantidadeSemanas < 1 || dto.QuantidadeSemanas > 4))
-            throw new InvalidOperationException("Regra Institucional: O limite de agendamento recorrente é de no máximo 4 semanas (1 mês) para evitar monopólio de laboratórios.");
 
         var usuario = await _context.Usuarios.FindAsync(dto.UsuarioId)
             ?? throw new KeyNotFoundException("Usuário solicitante não encontrado.");
+
+        // 2. Regra de Recorrência: máximo 2 semanas (evita monopólio de laboratórios)
+        if (dto.Recorrente && (dto.QuantidadeSemanas < 1 || dto.QuantidadeSemanas > LimiteSemanasRecorrencia))
+            throw new InvalidOperationException($"Regra Institucional: o agendamento recorrente é limitado a no máximo {LimiteSemanasRecorrencia} semanas.");
+
+        int totalOcorrencias = dto.Recorrente ? dto.QuantidadeSemanas : 1;
+
+        // 3. Regra de antecedência: professores (Fatec/ETEC) agendam com até 14 dias.
+        //    Coordenadores/Administradores (perfil 2) não têm limite de data.
+        if (usuario.Perfil != PerfilUsuario.Coordenador)
+        {
+            // DateTime.Now.Date: regra calculada no horário local (igual à validação do front)
+            var dataLimite = DateTime.Now.Date.AddDays(LimiteDiasAgendamento);
+            // Recorrência gera dias úteis até marca + 7*N (inclusive); reserva simples = a própria data.
+            var ultimaOcorrencia = dto.Recorrente
+                ? dto.DataInicio.AddDays(totalOcorrencias * 7)
+                : dto.DataInicio;
+
+            if (ultimaOcorrencia.Date > dataLimite)
+                throw new InvalidOperationException(
+                    $"Regra Institucional: professores só podem agendar com até {LimiteDiasAgendamento} dias de antecedência (até {dataLimite:dd/MM/yyyy}).");
+        }
 
         var laboratorio = await _context.Laboratorios.FindAsync(dto.LaboratorioId)
             ?? throw new KeyNotFoundException($"Laboratório {dto.LaboratorioId} não encontrado.");
@@ -135,18 +163,21 @@ public class ReservaService : IReservaService
         if (!laboratorio.Ativo)
             throw new InvalidOperationException("O laboratório selecionado encontra-se inativo para reservas.");
 
-        int totalOcorrencias = dto.Recorrente ? dto.QuantidadeSemanas : 1;
         Guid? recorrenciaGrupoId = dto.Recorrente ? Guid.NewGuid() : null;
         var novasReservas = new List<Reserva>();
+
+        // Recorrência = dias úteis (seg–sex) entre a data marcada e marca + 7*semanas
+        // (inclusive). Ex.: marcado na terça 20/10 com 1 semana → 20,21,22,23,26 e 27/10.
+        var datasOcorrencias = ObterDatasOcorrencias(dto.DataInicio, dto.Recorrente, totalOcorrencias);
 
         // 3. Execução em transação com controle atômico e tratamento de concorrência
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
-            for (int semana = 0; semana < totalOcorrencias; semana++)
+            int conflitantes = 0;
+            foreach (var inicioInstancia in datasOcorrencias)
             {
-                var inicioInstancia = dto.DataInicio.AddDays(semana * 7);
-                var fimInstancia = dto.DataFim.AddDays(semana * 7);
+                var fimInstancia = inicioInstancia + (dto.DataFim - dto.DataInicio);
 
                 // Regra: First-Come, First-Served - Verifica sobreposição exata
                 bool existeConflito = await _context.Reservas.AnyAsync(r =>
@@ -155,11 +186,16 @@ public class ReservaService : IReservaService
                     r.DataInicio < fimInstancia &&
                     r.DataFim > inicioInstancia);
 
-                if (existeConflito)
+                // Reserva simples em horário ocupado → recusa (quem chegou primeiro fica).
+                if (existeConflito && !dto.Recorrente)
                 {
                     throw new InvalidOperationException(
                         $"Conflito de horário detectado: O laboratório já possui reserva no período de {inicioInstancia:dd/MM/yyyy HH:mm} a {fimInstancia:HH:mm}. Operação cancelada.");
                 }
+
+                // Na recorrência, dias já ocupados entram como "Em conflito" para mediação
+                // da coordenação — os demais dias do período são criados normalmente.
+                if (existeConflito) conflitantes++;
 
                 var novaReserva = new Reserva
                 {
@@ -170,7 +206,7 @@ public class ReservaService : IReservaService
                     DataFim = fimInstancia,
                     Finalidade = dto.Finalidade,
                     Observacao = dto.Observacao,
-                    Status = StatusReserva.Confirmada,
+                    Status = existeConflito ? StatusReserva.EmConflito : StatusReserva.Confirmada,
                     RecorrenciaGrupoId = recorrenciaGrupoId,
                     CriadoEm = DateTime.UtcNow
                 };
@@ -187,7 +223,8 @@ public class ReservaService : IReservaService
                 Acao = "CRIACAO_RESERVA",
                 EntidadeAfetada = "Reserva",
                 RegistroId = recorrenciaGrupoId?.ToString() ?? novasReservas[0].Id.ToString(),
-                Detalhes = $"Reserva criada para Lab {laboratorio.Id} ({dto.Finalidade}) - Total instâncias: {novasReservas.Count}",
+                Detalhes = $"Reserva criada para Lab {laboratorio.Id} ({dto.Finalidade}) - Total instâncias: {novasReservas.Count}" +
+                    (conflitantes > 0 ? $" ({conflitantes} em conflito, pendente de mediação)" : string.Empty),
                 IpOrigem = ipOrigem,
                 DataHoraUtc = DateTime.UtcNow
             });
@@ -216,6 +253,25 @@ public class ReservaService : IReservaService
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    // Datas das ocorrências: dias úteis (seg–sex) entre a data marcada e
+    // marca + 7*semanas (inclusive). Reserva simples = apenas a própria data.
+    private static IEnumerable<DateTime> ObterDatasOcorrencias(DateTime dataInicio, bool recorrente, int totalSemanas)
+    {
+        if (!recorrente)
+            return new[] { dataInicio };
+
+        var fim = dataInicio.Date.AddDays(totalSemanas * 7);
+        var datas = new List<DateTime>();
+        for (var d = dataInicio.Date; d <= fim; d = d.AddDays(1))
+        {
+            if (d.DayOfWeek == DayOfWeek.Saturday || d.DayOfWeek == DayOfWeek.Sunday)
+                continue;
+            datas.Add(d.Add(dataInicio.TimeOfDay));
+        }
+
+        return datas.Count > 0 ? datas : new[] { dataInicio };
     }
 
     public async Task<ReservaDto> ResolverConflitoAsync(Guid reservaId, ResolverConflitoDto dto, string? ipOrigem = null)

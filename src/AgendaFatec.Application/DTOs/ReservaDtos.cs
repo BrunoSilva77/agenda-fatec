@@ -21,7 +21,7 @@ public class CriarReservaDto
 
     /// <summary>
     /// Quantidade de semanas para a recorrência.
-    /// REGRA DE NEGÓCIO: Máximo permitido de 4 semanas (1 mês).
+    /// REGRA DE NEGÓCIO: Máximo permitido de 2 semanas (janela de 14 dias de antecedência para professores).
     /// </summary>
     public int QuantidadeSemanas { get; set; } = 1;
 }

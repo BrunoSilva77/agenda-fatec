@@ -42,6 +42,8 @@ BEGIN
         [Nome] nvarchar(100) NOT NULL,
         [CompartilhadoEtec] bit NOT NULL,
         [Capacidade] int NOT NULL,
+        [Perfil] nvarchar(20) NULL,
+        [Cor] nvarchar(7) NULL,
         [Ativo] bit NOT NULL DEFAULT CAST(1 AS bit),
         CONSTRAINT [PK_Laboratorios] PRIMARY KEY ([Id])
     );
@@ -104,6 +106,10 @@ BEGIN
         (10, CAST(1 AS bit), 35, CAST(0 AS bit), N'Laboratório 10');
 
     SET IDENTITY_INSERT [Laboratorios] OFF;
+
+    -- Perfil de uso das salas institucionais (exibido nos chips do frontend)
+    UPDATE [Laboratorios] SET [Perfil] = N'Fatec/ETEC' WHERE [Id] IN (1, 2);
+    UPDATE [Laboratorios] SET [Perfil] = N'Fatec' WHERE [Id] IN (9, 10);
 
     -- Seed dos Blocos Padrão de Horário (Fatec Araçatuba)
     SET IDENTITY_INSERT [SlotsHorario] ON;
