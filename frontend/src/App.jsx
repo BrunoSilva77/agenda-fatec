@@ -13,7 +13,7 @@ import { CalendarioMes } from './components/CalendarioMes';
 import { ModalAdminSalas } from './components/ModalAdminSalas';
 import { dentroDoPrazo, strData, LIMITE_DIAS_AGENDAMENTO } from './utils/regrasAgendamento';
 import { ModalNovaReserva } from './components/ModalNovaReserva';
-import { ModalDia } from './components/ModalDia';
+import { ModalSemana } from './components/ModalSemana';
 import { ModalResolverConflito } from './components/ModalResolverConflito';
 import { PainelCoordenador } from './components/PainelCoordenador';
 import { TrilhaAuditoriaLgpd } from './components/TrilhaAuditoriaLgpd';
@@ -89,6 +89,32 @@ export default function App() {
 
     const slots = podeAgendar ? (await api.getDisponibilidade(labSelecionadoId, data)).slots : null;
     setDiaInfo({ data, slots, podeAgendar, motivo });
+  };
+
+  const handleSelecionarSemana = async (data) => {
+    const clicada = new Date(data + 'T12:00:00');
+    const segunda = new Date(clicada);
+    segunda.setDate(segunda.getDate() - ((segunda.getDay() + 6) % 7));
+    const semana = Array.from({ length: 5 }, (_, i) => {
+      const dia = new Date(segunda);
+      dia.setDate(segunda.getDate() + i);
+      return strData(dia);
+    });
+    const hojeStr = strData(new Date());
+    const disponibilidades = {};
+    await Promise.all(semana.map(async (dia) => {
+      const weekday = new Date(dia + 'T12:00:00').getDay();
+      const passado = dia < hojeStr;
+      const foraDoLimite = !dentroDoPrazo(dia, usuarioAtivo);
+      const podeAgendar = !passado && weekday !== 0 && weekday !== 6 && !foraDoLimite;
+      let motivo = null;
+      if (passado) motivo = 'Dia passado - consulta.';
+      else if (weekday === 0 || weekday === 6) motivo = 'Sem reservas aos fins de semana.';
+      else if (foraDoLimite) motivo = 'Fora do prazo de agendamento.';
+      const dados = podeAgendar ? await api.getDisponibilidade(labSelecionadoId, dia) : null;
+      disponibilidades[dia] = { ...(dados || {}), podeAgendar, motivo };
+    }));
+    setDiaInfo({ data, semana, disponibilidades });
   };
 
   const handleAdicionarLaboratorio = async (dados) => {
@@ -170,7 +196,7 @@ export default function App() {
               lab={laboratorios.find(l => l.id === labSelecionadoId) || null}
               laboratorios={laboratorios}
               reservas={reservas}
-              onSelecionarDia={handleSelecionarDia}
+              onSelecionarDia={handleSelecionarSemana}
               usuario={usuarioAtivo}
               diaSelecionado={diaParaReserva?.data || diaInfo?.data || null}
             />
@@ -234,8 +260,12 @@ export default function App() {
 
       {/* Popup do dia: lista os agendamentos e permite agendar no mesmo dia */}
       {diaInfo && !diaParaReserva && (
-        <ModalDia
+        <ModalSemana
           data={diaInfo.data}
+          semana={diaInfo.semana}
+          disponibilidades={diaInfo.disponibilidades}
+          reservas={reservas.filter(r => r.status !== 3 && r.laboratorioId === labSelecionadoId)}
+          onSelecionarHorario={(data, slots, initialSlotId) => setDiaParaReserva({ data, slots, initialSlotId })}
           lab={laboratorios.find(l => l.id === labSelecionadoId) || null}
           labNome={laboratorios.find(l => l.id === labSelecionadoId)?.nome || `Laboratório ${labSelecionadoId}`}
           reservasDoDia={reservas.filter(r =>
@@ -255,6 +285,7 @@ export default function App() {
         <ModalNovaReserva
           data={diaParaReserva.data}
           slots={diaParaReserva.slots}
+          initialSlotId={diaParaReserva.initialSlotId}
           labId={labSelecionadoId}
           labNome={laboratorios.find(l => l.id === labSelecionadoId)?.nome || `Laboratório ${labSelecionadoId}`}
           usuario={usuarioAtivo}

@@ -72,7 +72,7 @@ public class ReservaService : IReservaService
                             (!s.ExclusivoEtec || laboratorio.CompartilhadoEtec))
                 .ToListAsync());
 
-        // Ordenação em memória: o SQLite não suporta ORDER BY em TimeSpan
+        // Ordenação em memória para manter comportamento consistente entre provedores
         slots = slots.OrderBy(s => s.HoraInicio).ToList();
 
         var inicioDia = data.Date;
@@ -304,6 +304,7 @@ public class ReservaService : IReservaService
         reserva.Justificativa = dto.Justificativa;
         reserva.ResolvidoPorCoordenadorId = coordenador.Id;
         reserva.AtualizadoEm = DateTime.UtcNow;
+        reserva.RowVersion = Guid.NewGuid();
 
         // Trilha de Auditoria LGPD para deliberação da Coordenação
         await _context.AuditoriasLgpd.AddAsync(new AuditoriaLgpd
@@ -343,6 +344,7 @@ public class ReservaService : IReservaService
         reserva.Status = StatusReserva.Cancelada;
         reserva.Justificativa = justificativa ?? (ehCoordenador ? "Cancelada pela coordenação" : "Cancelada pelo solicitante");
         reserva.AtualizadoEm = DateTime.UtcNow;
+        reserva.RowVersion = Guid.NewGuid();
 
         await _context.AuditoriasLgpd.AddAsync(new AuditoriaLgpd
         {

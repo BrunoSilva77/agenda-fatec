@@ -43,7 +43,7 @@ public class ReservaConfiguration : IEntityTypeConfiguration<Reserva>
         // CONTROLE DE CONCORRÊNCIA OTIMISTA:
         builder.Property(r => r.RowVersion)
             .IsConcurrencyToken()
-            .ValueGeneratedOnAdd();
+            .ValueGeneratedNever();
 
         // Relacionamentos
         builder.HasOne(r => r.Laboratorio)

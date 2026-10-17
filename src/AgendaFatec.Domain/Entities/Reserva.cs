@@ -4,8 +4,8 @@ namespace AgendaFatec.Domain.Entities;
 
 /// <summary>
 /// Representa o agendamento de um laboratório por um usuário.
-/// Inclui token de concorrência otimista (RowVersion) para prevenir dupla reserva simultânea
-/// e identificador de grupo para controle do teto de recorrência (máximo de 2 semanas).
+/// Inclui token GUID para concorrência otimista para prevenir dupla reserva simultânea
+/// e identificador de grupo para controle do teto de recorrência (máximo de 1 mês).
 /// </summary>
 public class Reserva
 {
@@ -43,7 +43,7 @@ public class Reserva
 
     /// <summary>
     /// Identificador que agrupa reservas geradas por um agendamento recorrente.
-    /// Limite de negócio: no máximo 2 semanas de recorrência.
+    /// Limite de negócio: no máximo 1 mês de recorrência.
     /// </summary>
     public Guid? RecorrenciaGrupoId { get; set; }
 
@@ -73,10 +73,10 @@ public class Reserva
     public DateTime? AtualizadoEm { get; set; }
 
     /// <summary>
-    /// Token de concorrência otimista (coluna de versão gerada pelo provider do banco).
+    /// Token GUID de concorrência otimista gerado pela aplicação.
     /// Evita concorrência e dupla reserva concorrente no mesmo milissegundo via EF Core.
     /// </summary>
-    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+    public Guid RowVersion { get; set; } = Guid.NewGuid();
 
     // Propriedades de Navegação
     public virtual Laboratorio Laboratorio { get; set; } = null!;

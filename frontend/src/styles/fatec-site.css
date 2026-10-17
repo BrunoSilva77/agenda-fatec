@@ -888,3 +888,28 @@ nav.main-nav a.active:hover {
   .footer .container { grid-template-columns: 1fr; }
   .section { padding: 48px 0; }
 }
+
+.semana-modal { max-width: 1100px; }
+.semana-resumo { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; background:#f8fafc; padding:12px 16px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:18px; color:#64748b; font-size:.82rem; }
+.semana-resumo > div > div { margin-top:4px; }
+.semana-resumo > span { display:flex; align-items:center; gap:6px; }
+.semana-agenda { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+.semana-dia { min-width:0; border:1px solid #e2e8f0; border-radius:8px; padding:9px; background:#fff; }
+.semana-dia-header { display:flex; flex-direction:column; gap:3px; border-bottom:2px solid; padding-bottom:8px; margin-bottom:8px; text-transform:capitalize; }
+.semana-dia-header strong { font-size:.86rem; color:#263238; }
+.semana-dia-header span, .semana-dia-aviso { font-size:.7rem; color:#64748b; }
+.semana-dia-aviso { padding:6px 0; }
+.semana-slots { display:flex; flex-direction:column; gap:6px; }
+.semana-slot { min-height:52px; width:100%; display:grid; grid-template-columns:auto 1fr; align-items:center; gap:2px 6px; padding:7px; border:1px solid #cbd5e1; border-radius:6px; text-align:left; font:inherit; }
+.semana-slot span { font-size:.82rem; font-weight:800; }
+.semana-slot small { grid-column:2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.66rem; }
+.semana-slot.livre { cursor:pointer; background:#f0fdf4; color:#166534; }
+.semana-slot.livre:hover { border-color:var(--lab-solid,#cc3b3b); box-shadow:0 0 0 2px color-mix(in srgb,var(--lab-solid,#cc3b3b) 16%,transparent); }
+.semana-slot.ocupado { background:#f8fafc; color:#64748b; }
+.semana-sem-horarios { display:grid; gap:6px; font-size:.72rem; color:#64748b; }
+.semana-reserva { border-radius:5px; padding:6px; background:#fff7ed; color:#9a3412; }
+.semana-ajuda { display:flex; gap:8px; align-items:flex-start; color:var(--text-secondary); font-size:.8rem; line-height:1.5; margin:18px 0 0; }
+.semana-ajuda svg { flex-shrink:0; margin-top:2px; }
+@media (max-width:900px) { .semana-agenda { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media (max-width:620px) { .semana-agenda { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:420px) { .semana-agenda { grid-template-columns:1fr; } }

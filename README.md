@@ -8,6 +8,7 @@ Especificação completa: [`docs/ESPECIFICACAO.md`](docs/ESPECIFICACAO.md)
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Node.js LTS](https://nodejs.org) (npm incluído)
+- MySQL Server 8.0 ou superior (porta padrão 3306)
 
 ## Como rodar
 
@@ -27,7 +28,7 @@ Depois acesse:
 - **Entrada React alternativa:** http://localhost:5173/react.html
 - **Backend / Swagger:** http://localhost:5000/swagger
 
-Na primeira execução o `start-all.bat` roda `npm install` automaticamente.
+Na primeira execução o `start-all.bat` roda `npm install` automaticamente. A API cria o banco e as tabelas na primeira execução; o usuário MySQL configurado precisa ter permissão para criar o banco. Configure a senha em `src/AgendaFatec.Api/appsettings.json` ou pela variável `ConnectionStrings__DefaultConnection`.
 
 ## Estrutura
 

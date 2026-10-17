@@ -2,9 +2,19 @@ import React, { useState } from 'react';
 import { X, Calendar, Clock, AlertTriangle, ShieldCheck, User } from 'lucide-react';
 import { dentroDoPrazo, dataLimite, ehAdmin, strData, datasRecorrencia, LIMITE_DIAS_AGENDAMENTO } from '../utils/regrasAgendamento';
 
-export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose, onSucesso }) {
+const minutosDaHora = valor => {
+  const partes = String(valor).slice(0, 5).split(':').map(Number);
+  return partes[0] * 60 + partes[1];
+};
+const horaComMinutos = (valor, minutos) => {
+  const total = minutosDaHora(valor) + minutos;
+  return String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0') + ':00';
+};
+
+export function ModalNovaReserva({ data, slots, labId, labNome, usuario, initialSlotId, onClose, onSucesso }) {
   const [finalidade, setFinalidade] = useState('');
-  const [slotId, setSlotId] = useState('');
+  const [slotId, setSlotId] = useState(() => initialSlotId == null ? '' : String(initialSlotId));
+  const [duracaoMinutos, setDuracaoMinutos] = useState(100);
   const [observacao, setObservacao] = useState('');
   const [recorrente, setRecorrente] = useState(false);
   const [quantidadeSemanas, setQuantidadeSemanas] = useState(1);
@@ -34,13 +44,15 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
       return;
     }
 
+    if (!intervaloDisponivel) { setErro('A duracao escolhida ultrapassa a grade ou encontra um horario ocupado.'); return; }
+
     setCarregando(true);
     setErro('');
 
     // O mock devolve horário "HH:MM" e a API real "HH:MM:SS" — normaliza para "HH:MM:SS"
     // antes de montar o ISO local, senão vira data inválida (ex: "07:30:00:00").
     const horaInicio = String(slot.horaInicio);
-    const horaFim = String(slot.horaFim);
+    const horaFim = horaComMinutos(horaInicio, duracaoMinutos);
 
     try {
       await onSucesso({
@@ -50,7 +62,7 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
         usuarioEmail: usuario.email,
         usuarioPerfil: usuario.perfil,
         dataInicio: `${data}T${horaInicio.length === 5 ? `${horaInicio}:00` : horaInicio}`,
-        dataFim: `${data}T${horaFim.length === 5 ? `${horaFim}:00` : horaFim}`,
+        dataFim: data + 'T' + horaFim,
         finalidade,
         observacao,
         recorrente,
@@ -74,7 +86,17 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
     return new Date(`${data}T${hora}`) <= agora;
   };
 
-  const slotsLivres = slots.filter((s) => s.disponivel && !inicioPassado(s));
+  const slotSelecionado = slots.find(s => String(s.slotId) === String(slotId));
+  const inicioSelecionadoMin = slotSelecionado ? minutosDaHora(slotSelecionado.horaInicio) : null;
+  const fimSelecionadoMin = inicioSelecionadoMin == null ? null : inicioSelecionadoMin + duracaoMinutos;
+  const fimGradeMin = slots.length ? Math.max(...slots.map(s => minutosDaHora(s.horaFim))) : 0;
+  const cruzaOcupado = slotSelecionado && slots.some(s =>
+    !s.disponivel && minutosDaHora(s.horaInicio) < fimSelecionadoMin &&
+    minutosDaHora(s.horaFim) > inicioSelecionadoMin
+  );
+  const intervaloDisponivel = Boolean(slotSelecionado && slotSelecionado.disponivel &&
+    !inicioPassado(slotSelecionado) && fimSelecionadoMin <= fimGradeMin && !cruzaOcupado);
+  const slotsLivres = slots.filter(s => s.disponivel && !inicioPassado(s));
 
   // Datas que serão efetivamente criadas (mesma regra do backend) — exibidas no form
   const datasCriacao = recorrente ? datasRecorrencia(data, quantidadeSemanas) : [data];
@@ -227,6 +249,19 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
             )}
           </div>
 
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>Duracao da reserva</label>
+            <select value={duracaoMinutos} onChange={e => setDuracaoMinutos(Number(e.target.value))}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', fontSize: '0.9rem', background: '#fff' }}>
+              {[50, 100, 150, 200].map(minutos => <option key={minutos} value={minutos}>{minutos} minutos{minutos === 100 ? ' (padrao)' : ''}</option>)}
+            </select>
+            {slotSelecionado && <div style={{ fontSize: '0.78rem', color: intervaloDisponivel ? '#065F46' : '#991B1B', marginTop: 6, fontWeight: 600 }}>
+              {intervaloDisponivel
+                ? 'Reserva de ' + slotSelecionado.horaInicio.slice(0, 5) + ' a ' + horaComMinutos(slotSelecionado.horaInicio, duracaoMinutos).slice(0, 5) + '.'
+                : 'A duracao ultrapassa a grade ou encontra um horario ocupado. Ajuste a duracao ou escolha outro inicio.'}
+            </div>}
+          </div>
+
           {/* Nome e E-mail travados do cadastro */}
           <div style={{
             background: '#F1F6F7',
@@ -347,7 +382,7 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, onClose
             <button type="button" className="btn-outline" onClick={onClose} disabled={carregando}>
               Cancelar
             </button>
-            <button type="submit" className="btn-cps" disabled={carregando || slotsLivres.length === 0}>
+            <button type="submit" className="btn-cps" disabled={carregando || slotsLivres.length === 0 || !intervaloDisponivel}>
               {carregando ? 'Processando...' : 'Confirmar Reserva'}
             </button>
           </div>
