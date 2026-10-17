@@ -232,6 +232,14 @@ nav.main-nav a.active:hover {
   background: var(--lab-solid);
   flex-shrink: 0;
 }
+/* Ponto multicolorido do chip "Todas as salas" (uma cor por sala) */
+.lab-chip .chip-dot-multi {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: conic-gradient(from 0deg, #dc2626 0 25%, #2563eb 0 50%, #16a34a 0 75%, #7c3aed 0 100%);
+}
 .lab-chip .chip-cap {
   font-size: 11px;
   opacity: 0.75;

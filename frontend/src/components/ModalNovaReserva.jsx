@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, AlertTriangle, ShieldCheck, User } from 'lucide-react';
 import { dentroDoPrazo, dataLimite, ehAdmin, strData, datasRecorrencia, LIMITE_DIAS_AGENDAMENTO } from '../utils/regrasAgendamento';
+import { estiloLab } from './labCores';
 
 const minutosDaHora = valor => {
   const partes = String(valor).slice(0, 5).split(':').map(Number);
@@ -11,7 +12,12 @@ const horaComMinutos = (valor, minutos) => {
   return String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0') + ':00';
 };
 
-export function ModalNovaReserva({ data, slots, labId, labNome, usuario, initialSlotId, onClose, onSucesso }) {
+export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [], labNome, usuario, initialSlotId, onCarregarSlots, onClose, onSucesso }) {
+  // labId nulo = veio do filtro "Todas as salas": a sala é escolhida aqui dentro
+  // e a grade de horários da sala escolhida é carregada na troca.
+  const [slots, setSlots] = useState(() => slotsIniciais || []);
+  const [labEscolhido, setLabEscolhido] = useState(() => labId ?? (labs[0] ? labs[0].id : null));
+  const [carregandoSlots, setCarregandoSlots] = useState(false);
   const [finalidade, setFinalidade] = useState('');
   const [slotId, setSlotId] = useState(() => initialSlotId == null ? '' : String(initialSlotId));
   const [duracaoMinutos, setDuracaoMinutos] = useState(100);
@@ -20,6 +26,24 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, initial
   const [quantidadeSemanas, setQuantidadeSemanas] = useState(1);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
+
+  // No modo "Todas as salas" (labId nulo), carrega a grade da sala escolhida.
+  useEffect(() => {
+    if (labId != null) return; // sala já fixada pelo filtro — slots vieram prontos
+    if (labEscolhido == null) { setSlots([]); return; }
+    let ativo = true;
+    setCarregandoSlots(true);
+    Promise.resolve(typeof onCarregarSlots === 'function' ? onCarregarSlots(labEscolhido, data) : [])
+      .then(novos => { if (ativo) { setSlots(Array.isArray(novos) ? novos : []); setSlotId(''); } })
+      .catch(() => { if (ativo) setSlots([]); })
+      .finally(() => { if (ativo) setCarregandoSlots(false); });
+    return () => { ativo = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [labId, labEscolhido, data]);
+
+  const labAtual = (labId != null ? labs.find(l => l.id === labId) : labs.find(l => l.id === labEscolhido)) || null;
+  const nomeLabAtual = labAtual ? labAtual.nome : (labId != null ? labNome : 'Selecione a sala');
+  const estiloLabAtual = estiloLab(labAtual || labId || labEscolhido);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,7 +80,7 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, initial
 
     try {
       await onSucesso({
-        laboratorioId: labId,
+        laboratorioId: labId ?? labEscolhido,
         usuarioId: usuario.id,
         usuarioNome: usuario.nome,
         usuarioEmail: usuario.email,
@@ -136,8 +160,8 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, initial
 
           {/* Dados Resumidos da Reserva */}
           <div style={{ background: '#F8FAFC', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: '18px', border: '1px solid var(--border-light)' }}>
-            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--cps-red)' }}>
-              {labNome}
+            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: estiloLabAtual.text }}>
+              {nomeLabAtual}
             </div>
             <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px', flexWrap: 'wrap' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -145,6 +169,35 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, initial
               </span>
             </div>
           </div>
+
+          {/* Escolha da sala — só aparece quando veio do filtro "Todas as salas" */}
+          {labId == null && (
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-primary)' }}>
+                Laboratório *
+              </label>
+              <select
+                value={labEscolhido == null ? '' : String(labEscolhido)}
+                onChange={(e) => setLabEscolhido(e.target.value === '' ? null : Number(e.target.value))}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-light)',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  outline: 'none',
+                  background: '#FFFFFF'
+                }}
+                required
+              >
+                <option value="">Selecione a sala...</option>
+                {labs.map(l => (
+                  <option key={l.id} value={l.id}>{l.nome}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Regra de janela de 14 dias (admin fica isento) */}
           {ehAdmin(usuario) ? (
@@ -221,6 +274,7 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, initial
             <select
               value={slotId}
               onChange={(e) => setSlotId(e.target.value)}
+              disabled={carregandoSlots}
               style={{
                 width: '100%',
                 padding: '10px 14px',
@@ -233,14 +287,20 @@ export function ModalNovaReserva({ data, slots, labId, labNome, usuario, initial
               }}
               required
             >
-              <option value="">Selecione o horário...</option>
+              <option value="">
+                {carregandoSlots
+                  ? 'Carregando horários...'
+                  : labId == null && labEscolhido == null
+                    ? 'Escolha a sala primeiro...'
+                    : 'Selecione o horário...'}
+              </option>
               {slots.map((s) => (
                 <option key={s.slotId} value={s.slotId} disabled={!s.disponivel || inicioPassado(s)}>
                   {s.horaInicio} às {s.horaFim} ({s.descricao}){inicioPassado(s) ? ' — Horário já passado' : !s.disponivel ? ' — Ocupado' : ''}
                 </option>
               ))}
             </select>
-            {slotsLivres.length === 0 && (
+            {!carregandoSlots && slotsLivres.length === 0 && (
               <p style={{ fontSize: '0.75rem', color: '#991B1B', marginTop: '6px', fontWeight: 600 }}>
                 {ehHoje
                   ? 'Todos os horários deste dia já passaram ou estão ocupados. Escolha outro dia no calendário.'

@@ -4,8 +4,26 @@ import { estiloLab } from './labCores';
 
 // Chips horizontais de laboratórios — cada lab tem sua cor e seu perfil de uso.
 export function FiltroLaboratorios({ laboratorios, labSelecionadoId, onSelecionarLab, onAdicionarSala }) {
+  const todasSelecionadas = labSelecionadoId == null;
   return (
     <div className="lab-chips">
+      {/* Visão geral: mostra a reserva de todas as salas, cada uma com sua cor */}
+      <button
+        className={`lab-chip lab-chip-todas ${todasSelecionadas ? 'selected' : ''}`}
+        style={{
+          '--lab-solid': '#334155',
+          '--lab-soft': '#f1f5f9',
+          '--lab-border': '#94a3b8',
+          '--lab-text': '#334155',
+          '--lab-ring': '#e2e8f0',
+        }}
+        onClick={() => onSelecionarLab(null)}
+        title="Mostrar no calendário as reservas de todas as salas (cada uma com sua cor)"
+      >
+        <span className="chip-dot-multi" />
+        <span>Todas as salas</span>
+      </button>
+
       {laboratorios.map((lab) => {
         const c = estiloLab(lab); // respeita a cor cadastrada pelo coordenador
         const ativo = lab.id === labSelecionadoId;

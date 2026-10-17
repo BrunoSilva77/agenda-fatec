@@ -23,12 +23,19 @@ export function CalendarioMes({ laboratorioId, lab, laboratorios, reservas, onSe
   const blanks = primeiroDia.getDay(); // calendário inicia no Domingo
 
   // Filtra pela sala selecionada no chip: só as reservas daquela sala aparecem;
-  // dias sem reserva da sala ficam "Disponível".
+  // com o chip "Todas as salas" (id nulo) o calendário mostra as reservas de
+  // todas as salas — cada ponto/rótulo na cor da sala dona da reserva.
+  const todasSalas = laboratorioId == null;
   const reservasNoDia = date => reservas.filter(r =>
     r.status !== 3 &&
-    (laboratorioId == null || r.laboratorioId === laboratorioId) &&
+    (todasSalas || r.laboratorioId === laboratorioId) &&
     r.dataInicio.startsWith(strData(date))
   );
+  const corDaReserva = r => {
+    const labRes = (laboratorios || []).find(l => l.id === r.laboratorioId);
+    return { labRes, estilo: estiloLab(labRes || r.laboratorioId) };
+  };
+  const labNome = id => ((laboratorios || []).find(l => l.id === id) || {}).nome || `Lab ${id}`;
   const titulo = dataFoco.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   return (
@@ -61,7 +68,14 @@ export function CalendarioMes({ laboratorioId, lab, laboratorios, reservas, onSe
       <div className="card-body">
         <div className="cal-legend">
           <span><i className="cal-dot cal-dot-livre" /> Disponível</span>
-          <span><i className="cal-dot cal-dot-ocupado" style={{ background: cor.solid }} /> Com reserva</span>
+          {todasSalas ? (
+            // Visão "Todas as salas": cada sala entra na legenda com sua cor
+            (laboratorios || []).map(l => (
+              <span key={l.id}><i className="cal-dot" style={{ background: estiloLab(l).solid }} /> {l.nome}</span>
+            ))
+          ) : (
+            <span><i className="cal-dot cal-dot-ocupado" style={{ background: cor.solid }} /> Com reserva</span>
+          )}
           <span><i className="cal-dot cal-dot-conflito" /> Em conflito</span>
           <span><i className="cal-dot cal-dot-hoje" /> Hoje</span>
           {!admin && <span><i className="cal-dot cal-dot-limite" /> Fora do prazo ({LIMITE_DIAS_AGENDAMENTO} dias)</span>}
@@ -114,25 +128,29 @@ export function CalendarioMes({ laboratorioId, lab, laboratorios, reservas, onSe
                   <>
                     <span className="cal-day-status">
                       {lista.slice(0, 4).map(r => {
-                        const labRes = (laboratorios || []).find(l => l.id === r.laboratorioId);
                         // Ponto na cor da sala da reserva (igual ao layout original);
                         // conflito em âmbar. Salas sem cadastro caem no vermelho padrão.
-                        const corRes = r.status === 2 ? null : estiloLab(labRes || r.laboratorioId);
+                        const { estilo } = corDaReserva(r);
+                        const corRes = r.status === 2 ? null : estilo;
                         return (
                           <i
                             key={r.id}
                             className="cal-dot"
-                            title={`${r.usuarioNome} — ${r.finalidade} (${labRes ? labRes.nome : `Lab ${r.laboratorioId}`})`}
+                            title={`${r.usuarioNome} — ${r.finalidade} (${labNome(r.laboratorioId)})`}
                             style={{ background: corRes ? corRes.solid : '#b45309' }}
                           />
                         );
                       })}
                     </span>
-                    {lista.slice(0, 2).map(r => (
-                      <span key={r.id} className="cal-ocupacao-resumo" style={{ color: r.status === 2 ? '#8b1a1a' : cor.text }}>
-                        {sobrenome(r.usuarioNome)} — {r.finalidade}
-                      </span>
-                    ))}
+                    {lista.slice(0, 2).map(r => {
+                      // Rótulo na cor da sala (essencial no modo "Todas as salas")
+                      const { estilo } = corDaReserva(r);
+                      return (
+                        <span key={r.id} className="cal-ocupacao-resumo" style={{ color: r.status === 2 ? '#8b1a1a' : estilo.text }}>
+                          {sobrenome(r.usuarioNome)} — {r.finalidade}
+                        </span>
+                      );
+                    })}
                     {lista.length > 2 && (
                       <span className="cal-ocupacao-resumo">+{lista.length - 2} reserva(s)</span>
                     )}
