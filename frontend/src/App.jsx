@@ -13,7 +13,7 @@ import { CalendarioMes } from './components/CalendarioMes';
 import { ModalAdminSalas } from './components/ModalAdminSalas';
 import { dentroDoPrazo, strData, LIMITE_DIAS_AGENDAMENTO } from './utils/regrasAgendamento';
 import { ModalNovaReserva } from './components/ModalNovaReserva';
-import { ModalSemana } from './components/ModalSemana';
+import { ModalDia } from './components/ModalDia';
 import { ModalResolverConflito } from './components/ModalResolverConflito';
 import { PainelCoordenador } from './components/PainelCoordenador';
 import { TrilhaAuditoriaLgpd } from './components/TrilhaAuditoriaLgpd';
@@ -87,34 +87,12 @@ export default function App() {
       motivo = `Fora do prazo institucional: professores (Fatec e ETEC) podem agendar com até ${LIMITE_DIAS_AGENDAMENTO} dias de antecedência.`;
     }
 
-    const slots = podeAgendar ? (await api.getDisponibilidade(labSelecionadoId, data)).slots : null;
+    // No modo "Todas as salas" os horários só são buscados ao abrir a reserva
+    // (aí o usuário escolhe a sala e a grade daquela sala é carregada).
+    const slots = podeAgendar && labSelecionadoId != null
+      ? (await api.getDisponibilidade(labSelecionadoId, data)).slots
+      : null;
     setDiaInfo({ data, slots, podeAgendar, motivo });
-  };
-
-  const handleSelecionarSemana = async (data) => {
-    const clicada = new Date(data + 'T12:00:00');
-    const segunda = new Date(clicada);
-    segunda.setDate(segunda.getDate() - ((segunda.getDay() + 6) % 7));
-    const semana = Array.from({ length: 5 }, (_, i) => {
-      const dia = new Date(segunda);
-      dia.setDate(segunda.getDate() + i);
-      return strData(dia);
-    });
-    const hojeStr = strData(new Date());
-    const disponibilidades = {};
-    await Promise.all(semana.map(async (dia) => {
-      const weekday = new Date(dia + 'T12:00:00').getDay();
-      const passado = dia < hojeStr;
-      const foraDoLimite = !dentroDoPrazo(dia, usuarioAtivo);
-      const podeAgendar = !passado && weekday !== 0 && weekday !== 6 && !foraDoLimite;
-      let motivo = null;
-      if (passado) motivo = 'Dia passado - consulta.';
-      else if (weekday === 0 || weekday === 6) motivo = 'Sem reservas aos fins de semana.';
-      else if (foraDoLimite) motivo = 'Fora do prazo de agendamento.';
-      const dados = podeAgendar ? await api.getDisponibilidade(labSelecionadoId, dia) : null;
-      disponibilidades[dia] = { ...(dados || {}), podeAgendar, motivo };
-    }));
-    setDiaInfo({ data, semana, disponibilidades });
   };
 
   const handleAdicionarLaboratorio = async (dados) => {
@@ -196,7 +174,7 @@ export default function App() {
               lab={laboratorios.find(l => l.id === labSelecionadoId) || null}
               laboratorios={laboratorios}
               reservas={reservas}
-              onSelecionarDia={handleSelecionarSemana}
+              onSelecionarDia={handleSelecionarDia}
               usuario={usuarioAtivo}
               diaSelecionado={diaParaReserva?.data || diaInfo?.data || null}
             />
@@ -258,19 +236,21 @@ export default function App() {
         />
       )}
 
-      {/* Popup do dia: lista os agendamentos e permite agendar no mesmo dia */}
+      {/* Popup do dia: lista os agendamentos já feitos e oferece o botão para agendar */}
       {diaInfo && !diaParaReserva && (
-        <ModalSemana
+        <ModalDia
           data={diaInfo.data}
-          semana={diaInfo.semana}
-          disponibilidades={diaInfo.disponibilidades}
-          reservas={reservas.filter(r => r.status !== 3 && r.laboratorioId === labSelecionadoId)}
-          onSelecionarHorario={(data, slots, initialSlotId) => setDiaParaReserva({ data, slots, initialSlotId })}
-          lab={laboratorios.find(l => l.id === labSelecionadoId) || null}
-          labNome={laboratorios.find(l => l.id === labSelecionadoId)?.nome || `Laboratório ${labSelecionadoId}`}
+          lab={labSelecionadoId == null ? null : laboratorios.find(l => l.id === labSelecionadoId) || null}
+          labNome={
+            labSelecionadoId == null
+              ? 'Todas as salas'
+              : laboratorios.find(l => l.id === labSelecionadoId)?.nome || `Laboratório ${labSelecionadoId}`
+          }
+          laboratorios={laboratorios}
+          mostrarTodasSalas={labSelecionadoId == null}
           reservasDoDia={reservas.filter(r =>
             r.status !== 3 &&
-            r.laboratorioId === labSelecionadoId &&
+            (labSelecionadoId == null || r.laboratorioId === labSelecionadoId) &&
             r.dataInicio.startsWith(diaInfo.data)
           )}
           podeAgendar={diaInfo.podeAgendar}
@@ -280,15 +260,17 @@ export default function App() {
         />
       )}
 
-      {/* Modais */}
+      {/* Modais do fluxo de agendamento */}
       {diaParaReserva && usuarioAtivo && (
         <ModalNovaReserva
           data={diaParaReserva.data}
-          slots={diaParaReserva.slots}
+          slots={diaParaReserva.slots || []}
           initialSlotId={diaParaReserva.initialSlotId}
           labId={labSelecionadoId}
+          labs={laboratorios}
           labNome={laboratorios.find(l => l.id === labSelecionadoId)?.nome || `Laboratório ${labSelecionadoId}`}
           usuario={usuarioAtivo}
+          onCarregarSlots={(idLab, data) => api.getDisponibilidade(idLab, data).then(r => r.slots)}
           onClose={() => setDiaParaReserva(null)}
           onSucesso={handleCriarReserva}
         />

@@ -6,11 +6,16 @@ import { estiloLab } from './labCores';
 // o botão para agendar naquele mesmo dia (quando a data for agendável).
 const formatarHora = (iso) => (iso || '').slice(11, 16);
 
-export function ModalDia({ data, lab, labNome, reservasDoDia, podeAgendar, motivo, onClose, onAgendar }) {
+export function ModalDia({ data, lab, labNome, laboratorios = [], mostrarTodasSalas = false, reservasDoDia, podeAgendar, motivo, onClose, onAgendar }) {
   const dt = new Date(`${data}T12:00:00`);
   const dataExtenso = dt.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
   const cor = estiloLab(lab || {});
   const ordenadas = [...reservasDoDia].sort((a, b) => a.dataInicio.localeCompare(b.dataInicio));
+  // Cor/nome da sala dona de cada reserva (essencial no modo "Todas as salas")
+  const estiloDaReserva = (r) => {
+    const labRes = laboratorios.find(l => l.id === r.laboratorioId);
+    return { labRes, estilo: estiloLab(labRes || r.laboratorioId) };
+  };
 
   return (
     <div className="cps-modal-overlay" onClick={onClose}>
@@ -64,6 +69,7 @@ export function ModalDia({ data, lab, labNome, reservasDoDia, podeAgendar, motiv
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {ordenadas.map(r => {
                 const conflito = r.status === 2;
+                const { labRes, estilo } = estiloDaReserva(r);
                 return (
                   <li key={r.id} style={{
                     display: 'flex', gap: 10, alignItems: 'flex-start',
@@ -73,7 +79,7 @@ export function ModalDia({ data, lab, labNome, reservasDoDia, podeAgendar, motiv
                   }}>
                     <span style={{
                       width: 10, height: 10, borderRadius: '50%', flexShrink: 0, marginTop: 4,
-                      background: conflito ? '#b45309' : cor.solid
+                      background: conflito ? '#b45309' : estilo.solid
                     }} />
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
@@ -84,6 +90,17 @@ export function ModalDia({ data, lab, labNome, reservasDoDia, podeAgendar, motiv
                       <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: 2 }}>
                         {r.finalidade}
                       </div>
+                      {mostrarTodasSalas && (
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 6,
+                          fontSize: '0.7rem', fontWeight: 800, color: estilo.text,
+                          background: estilo.soft, border: `1px solid ${estilo.border}`,
+                          borderRadius: 999, padding: '2px 8px'
+                        }}>
+                          <i style={{ width: 7, height: 7, borderRadius: '50%', background: estilo.solid }} />
+                          {labRes ? labRes.nome : `Laboratório ${r.laboratorioId}`}
+                        </span>
+                      )}
                       {r.observacao && (
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 2 }}>
                           Obs.: {r.observacao}
