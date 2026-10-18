@@ -290,6 +290,74 @@ nav.main-nav a.active:hover {
   color: #8b1a1a;
 }
 
+/* Agrupa o chip da sala com seu botão de excluir (não podem ser aninhados) */
+.lab-chip-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Excluir sala — visível somente para a Coordenação (a prop só é repassada a ela) */
+.lab-chip-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid #e4e5e6;
+  background: #fff;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.lab-chip-del:hover {
+  border-color: #cc3b3b;
+  background: #fdf3f3;
+  color: #cc3b3b;
+}
+
+/* Estado vazio: nenhuma sala cadastrada — some com os chips e o calendário
+   para não sugerir agendamento em uma sala inexistente. */
+.lab-chips-empty {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding: 20px 22px;
+  border: 1px dashed #e4e5e6;
+  border-radius: var(--radius-md);
+  background: #FAFBFC;
+}
+.lab-chips-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #F1F5F9;
+  color: #64748B;
+}
+.lab-chips-empty strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.lab-chips-empty p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  max-width: 560px;
+}
+
 /* CARD */
 .card {
   background: #fff;

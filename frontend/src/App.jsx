@@ -31,6 +31,7 @@ export default function App() {
 
   const [tabAtiva, setTabAtiva] = useState('mapa');
   const [laboratorios, setLaboratorios] = useState([]);
+  const [labsCarregados, setLabsCarregados] = useState(false);
   const [labSelecionadoId, setLabSelecionadoId] = useState(1);
   const [reservas, setReservas] = useState([]);
   const [auditorias, setAuditorias] = useState([]);
@@ -42,9 +43,22 @@ export default function App() {
   const [adminSalaAberto, setAdminSalaAberto] = useState(false);
   const [mensagemSucesso, setMensagemSucesso] = useState('');
 
+  // Sem sala cadastrada não há o que agendar — o calendário e o modal ficam
+  // indisponíveis até a coordenação cadastrar a primeira sala.
+  const semSalas = labsCarregados && laboratorios.length === 0;
+
   const carregarDados = async () => {
-    const labs = await api.getLaboratorios();
-    setLaboratorios(labs);
+    try {
+      const labs = await api.getLaboratorios();
+      setLaboratorios(labs);
+      // Se a primeira sala não existir mais, o chip selecionado deixa de apontar
+      // para nada — volta para a visão geral.
+      setLabSelecionadoId(atual => (labs.some(l => l.id === atual) ? atual : null));
+    } catch (erro) {
+      exibirNotificacao(erro.message || 'Não foi possível carregar os laboratórios.');
+    } finally {
+      setLabsCarregados(true);
+    }
 
     const todasReservas = await api.getReservas();
     setReservas(todasReservas);
@@ -65,6 +79,10 @@ export default function App() {
   // Clique num dia do calendário → abre o popup do dia (lista os agendamentos da sala);
   // se o dia for agendável, o popup traz o botão "Agendar neste dia"
   const handleSelecionarDia = async (data) => {
+    if (semSalas) {
+      exibirNotificacao('Nenhum laboratório cadastrado. A Coordenação pode cadastrar salas pelo botão "Nova Sala".');
+      return;
+    }
     if (!usuarioAtivo) {
       exibirNotificacao('A identificação do professor será fornecida pelo portal SIGA.');
       return;
@@ -105,6 +123,32 @@ export default function App() {
     const labs = await api.getLaboratorios();
     setLaboratorios(labs);
     exibirNotificacao('Laboratório cadastrado com sucesso.');
+  };
+
+  // Excluir sala — restrito à Coordenação. A API recusa quando a sala ainda tem
+  // reservas no histórico (FK Restrict + trilha de auditoria LGPD).
+  const handleExcluirSala = async (lab) => {
+    if (usuarioAtivo?.perfil !== 2) {
+      exibirNotificacao('Apenas a Coordenação/Administração pode excluir salas.');
+      return;
+    }
+    const confirmar = window.confirm(
+      `Excluir a sala "${lab.nome}"?\n\n` +
+      'A sala e sua grade de horários serão removidas. ' +
+      'Se existir alguma reserva registrada para ela, a exclusão será recusada para preservar o histórico.'
+    );
+    if (!confirmar) return;
+
+    try {
+      await api.excluirLaboratorio(lab.id, usuarioAtivo.id);
+      const labs = await api.getLaboratorios();
+      setLaboratorios(labs);
+      // Se a sala excluída era a selecionada, volta para a visão geral
+      setLabSelecionadoId(atual => (atual === lab.id ? null : atual));
+      exibirNotificacao(`Sala "${lab.nome}" excluída com sucesso.`);
+    } catch (erro) {
+      exibirNotificacao(erro.message || 'Não foi possível excluir a sala.');
+    }
   };
   const handleCriarReserva = async (dados) => {
     const criadas = await api.criarReserva(dados);
@@ -167,17 +211,23 @@ export default function App() {
               labSelecionadoId={labSelecionadoId}
               onSelecionarLab={setLabSelecionadoId}
               onAdicionarSala={usuarioAtivo?.perfil === 2 ? () => setAdminSalaAberto(true) : undefined}
+              onExcluirSala={usuarioAtivo?.perfil === 2 ? handleExcluirSala : undefined}
+              semSalas={semSalas}
             />
 
-            <CalendarioMes
-              laboratorioId={labSelecionadoId}
-              lab={laboratorios.find(l => l.id === labSelecionadoId) || null}
-              laboratorios={laboratorios}
-              reservas={reservas}
-              onSelecionarDia={handleSelecionarDia}
-              usuario={usuarioAtivo}
-              diaSelecionado={diaParaReserva?.data || diaInfo?.data || null}
-            />
+            {/* Sem sala cadastrada não há grade a mostrar — o calendário some para
+                não sugerir agendamento em uma sala inexistente. */}
+            {!semSalas && (
+              <CalendarioMes
+                laboratorioId={labSelecionadoId}
+                lab={laboratorios.find(l => l.id === labSelecionadoId) || null}
+                laboratorios={laboratorios}
+                reservas={reservas}
+                onSelecionarDia={handleSelecionarDia}
+                usuario={usuarioAtivo}
+                diaSelecionado={diaParaReserva?.data || diaInfo?.data || null}
+              />
+            )}
 
             {!usuarioAtivo && (
               <p className="siga-note">

@@ -156,12 +156,22 @@ let auditoriasMock = [
 ];
 
 export const api = {
+  // Falha de rede de verdade (offline, timeout, CORS). Diferente de uma resposta
+  // HTTP de erro, que significa que a API está no ar mas recusou o pedido — nesse
+  // caso devolvemos o erro em vez de cair no modo simulado e "inventar" dados.
+  _ehFalhaDeRede(erro) {
+    return erro?.name === 'TimeoutError' || erro?.name === 'AbortError' || erro?.message === 'Failed to fetch';
+  },
+
   // Lista todos os laboratórios
   async getLaboratorios() {
     try {
-      const res = await fetch(`${API_BASE_URL}/laboratorios`, { signal: AbortSignal.timeout(1000) });
+      const res = await fetch(`${API_BASE_URL}/laboratorios`, { signal: AbortSignal.timeout(1500) });
       if (res.ok) return await res.json();
-    } catch {}
+      throw new Error(`Falha ao carregar os laboratórios (HTTP ${res.status}).`);
+    } catch (erro) {
+      if (!this._ehFalhaDeRede(erro)) throw erro;
+    }
     return laboratoriosMock;
   },
 
@@ -178,14 +188,46 @@ export const api = {
     laboratoriosMock.push(novo);
     return novo;
   },
+
+  // Excluir sala (DELETE na API; restrito à Coordenação). Sem API, remove do mock.
+  async excluirLaboratorio(laboratorioId, solicitanteId) {
+    const qs = solicitanteId ? `?solicitanteId=${encodeURIComponent(solicitanteId)}` : '';
+
+    let rede = false;
+    try {
+      const res = await fetch(`${API_BASE_URL}/laboratorios/${laboratorioId}${qs}`, {
+        method: 'DELETE',
+        signal: AbortSignal.timeout(2000)
+      });
+      rede = true;
+      if (res.ok || res.status === 204) return;
+      // A API recusou (sala com reservas ativas, perfil insuficiente, não encontrada)
+      const erro = await res.json().catch(() => ({}));
+      throw new Error(erro.mensagem || 'Não foi possível excluir a sala.');
+    } catch (erro) {
+      if (rede) throw erro;
+      if (!this._ehFalhaDeRede(erro)) throw erro;
+    }
+
+    // Modo simulado (API indisponível): remove do mock
+    const index = laboratoriosMock.findIndex(l => l.id === laboratorioId);
+    if (index !== -1) laboratoriosMock.splice(index, 1);
+  },
   // Consulta disponibilidade de horários
   async getDisponibilidade(laboratorioId, dataStr) {
     try {
       const res = await fetch(`${API_BASE_URL}/reservas/disponibilidade?laboratorioId=${laboratorioId}&data=${dataStr}`, {
-        signal: AbortSignal.timeout(1000)
+        signal: AbortSignal.timeout(1500)
       });
       if (res.ok) return await res.json();
-    } catch {}
+      // A API respondeu indicando que a sala não existe / pedido inválido — não
+      // podemos cair no mock, senão a tela passa a mostrar uma grade de horários
+      // de uma sala que não está cadastrada.
+      const erro = await res.json().catch(() => ({}));
+      throw new Error(erro.Mensagem || erro.mensagem || `Laboratório ${laboratorioId} não encontrado (HTTP ${res.status}).`);
+    } catch (erro) {
+      if (!this._ehFalhaDeRede(erro)) throw erro;
+    }
 
     const lab = laboratoriosMock.find(l => l.id === laboratorioId);
     let slots = [...slotsPadraoFatec];
