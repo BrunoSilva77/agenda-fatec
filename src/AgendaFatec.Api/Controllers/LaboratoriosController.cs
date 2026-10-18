@@ -37,6 +37,29 @@ public class LaboratoriosController : ControllerBase
         catch (ArgumentException ex) { return BadRequest(new { mensagem = ex.Message }); }
         catch (UnauthorizedAccessException ex) { return StatusCode(StatusCodes.Status403Forbidden, new { mensagem = ex.Message }); }
     }
+
+    /// <summary>
+    /// Exclui uma sala e sua grade customizada. Restrito à Coordenação/Administração.
+    /// Recusado quando a sala ainda possui reservas ativas (histórico preservado para auditoria LGPD).
+    /// </summary>
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Excluir(int id, [FromQuery] Guid solicitanteId)
+    {
+        var ipOrigem = HttpContext.Connection.RemoteIpAddress?.ToString();
+        try
+        {
+            await _laboratorioService.ExcluirAsync(id, solicitanteId, ipOrigem);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex) { return NotFound(new { mensagem = ex.Message }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { mensagem = ex.Message }); }
+        catch (UnauthorizedAccessException ex) { return StatusCode(StatusCodes.Status403Forbidden, new { mensagem = ex.Message }); }
+    }
+
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(LaboratorioDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
