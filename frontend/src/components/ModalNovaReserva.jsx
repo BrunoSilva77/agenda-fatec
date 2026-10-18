@@ -143,8 +143,8 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
         <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
           {erro && (
             <div style={{
-              background: '#FEE2E2',
-              color: '#991B1B',
+              background: 'var(--bg-danger)',
+              color: 'var(--color-danger-text)',
               padding: '12px 16px',
               borderRadius: 'var(--radius-md)',
               fontSize: '0.85rem',
@@ -187,7 +187,7 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
                   fontSize: '0.9rem',
                   fontWeight: 600,
                   outline: 'none',
-                  background: '#FFFFFF'
+                  background: 'var(--bg-surface)'
                 }}
                 required
               >
@@ -205,16 +205,16 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
               display: 'flex',
               gap: 8,
               alignItems: 'flex-start',
-              background: '#ECFDF5',
-              border: '1px solid #A7F3D0',
+              background: 'var(--bg-available)',
+              border: '1px solid var(--border-available)',
               borderRadius: 'var(--radius-md)',
               padding: '10px 14px',
               marginBottom: '18px',
               fontSize: '0.78rem',
-              color: '#065F46',
+              color: 'var(--color-available-text)',
               lineHeight: 1.5
             }}>
-              <ShieldCheck size={15} color="#047857" style={{ flexShrink: 0, marginTop: 1 }} />
+              <ShieldCheck size={15} color="var(--color-available-icon)" style={{ flexShrink: 0, marginTop: 1 }} />
               <span>
                 <strong>Cargo de admin (Coordenação):</strong> sem limite de antecedência —
                 pode agendar qualquer data futura.
@@ -225,16 +225,16 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
               display: 'flex',
               gap: 8,
               alignItems: 'flex-start',
-              background: '#FFFBEB',
-              border: '1px solid #FDE68A',
+              background: 'var(--bg-conflict)',
+              border: '1px solid var(--border-conflict)',
               borderRadius: 'var(--radius-md)',
               padding: '10px 14px',
               marginBottom: '18px',
               fontSize: '0.78rem',
-              color: '#92400E',
+              color: 'var(--color-conflict-text)',
               lineHeight: 1.5
             }}>
-              <ShieldCheck size={15} color="#B45309" style={{ flexShrink: 0, marginTop: 1 }} />
+              <ShieldCheck size={15} color="var(--color-conflict-strong)" style={{ flexShrink: 0, marginTop: 1 }} />
               <span>
                 <strong>Regra de {LIMITE_DIAS_AGENDAMENTO} dias:</strong> professores (Fatec e ETEC) só podem reservar com até{' '}
                 {LIMITE_DIAS_AGENDAMENTO} dias de antecedência — última data aceita:{' '}
@@ -283,7 +283,7 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
                 fontSize: '0.9rem',
                 fontWeight: 600,
                 outline: 'none',
-                background: '#FFFFFF'
+                background: 'var(--bg-surface)'
               }}
               required
             >
@@ -301,7 +301,7 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
               ))}
             </select>
             {!carregandoSlots && slotsLivres.length === 0 && (
-              <p style={{ fontSize: '0.75rem', color: '#991B1B', marginTop: '6px', fontWeight: 600 }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-danger-text)', marginTop: '6px', fontWeight: 600 }}>
                 {ehHoje
                   ? 'Todos os horários deste dia já passaram ou estão ocupados. Escolha outro dia no calendário.'
                   : 'Todos os horários deste dia já estão ocupados. Tente outro dia no calendário.'}
@@ -312,10 +312,10 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>Duracao da reserva</label>
             <select value={duracaoMinutos} onChange={e => setDuracaoMinutos(Number(e.target.value))}
-              style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', fontSize: '0.9rem', background: '#fff' }}>
+              style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', fontSize: '0.9rem', background: 'var(--bg-surface)' }}>
               {[50, 100, 150, 200].map(minutos => <option key={minutos} value={minutos}>{minutos} minutos{minutos === 100 ? ' (padrao)' : ''}</option>)}
             </select>
-            {slotSelecionado && <div style={{ fontSize: '0.78rem', color: intervaloDisponivel ? '#065F46' : '#991B1B', marginTop: 6, fontWeight: 600 }}>
+            {slotSelecionado && <div style={{ fontSize: '0.78rem', color: intervaloDisponivel ? '#065F46' : 'var(--color-danger-text)', marginTop: 6, fontWeight: 600 }}>
               {intervaloDisponivel
                 ? 'Reserva de ' + slotSelecionado.horaInicio.slice(0, 5) + ' a ' + horaComMinutos(slotSelecionado.horaInicio, duracaoMinutos).slice(0, 5) + '.'
                 : 'A duracao ultrapassa a grade ou encontra um horario ocupado. Ajuste a duracao ou escolha outro inicio.'}
@@ -324,7 +324,7 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
 
           {/* Nome e E-mail travados do cadastro */}
           <div style={{
-            background: '#F1F6F7',
+            background: 'var(--bg-input)',
             border: '1px dashed var(--border-light)',
             borderRadius: 'var(--radius-md)',
             padding: '12px 16px',
@@ -377,7 +377,7 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
             </label>
 
             {recorrente && (
-              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed #FECACA' }}>
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--border-occupied)' }}>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
                   Período da Recorrência (Limite Máximo: 2 semanas):
                 </label>
@@ -405,7 +405,7 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
                   fontSize: '0.78rem',
                   marginTop: '8px',
                   padding: '6px 10px',
-                  background: '#FEF2F2',
+                  background: 'var(--bg-occupied)',
                   borderRadius: 'var(--radius-sm)'
                 }}>
                   <strong style={{ color: 'var(--cps-red)' }}>Sua aula será agendada em:</strong>
@@ -414,12 +414,12 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
                   </span>
                 </div>
                 {foraDaJanela && (
-                  <div style={{ fontSize: '0.75rem', color: '#991B1B', fontWeight: 700, marginTop: '6px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-danger-text)', fontWeight: 700, marginTop: '6px' }}>
                     ⚠ Estas datas ultrapassam a janela de {LIMITE_DIAS_AGENDAMENTO} dias — reduza o período da recorrência.
                   </div>
                 )}
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#991B1B', marginTop: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--color-danger-text)', marginTop: '6px' }}>
                   <ShieldCheck size={14} />
                   <span>
                     Regra Institucional: professores podem agendar com até {LIMITE_DIAS_AGENDAMENTO} dias de antecedência — por isso o agendamento recorrente é limitado a 2 semanas.
@@ -438,7 +438,30 @@ export function ModalNovaReserva({ data, slots: slotsIniciais, labId, labs = [],
           </div>
 
           {/* Ações */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px' }}>
+            {/* Motivo do botão desabilitado — antes o clique simplesmente não fazia nada
+                sem nenhuma explicação para o professor. */}
+            {(carregando || slotsLivres.length === 0 || !intervaloDisponivel) && (
+              <span style={{
+                fontSize: '0.76rem',
+                fontWeight: 700,
+                color: 'var(--color-danger-text)',
+                background: 'var(--bg-occupied)',
+                border: '1px solid var(--border-occupied)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '6px 10px',
+                maxWidth: 320,
+                lineHeight: 1.4
+              }}>
+                {carregando
+                  ? 'Processando a reserva...'
+                  : !slotId
+                    ? 'Selecione o horário da aula para liberar a confirmação.'
+                    : slotsLivres.length === 0
+                      ? 'Não há horários livres neste dia — escolha outra data no calendário.'
+                      : 'A duração ultrapassa a grade ou cruza um horário já ocupado. Ajuste a duração ou escolha outro início.'}
+              </span>
+            )}
             <button type="button" className="btn-outline" onClick={onClose} disabled={carregando}>
               Cancelar
             </button>
