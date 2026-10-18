@@ -137,7 +137,7 @@ export function CalendarioMes({ laboratorioId, lab, laboratorios, reservas, onSe
                             key={r.id}
                             className="cal-dot"
                             title={`${r.usuarioNome} — ${r.finalidade} (${labNome(r.laboratorioId)})`}
-                            style={{ background: corRes ? corRes.solid : '#b45309' }}
+                            style={{ background: corRes ? corRes.solid : 'var(--color-conflict-strong)'}}
                           />
                         );
                       })}

@@ -49,7 +49,7 @@ export function ModalResolverConflito({ slot, coordenador, onClose, onSucesso })
 
         <form onSubmit={handleResolver} style={{ padding: '24px' }}>
           {erro && (
-            <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', marginBottom: '16px' }}>
+            <div style={{ background: 'var(--bg-danger)', color: 'var(--color-danger-text)', padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', marginBottom: '16px' }}>
               {erro}
             </div>
           )}
@@ -58,8 +58,8 @@ export function ModalResolverConflito({ slot, coordenador, onClose, onSucesso })
             Em conformidade com as diretrizes do Centro Paula Souza, a Coordenação de Curso possui poder decisório final para redistribuir vagas ou readequar prioridades institucionais.
           </p>
 
-          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '12px', borderRadius: 'var(--radius-md)', marginBottom: '18px' }}>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#B45309' }}>
+          <div style={{ background: 'var(--bg-conflict)', border: '1px solid var(--border-conflict)', padding: '12px', borderRadius: 'var(--radius-md)', marginBottom: '18px' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--color-conflict-strong)' }}>
               Horário do Conflito: {slot.horaInicio} às {slot.horaFim} ({slot.descricao})
             </div>
             <div style={{ fontSize: '0.78rem', color: '#78350F', marginTop: '4px' }}>
@@ -113,7 +113,7 @@ export function ModalResolverConflito({ slot, coordenador, onClose, onSucesso })
             <button type="button" className="btn-outline" onClick={onClose} disabled={carregando}>
               Voltar
             </button>
-            <button type="submit" className="btn-cps" style={{ background: '#B45309' }} disabled={carregando}>
+            <button type="submit" className="btn-cps" style={{ background: 'var(--bg-conflict-strong)' }} disabled={carregando}>
               {carregando ? 'Registrando Deliberação...' : 'Concluir Resolução de Conflito'}
             </button>
           </div>

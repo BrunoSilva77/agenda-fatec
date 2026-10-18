@@ -39,6 +39,22 @@
   --bg-etec: #EEF2FF;
   --border-etec: #C7D2FE;
 
+  /* Superfícies, bordas e textos de apoio (painéis, avisos e status) */
+  --bg-subtle: #F1F5F9;
+  --bg-input: #F1F6F7;
+  --bg-danger: #FEE2E2;
+  --bg-conflict-strong: #B45309;
+
+  --border-danger: #FCA5A5;
+  --border-occupied: #FECACA;
+
+  --color-conflict-strong: #B45309;
+  --color-conflict-text: #92400E;
+  --color-available-text: #065F46;
+  --color-available-icon: #047857;
+  --color-danger: #DC2626;
+  --color-danger-text: #991B1B;
+
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
