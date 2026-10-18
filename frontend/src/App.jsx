@@ -252,7 +252,6 @@ export default function App() {
               reservas={reservas}
               onResolverConflito={(conflito) => setConflitoParaResolver(conflito)}
               onCancelarReserva={handleCancelarReserva}
-              onAdicionarLaboratorio={handleAdicionarLaboratorio}
             />
           </div>
         </section>
