@@ -1,0 +1,531 @@
+/* Calendário Dia / Semana / Mês — layout das referências em prototipos/:
+   barra de ferramentas no topo (visão à esquerda, navegação à direita),
+   grade principal + trilho lateral com mini-calendário e chips por sala.
+   Cores: cromado neutro, acento vermelho institucional (CPS/Fatec) e
+   cores de sala trazidas de labCores.js. */
+
+.card.gc-card {
+  --cal-canvas: #EDF1F7;
+  --cal-line: #DCE3EC;
+  --cal-line-strong: #CBD5E1;
+  --cal-text: #1E293B;
+  --cal-muted: #64748B;
+  --cal-faint: #94A3B8;
+  --cal-tint: #F3F6FA;
+  --cal-accent: #B20000;
+  --cal-accent-soft: #FEE2E2;
+  --cal-accent-border: #FECACA;
+  --cal-free: #16A34A;
+  --cal-conflict: #B45309;
+  /* Canvas mais escuro que as células: grade branca "salta" do fundo */
+  background-color: var(--cal-canvas);
+}
+
+/* BARRA DE FERRAMENTAS */
+.gc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--cal-line);
+}
+.gc-view {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3C4043;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  border: 1px solid var(--cal-line);
+  border-radius: 8px;
+  padding: 7px 28px 7px 12px;
+  cursor: pointer;
+}
+.gc-view:hover { border-color: var(--cal-line-strong); background-color: #F8FAFC; }
+.gc-nav { display: flex; align-items: center; gap: 6px; }
+.gc-hoje {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cal-accent);
+  background: var(--cal-accent-soft);
+  border: 1px solid var(--cal-accent-border);
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+.gc-hoje:hover { background: var(--cal-accent); border-color: var(--cal-accent); color: #fff; }
+.gc-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--cal-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.gc-arrow:hover { background: #F1F5F9; color: var(--cal-text); }
+.gc-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cal-text);
+  min-width: 250px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* LAYOUT: grade + trilho lateral */
+.gc-layout { display: grid; grid-template-columns: minmax(0, 1fr) 264px; }
+.gc-main { min-width: 0; overflow-x: auto; }
+.gc-rail {
+  border-left: 1px solid var(--cal-line);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* VISÃO MÊS */
+.gc-month { padding: 10px 14px 16px; }
+.gc-dow,
+.gc-grid { grid-template-columns: repeat(7, minmax(92px, 1fr)); }
+.gc-dow { display: grid; }
+.gc-dow span {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--cal-muted);
+  text-transform: uppercase;
+  padding: 6px 0 8px;
+  border-bottom: 1px solid var(--cal-line);
+}
+.gc-grid {
+  display: grid;
+  border-left: 1px solid var(--cal-line);
+}
+.gc-cell {
+  position: relative;
+  min-height: 104px;
+  padding: 6px 6px 8px;
+  background-color: #fff;
+  border: 0;
+  border-right: 1px solid var(--cal-line);
+  border-bottom: 1px solid var(--cal-line);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: stretch;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+.gc-cell.out { background-color: #E7ECF3; color: #96A0AE; }
+/* Coluna do domingo com tinta própria (vence o fundo de dias de outro mês) */
+.gc-cell.dom { background-color: var(--cal-tint); }
+.gc-cell:hover { background-color: #E8EDF5; }
+.gc-cell.past .gc-num { color: #9AA0A6; font-weight: 500; }
+.gc-cell.limite {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 9px,
+    rgba(148, 163, 184, 0.30) 9px 11px
+  );
+}
+.gc-num {
+  align-self: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3C4043;
+}
+.gc-cell.hoje .gc-num { background: var(--cal-accent); color: #fff; }
+.gc-cell.past.hoje .gc-num { color: #fff; }
+.gc-cell.sel { box-shadow: inset 0 0 0 2px var(--cal-accent); z-index: 1; background-color: var(--cal-accent-soft); }
+.gc-cell.sel.dom { background-color: var(--cal-accent-soft); }
+.gc-free {
+  position: absolute;
+  top: 10px;
+  right: 9px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cal-free);
+}
+.gc-chip {
+  display: block;
+  width: 100%;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* escurece levemente o fundo para texto branco continuar legível em cores claras */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.16));
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+.gc-chip-conf { background-color: var(--cal-conflict); }
+.gc-cell.past .gc-chip { opacity: 0.6; }
+.gc-more {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--cal-muted);
+  padding-left: 3px;
+}
+
+/* VISÕES SEMANA E DIA */
+.gc-time { padding: 0 0 14px; }
+.gc-head {
+  display: grid;
+  border-bottom: 1px solid var(--cal-line);
+}
+.gc-head-gutter { border-right: 0; }
+.gc-th {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px 10px;
+  border: 0;
+  border-left: 1px solid var(--cal-line);
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+.gc-th-dow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--cal-muted);
+  text-transform: uppercase;
+}
+.gc-th-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 400;
+  color: #5F6368;
+}
+.gc-th:hover .gc-th-num { background: #E1E8F1; }
+.gc-th.hoje .gc-th-dow { color: var(--cal-accent); }
+.gc-th.hoje .gc-th-num { background: var(--cal-accent); color: #fff; font-weight: 600; }
+.gc-th.hoje:hover .gc-th-num { background: var(--cal-accent); }
+/* Dia marcado no mini-calendário — anel + tinta suave na coluna/célula */
+.gc-th.sel { background: var(--cal-accent-soft); }
+.gc-th.sel .gc-th-dow { color: var(--cal-accent); }
+.gc-th.sel .gc-th-num { box-shadow: inset 0 0 0 2px var(--cal-accent); color: var(--cal-accent); font-weight: 700; }
+.gc-th.sel.hoje .gc-th-num { color: #fff; }
+
+.gc-body { display: grid; padding-top: 6px; }
+.gc-gutter { position: relative; }
+.gc-gutter-h { position: relative; height: 48px; border-top: 1px solid var(--cal-line); }
+.gc-gutter-h span {
+  position: absolute;
+  top: -7px;
+  right: 8px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--cal-muted);
+  background: var(--cal-canvas);
+  padding: 0 4px;
+}
+.gc-col {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--cal-line);
+  border-bottom: 1px solid var(--cal-line);
+  background-color: #fff;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--cal-line) 0 1px,
+    transparent 1px 48px
+  );
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-height: 768px;
+}
+/* Domingo e sábado com a mesma tinta da coluna do domingo no mês */
+.gc-col.fds { background-color: var(--cal-tint); }
+.gc-col:hover { background-color: #F2F5FA; }
+/* Coluna do dia marcado no mini-calendário */
+.gc-col.sel,
+.gc-col.sel:hover { background-color: #FBF1F1; }
+.gc-col.fds:hover { background-color: var(--cal-tint); }
+.gc-col.past .gc-ev { opacity: 0.55; }
+
+.gc-ev {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  align-items: flex-start;
+  border: 0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.16));
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+}
+.gc-ev b { font-weight: 700; font-size: 10.5px; }
+.gc-ev span {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  opacity: 0.95;
+}
+.gc-ev-conf { background-color: var(--cal-conflict); }
+.gc-ev-min { padding: 1px 5px; }
+.gc-ev-min b { font-size: 10px; }
+.gc-ev:hover { z-index: 4; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.28); }
+
+/* Linha da hora atual (só nos dias de hoje) */
+.gc-now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--cal-accent);
+  z-index: 5;
+  pointer-events: none;
+}
+.gc-now::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cal-accent);
+}
+
+/* TRILHO: mini-calendário */
+.gc-mini-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.gc-mini-title { font-size: 13.5px; font-weight: 700; color: var(--cal-text); }
+.gc-mini-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--cal-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.gc-mini-btn:hover { background: #E2E8F0; color: var(--cal-text); }
+.gc-mini-dow,
+.gc-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.gc-mini-dow { margin-top: 8px; }
+.gc-mini-dow span {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--cal-muted);
+}
+.gc-mini-grid { margin-top: 4px; }
+.gc-mini-day {
+  height: 30px;
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  color: #3C4043;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gc-mini-day:hover { background: #E2E8F0; }
+.gc-mini-day.out { color: #BDC1C6; }
+.gc-mini-day.ev { background: var(--cal-accent-soft); color: var(--cal-accent); font-weight: 700; }
+.gc-mini-day.hoje { background: var(--cal-accent); color: #fff; font-weight: 700; }
+.gc-mini-day.sel { box-shadow: inset 0 0 0 2px var(--cal-accent); }
+.gc-mini-day.hoje.sel { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--cal-accent); }
+
+/* TRILHO: filtros por sala */
+.gc-filters-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cal-muted);
+  margin-bottom: 8px;
+}
+.gc-fchips { display: flex; flex-direction: column; gap: 6px; }
+.gc-frow { display: flex; align-items: center; gap: 6px; }
+.gc-fchip {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--cal-line);
+  background-color: #fff;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #3C4043;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.gc-fchip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gc-fchip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+.gc-fchip:not(.on) {
+  background-color: var(--f-soft, #F1F5F9);
+  border-color: var(--f-border, #E2E8F0);
+  color: var(--f-text, #334155);
+}
+.gc-fchip.on {
+  background-color: var(--f-solid, #334155);
+  border-color: transparent;
+  color: #fff;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.14));
+}
+.gc-fdel {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid var(--cal-line);
+  background: #fff;
+  color: var(--cal-faint);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.gc-fdel:hover { color: #DC2626; border-color: #FCA5A5; background: #FEF2F2; }
+.gc-fadd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  border: 1px dashed var(--cal-line-strong);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--cal-muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.gc-fadd:hover { border-color: var(--cal-accent); color: var(--cal-accent); background: var(--cal-accent-soft); }
+
+/* TRILHO: legenda */
+.gc-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--cal-muted);
+  border-top: 1px solid var(--cal-line);
+  padding-top: 12px;
+}
+.gc-legend span { display: flex; align-items: center; gap: 7px; }
+.gc-legend i { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.gc-dot-livre { background: var(--cal-free); }
+.gc-dot-conf { background: var(--cal-conflict); }
+.gc-dot-hoje { background: var(--cal-accent); }
+.gc-dot-limite { background: #C7CCD1; }
+.gc-legend-note { font-size: 11px; color: var(--cal-faint); line-height: 1.45; }
+
+/* RODAPÉ INFORMATIVO */
+.gc-note {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  padding: 11px 16px;
+  border-top: 1px solid var(--cal-line);
+  background: #E7EDF5;
+  font-size: 12px;
+  color: var(--cal-muted);
+  line-height: 1.5;
+}
+.gc-note svg { flex-shrink: 0; margin-top: 2px; color: var(--cal-faint); }
+
+/* FOCO DE TECLADO */
+.gc-card button:focus-visible,
+.gc-card select:focus-visible {
+  outline: 2px solid var(--cal-accent);
+  outline-offset: 1px;
+}
+
+/* RESPONSIVO */
+@media (max-width: 1040px) {
+  .gc-layout { grid-template-columns: 1fr; }
+  .gc-rail { border-left: 0; border-top: 1px solid var(--cal-line); }
+}
+@media (max-width: 640px) {
+  .gc-title { min-width: 0; font-size: 14.5px; white-space: normal; }
+  .gc-toolbar { gap: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gc-card *,
+  .gc-card *::before,
+  .gc-card *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

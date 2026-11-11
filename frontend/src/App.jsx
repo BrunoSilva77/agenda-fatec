@@ -9,7 +9,7 @@ import { HeroBanner } from './components/HeroBanner';
 import { CalloutContato } from './components/CalloutContato';
 import { FooterFatec } from './components/FooterFatec';
 import { FiltroLaboratorios } from './components/FiltroLaboratorios';
-import { CalendarioMes } from './components/CalendarioMes';
+import { Calendario } from './components/Calendario';
 import { ModalAdminSalas } from './components/ModalAdminSalas';
 import { dentroDoPrazo, strData, LIMITE_DIAS_AGENDAMENTO } from './utils/regrasAgendamento';
 import { ModalNovaReserva } from './components/ModalNovaReserva';
@@ -206,26 +206,28 @@ export default function App() {
               <hr />
             </div>
 
-            <FiltroLaboratorios
-              laboratorios={laboratorios}
-              labSelecionadoId={labSelecionadoId}
-              onSelecionarLab={setLabSelecionadoId}
-              onAdicionarSala={usuarioAtivo?.perfil === 2 ? () => setAdminSalaAberto(true) : undefined}
-              onExcluirSala={usuarioAtivo?.perfil === 2 ? handleExcluirSala : undefined}
-              semSalas={semSalas}
-            />
-
-            {/* Sem sala cadastrada não há grade a mostrar — o calendário some para
-                não sugerir agendamento em uma sala inexistente. */}
-            {!semSalas && (
-              <CalendarioMes
+            {/* Chips e estado vazio: sem sala cadastrada não há grade a mostrar —
+                o calendário some para não sugerir agendamento em sala inexistente.
+                Com salas, o filtro por sala vive no trilho lateral do Calendario. */}
+            {semSalas ? (
+              <FiltroLaboratorios
+                laboratorios={laboratorios}
+                labSelecionadoId={labSelecionadoId}
+                onSelecionarLab={setLabSelecionadoId}
+                onAdicionarSala={usuarioAtivo?.perfil === 2 ? () => setAdminSalaAberto(true) : undefined}
+                semSalas
+              />
+            ) : (
+              <Calendario
                 laboratorioId={labSelecionadoId}
-                lab={laboratorios.find(l => l.id === labSelecionadoId) || null}
                 laboratorios={laboratorios}
                 reservas={reservas}
                 onSelecionarDia={handleSelecionarDia}
+                onSelecionarLab={setLabSelecionadoId}
                 usuario={usuarioAtivo}
                 diaSelecionado={diaParaReserva?.data || diaInfo?.data || null}
+                onAdicionarSala={usuarioAtivo?.perfil === 2 ? () => setAdminSalaAberto(true) : undefined}
+                onExcluirSala={usuarioAtivo?.perfil === 2 ? handleExcluirSala : undefined}
               />
             )}
 
@@ -250,6 +252,7 @@ export default function App() {
             </div>
             <PainelCoordenador
               reservas={reservas}
+              usuario={usuarioAtivo}
               onResolverConflito={(conflito) => setConflitoParaResolver(conflito)}
               onCancelarReserva={handleCancelarReserva}
             />
@@ -319,6 +322,7 @@ export default function App() {
           labs={laboratorios}
           labNome={laboratorios.find(l => l.id === labSelecionadoId)?.nome || `Laboratório ${labSelecionadoId}`}
           usuario={usuarioAtivo}
+          reservas={reservas}
           onCarregarSlots={(idLab, data) => api.getDisponibilidade(idLab, data).then(r => r.slots)}
           onClose={() => setDiaParaReserva(null)}
           onSucesso={handleCriarReserva}

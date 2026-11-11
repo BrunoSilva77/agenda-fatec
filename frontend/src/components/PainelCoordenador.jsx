@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { ShieldAlert, AlertTriangle, Filter } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ShieldAlert, AlertTriangle, Filter, Package, Plus, Trash2 } from 'lucide-react';
+import { api } from '../services/api';
 
 // Rótulos e cores dos status (enum StatusReserva do domínio)
 const STATUS_RESERVA = [
@@ -39,13 +40,69 @@ const estiloCampo = {
   background: 'var(--bg-surface)'
 };
 
-export function PainelCoordenador({ reservas, onResolverConflito, onCancelarReserva }) {
+export function PainelCoordenador({ reservas, usuario, onResolverConflito, onCancelarReserva }) {
   // Filtros do "Mapa Geral". Por padrão abre com tudo visível (inclusive as
   // canceladas) — o checkbox só oculta quando a coordenação quiser reduzir o ruído.
   const [filtroStatus, setFiltroStatus] = useState('');
   const [dataDe, setDataDe] = useState('');
   const [dataAte, setDataAte] = useState('');
   const [ocultarCanceladas, setOcultarCanceladas] = useState(false);
+
+  // Catálogo de equipamentos das aulas — Coordenação adiciona/remove itens
+  // (o backend valida o perfil 2 e bloqueia remoção de item em uso por reserva ativa).
+  const [catalogo, setCatalogo] = useState([]);
+  const [novoNome, setNovoNome] = useState('');
+  const [novoDetalhe, setNovoDetalhe] = useState('');
+  const [novoExclusivo, setNovoExclusivo] = useState(false);
+  const [erroCatalogo, setErroCatalogo] = useState('');
+  const [catCarregando, setCatCarregando] = useState(true);
+
+  useEffect(() => {
+    let ativo = true;
+    api.getEquipamentos()
+      .then(lista => {
+        if (!ativo) return;
+        setCatalogo(Array.isArray(lista) ? lista : []);
+        setCatCarregando(false);
+      })
+      .catch(() => { if (ativo) setCatCarregando(false); });
+    return () => { ativo = false; };
+  }, []);
+
+  const recarregarCatalogo = async () => {
+    const lista = await api.getEquipamentos();
+    setCatalogo(Array.isArray(lista) ? lista : []);
+  };
+
+  const adicionarItem = async () => {
+    setErroCatalogo('');
+    const nome = novoNome.trim();
+    if (!nome) { setErroCatalogo('Informe o nome do equipamento.'); return; }
+    try {
+      await api.criarEquipamento({
+        solicitanteId: usuario?.id,
+        nome,
+        detalhe: novoDetalhe.trim() || undefined,
+        exclusivo: novoExclusivo
+      });
+      await recarregarCatalogo();
+      setNovoNome('');
+      setNovoDetalhe('');
+      setNovoExclusivo(false);
+    } catch (err) {
+      setErroCatalogo(err.message || 'Não foi possível cadastrar o equipamento.');
+    }
+  };
+
+  const removerItem = async (id) => {
+    setErroCatalogo('');
+    try {
+      await api.excluirEquipamento(id, usuario?.id);
+      await recarregarCatalogo();
+    } catch (err) {
+      setErroCatalogo(err.message || 'Não foi possível remover o equipamento.');
+    }
+  };
 
   const conflitos = reservas.filter(r => r.status === 2);
   const confirmadas = reservas.filter(r => r.status === 1);
@@ -152,6 +209,121 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
             ))}
           </div>
         )}
+      </div>
+
+      {/* Catálogo de Equipamentos — Coordenação adiciona/remove itens das aulas */}
+      <div style={{ marginBottom: '32px' }}>
+        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Package size={18} color="var(--cps-red)" /> Equipamentos Disponíveis para as Aulas
+        </h3>
+
+        <div style={{ background: '#F8FAFC', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+          {catCarregando ? (
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '8px 0' }}>Carregando catálogo…</div>
+          ) : catalogo.length === 0 ? (
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '8px 0' }}>
+              Nenhum equipamento cadastrado. Adicione o primeiro abaixo.
+            </div>
+          ) : (
+            <ul style={{ listStyle: 'none', margin: '0 0 14px', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {catalogo.map(item => (
+                <li
+                  key={item.id}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    background: 'var(--bg-surface)', border: '1px solid var(--border-light)',
+                    borderRadius: 'var(--radius-md)', padding: '10px 14px'
+                  }}
+                >
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <strong style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{item.nome}</strong>
+                    <small style={{ display: 'block', fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
+                      {item.detalhe || 'Sem detalhe'}
+                    </small>
+                  </span>
+                  {item.exclusivo && (
+                    <span
+                      style={{
+                        fontSize: '0.68rem', fontWeight: 800, padding: '3px 9px',
+                        borderRadius: '12px', background: 'var(--bg-conflict)',
+                        color: 'var(--color-conflict-strong)', border: '1px solid var(--border-conflict)',
+                        whiteSpace: 'nowrap'
+                      }}
+                      title="Só uma reserva por horário — se já reservado, outro professor não pode pedir"
+                    >
+                      EXCLUSIVO
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removerItem(item.id)}
+                    aria-label={`Remover ${item.nome}`}
+                    title={`Remover ${item.nome} do catálogo`}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5, background: 'transparent',
+                      border: '1px solid var(--border-danger)', color: 'var(--color-danger)',
+                      borderRadius: 'var(--radius-sm)', padding: '6px 10px', fontSize: '0.74rem',
+                      fontWeight: 700, cursor: 'pointer', flexShrink: 0
+                    }}
+                  >
+                    <Trash2 size={13} /> Remover
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Formulário de cadastro de novo item */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', flex: '1 1 180px' }}>
+              Nome do equipamento
+              <input
+                type="text"
+                value={novoNome}
+                onChange={e => setNovoNome(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); adicionarItem(); } }}
+                placeholder="Ex: Mesa digitalizadora"
+                maxLength={120}
+                style={estiloCampo}
+              />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', flex: '1 1 180px' }}>
+              Detalhe (opcional)
+              <input
+                type="text"
+                value={novoDetalhe}
+                onChange={e => setNovoDetalhe(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); adicionarItem(); } }}
+                placeholder="Ex: Guarda no laboratório 2"
+                maxLength={200}
+                style={estiloCampo}
+              />
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', paddingBottom: 8, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              <input
+                type="checkbox"
+                checked={novoExclusivo}
+                onChange={e => setNovoExclusivo(e.target.checked)}
+                style={{ width: 15, height: 15, accentColor: 'var(--cps-red)' }}
+              />
+              Exclusivo (1 por horário)
+            </label>
+            <button
+              type="button"
+              className="btn-cps"
+              onClick={adicionarItem}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '9px 16px', fontSize: '0.8rem', paddingBottom: 9 }}
+            >
+              <Plus size={15} /> Adicionar
+            </button>
+          </div>
+
+          {erroCatalogo && (
+            <div style={{ marginTop: '10px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-danger-text)' }}>
+              {erroCatalogo}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tabela de Reservas Gerais */}
