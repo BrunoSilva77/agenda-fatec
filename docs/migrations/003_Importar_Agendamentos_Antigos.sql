@@ -10,7 +10,7 @@ INSERT IGNORE INTO `Usuarios` (`Id`, `Nome`, `Email`, `SigaId`, `Perfil`, `Ativo
 INSERT IGNORE INTO `Usuarios` (`Id`, `Nome`, `Email`, `SigaId`, `Perfil`, `Ativo`, `DataCadastro`) VALUES ('33333333-3333-3333-3333-333333333333', 'Coord. Marcelo Oliveira', 'marcelo.oliveira@fatec.sp.gov.br', 'SIGA-COORD-2001', 2, 1, '2026-09-23 22:59:59.5434615');
 
 -- Reservas
-INSERT IGNORE INTO `Reservas` (`Id`, `LaboratorioId`, `UsuarioId`, `DataInicio`, `DataFim`, `Finalidade`, `Status`, `RecorrenciaGrupoId`, `Justificativa`, `Observacao`, `ResolvidoPorCoordenadorId`, `CriadoEm`, `AtualizadoEm`, `RowVersion`) VALUES ('D71DF764-2BC4-4E3A-9EEE-9D5B3CCFA32B', 1, '11111111-1111-1111-1111-111111111111', '2026-10-15 08:20:00', '2026-10-15 09:10:00', 'Banco de Dados', 1, NULL, NULL, '', NULL, '2026-10-15 01:52:04.9963761', NULL, X'');
+INSERT IGNORE INTO `Reservas` (`Id`, `LaboratorioId`, `UsuarioId`, `DataInicio`, `DataFim`, `Finalidade`, `Status`, `RecorrenciaGrupoId`, `Justificativa`, `Observacao`, `ResolvidoPorCoordenadorId`, `CriadoEm`, `AtualizadoEm`, `RowVersion`) VALUES ('D71DF764-2BC4-4E3A-9EEE-9D5B3CCFA32B', 1, '11111111-1111-1111-1111-111111111111', '2026-10-15 08:20:00', '2026-10-15 09:10:00', 'Banco de Dados', 1, NULL, NULL, '', NULL, '2026-10-15 01:52:04.9963761', NULL, UUID());
 
 -- AuditoriasLgpd
 INSERT IGNORE INTO `AuditoriasLgpd` (`Id`, `UsuarioId`, `UsuarioEmail`, `Acao`, `EntidadeAfetada`, `RegistroId`, `Detalhes`, `IpOrigem`, `DataHoraUtc`) VALUES (1, '11111111-1111-1111-1111-111111111111', 'carlos.eduardo@fatec.sp.gov.br', 'CRIACAO_RESERVA', 'Reserva', 'd71df764-2bc4-4e3a-9eee-9d5b3ccfa32b', 'Reserva criada para Lab 1 (Banco de Dados) - Total instâncias: 1', '::1', '2026-10-15 01:52:05.0525853');
