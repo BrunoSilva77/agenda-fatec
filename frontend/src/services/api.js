@@ -1,5 +1,7 @@
 // Cliente HTTP com suporte a API real ASP.NET Core e fallback offline
 import { dentroDoPrazo, dataLimite, strData, datasRecorrencia, LIMITE_DIAS_AGENDAMENTO } from '../utils/regrasAgendamento';
+import { listarEquipamentos, adicionarEquipamento, removerEquipamento } from '../utils/equipamentos';
+import { USUARIOS_TESTE } from '../utils/usuariosTeste';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -156,12 +158,22 @@ let auditoriasMock = [
 ];
 
 export const api = {
+  // Falha de rede de verdade (offline, timeout, CORS). Diferente de uma resposta
+  // HTTP de erro, que significa que a API está no ar mas recusou o pedido — nesse
+  // caso devolvemos o erro em vez de cair no modo simulado e "inventar" dados.
+  _ehFalhaDeRede(erro) {
+    return erro?.name === 'TimeoutError' || erro?.name === 'AbortError' || erro?.message === 'Failed to fetch';
+  },
+
   // Lista todos os laboratórios
   async getLaboratorios() {
     try {
-      const res = await fetch(`${API_BASE_URL}/laboratorios`, { signal: AbortSignal.timeout(1000) });
+      const res = await fetch(`${API_BASE_URL}/laboratorios`, { signal: AbortSignal.timeout(1500) });
       if (res.ok) return await res.json();
-    } catch {}
+      throw new Error(`Falha ao carregar os laboratórios (HTTP ${res.status}).`);
+    } catch (erro) {
+      if (!this._ehFalhaDeRede(erro)) throw erro;
+    }
     return laboratoriosMock;
   },
 
@@ -178,14 +190,46 @@ export const api = {
     laboratoriosMock.push(novo);
     return novo;
   },
+
+  // Excluir sala (DELETE na API; restrito à Coordenação). Sem API, remove do mock.
+  async excluirLaboratorio(laboratorioId, solicitanteId) {
+    const qs = solicitanteId ? `?solicitanteId=${encodeURIComponent(solicitanteId)}` : '';
+
+    let rede = false;
+    try {
+      const res = await fetch(`${API_BASE_URL}/laboratorios/${laboratorioId}${qs}`, {
+        method: 'DELETE',
+        signal: AbortSignal.timeout(2000)
+      });
+      rede = true;
+      if (res.ok || res.status === 204) return;
+      // A API recusou (sala com reservas ativas, perfil insuficiente, não encontrada)
+      const erro = await res.json().catch(() => ({}));
+      throw new Error(erro.mensagem || 'Não foi possível excluir a sala.');
+    } catch (erro) {
+      if (rede) throw erro;
+      if (!this._ehFalhaDeRede(erro)) throw erro;
+    }
+
+    // Modo simulado (API indisponível): remove do mock
+    const index = laboratoriosMock.findIndex(l => l.id === laboratorioId);
+    if (index !== -1) laboratoriosMock.splice(index, 1);
+  },
   // Consulta disponibilidade de horários
   async getDisponibilidade(laboratorioId, dataStr) {
     try {
       const res = await fetch(`${API_BASE_URL}/reservas/disponibilidade?laboratorioId=${laboratorioId}&data=${dataStr}`, {
-        signal: AbortSignal.timeout(1000)
+        signal: AbortSignal.timeout(1500)
       });
       if (res.ok) return await res.json();
-    } catch {}
+      // A API respondeu indicando que a sala não existe / pedido inválido — não
+      // podemos cair no mock, senão a tela passa a mostrar uma grade de horários
+      // de uma sala que não está cadastrada.
+      const erro = await res.json().catch(() => ({}));
+      throw new Error(erro.Mensagem || erro.mensagem || `Laboratório ${laboratorioId} não encontrado (HTTP ${res.status}).`);
+    } catch (erro) {
+      if (!this._ehFalhaDeRede(erro)) throw erro;
+    }
 
     const lab = laboratoriosMock.find(l => l.id === laboratorioId);
     let slots = [...slotsPadraoFatec];
@@ -226,6 +270,80 @@ export const api = {
       data: dataStr,
       slots: slotsComDisponibilidade
     };
+  },
+
+  // ---------- Equipamentos (catálogo da reserva) ----------
+  // Lista o catálogo: API quando online, localStorage no modo simulado.
+  async getEquipamentos() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/equipamentos`, { signal: AbortSignal.timeout(1500) });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          return data.map(e => ({
+            id: e.id,
+            nome: e.nome,
+            detalhe: e.detalhe || '',
+            exclusivo: Boolean(e.exclusivo)
+          }));
+        }
+      }
+    } catch { /* API offline → catálogo local */ }
+    return listarEquipamentos();
+  },
+
+  // Cadastra item no catálogo — restrito à Coordenação (o backend valida o perfil).
+  async criarEquipamento(dados) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/equipamentos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados),
+        signal: AbortSignal.timeout(1500)
+      });
+      if (res.ok) return await res.json();
+      const erro = await res.json().catch(() => ({}));
+      if (erro.mensagem) { const e = new Error(erro.mensagem); e.regra = true; throw e; }
+      throw new Error(`Falha ao cadastrar equipamento (HTTP ${res.status}).`);
+    } catch (e) {
+      if (e.regra) throw e; // regra/permissão vinda da API → repassa ao usuário
+      const semRede = e.name === 'TimeoutError' || e.name === 'AbortError' || e.message === 'Failed to fetch';
+      if (!semRede) throw e;
+    }
+
+    // Modo simulado: mesma regra do backend — só a Coordenação cadastra
+    const solicitante = USUARIOS_TESTE.find(u => u.id === dados.solicitanteId);
+    if (!solicitante || solicitante.perfil !== 2) {
+      throw new Error('Apenas usuários com perfil de Coordenador/Administrador podem cadastrar equipamentos.');
+    }
+    const lista = adicionarEquipamento(dados);
+    return lista[lista.length - 1];
+  },
+
+  // Remove item do catálogo — restrito à Coordenação.
+  async excluirEquipamento(id, solicitanteId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/equipamentos/${encodeURIComponent(id)}?solicitanteId=${solicitanteId}`, {
+        method: 'DELETE',
+        signal: AbortSignal.timeout(1500)
+      });
+      if (res.ok) return true;
+      const erro = await res.json().catch(() => ({}));
+      if (erro.mensagem) { const e = new Error(erro.mensagem); e.regra = true; throw e; }
+      throw new Error(`Falha ao remover equipamento (HTTP ${res.status}).`);
+    } catch (e) {
+      if (e.regra) throw e;
+      const semRede = e.name === 'TimeoutError' || e.name === 'AbortError' || e.message === 'Failed to fetch';
+      if (!semRede) throw e;
+    }
+
+    // Modo simulado: mesma regra do backend — só a Coordenação remove
+    const solicitante = USUARIOS_TESTE.find(u => u.id === solicitanteId);
+    if (!solicitante || solicitante.perfil !== 2) {
+      throw new Error('Apenas usuários com perfil de Coordenador/Administrador podem remover equipamentos.');
+    }
+    removerEquipamento(id);
+    return true;
   },
 
   // Cria uma nova reserva com validação de concorrência, janela de 14 dias e limite de 2 semanas na recorrência
@@ -271,6 +389,13 @@ export const api = {
       : [strData(origem)];
     const duracao = new Date(dados.dataFim) - origem;
 
+    // Equipamentos pedidos: exclusivos não podem estar em outra reserva no mesmo intervalo
+    const catalogoEq = listarEquipamentos();
+    const pedidos = Array.isArray(dados.equipamentos) ? dados.equipamentos : [];
+    const exclusivos = pedidos
+      .map(id => catalogoEq.find(e => e.id === id))
+      .filter(e => e && e.exclusivo);
+
     for (const dataStr of datasCriadas) {
       const hh = String(origem.getHours()).padStart(2, '0');
       const mm = String(origem.getMinutes()).padStart(2, '0');
@@ -292,6 +417,20 @@ export const api = {
         throw new Error(`Conflito de horário no dia ${dInicio.toLocaleDateString('pt-BR')}: Horário já ocupado.`);
       }
 
+      // Equipamento exclusivo (ex: carrinho de notebooks) já reservado no intervalo → recusa
+      for (const eq of exclusivos) {
+        const ocupado = reservasMock.some(r =>
+          r.status !== 3 &&
+          Array.isArray(r.equipamentos) &&
+          r.equipamentos.includes(eq.id) &&
+          r.dataInicio < dFim.toISOString() &&
+          r.dataFim > dInicio.toISOString()
+        );
+        if (ocupado) {
+          throw new Error(`Equipamento exclusivo já reservado neste horário (${dInicio.toLocaleDateString('pt-BR')}): ${eq.nome}. Escolha outro horário.`);
+        }
+      }
+
       const nova = {
         id: crypto.randomUUID(),
         laboratorioId: dados.laboratorioId,
@@ -306,6 +445,7 @@ export const api = {
         recorrenciaGrupoId: grupoId,
         justificativa: null,
         observacao: dados.observacao || null,
+        equipamentos: pedidos,
         criadoEm: new Date().toISOString()
       };
 

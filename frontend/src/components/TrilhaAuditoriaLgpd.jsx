@@ -3,7 +3,7 @@ import { ShieldCheck, Lock, FileText } from 'lucide-react';
 
 export function TrilhaAuditoriaLgpd({ auditorias }) {
   return (
-    <div style={{ background: '#FFFFFF', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
+    <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-light)' }}>
         <div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -14,7 +14,7 @@ export function TrilhaAuditoriaLgpd({ auditorias }) {
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '6px 12px', borderRadius: 'var(--radius-md)', color: '#065F46', fontSize: '0.78rem', fontWeight: 700 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-available)', border: '1px solid var(--border-available)', padding: '6px 12px', borderRadius: 'var(--radius-md)', color: 'var(--color-available-text)', fontSize: '0.78rem', fontWeight: 700 }}>
           <Lock size={14} /> Minimização de Dados Ativa
         </div>
       </div>
@@ -60,7 +60,7 @@ export function TrilhaAuditoriaLgpd({ auditorias }) {
                     borderRadius: '6px',
                     fontSize: '0.72rem',
                     fontWeight: 700,
-                    background: item.acao.includes('CRIACAO') ? 'var(--bg-available)' : item.acao.includes('CONFLITO') ? 'var(--bg-conflict)' : '#F1F5F9',
+                    background: item.acao.includes('CRIACAO') ? 'var(--bg-available)' : item.acao.includes('CONFLITO') ? 'var(--bg-conflict)' : 'var(--bg-subtle)',
                     color: item.acao.includes('CRIACAO') ? 'var(--color-available)' : item.acao.includes('CONFLITO') ? '#B45309' : 'var(--text-primary)'
                   }}>
                     {item.acao}

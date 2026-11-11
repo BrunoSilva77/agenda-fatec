@@ -82,4 +82,5 @@ public class Reserva
     public virtual Laboratorio Laboratorio { get; set; } = null!;
     public virtual Usuario Usuario { get; set; } = null!;
     public virtual Usuario? ResolvidoPorCoordenador { get; set; }
+    public virtual ICollection<ReservaEquipamento> ReservasEquipamentos { get; set; } = new List<ReservaEquipamento>();
 }

@@ -284,6 +284,24 @@
   box-shadow: 0 4px 8px rgba(178, 0, 0, 0.3);
 }
 
+/* Estado desabilitado — sem esta regra o botão ficava visualmente idêntico ao
+   habilitado (vermelho vivo, opacidade 1 e cursor de mão), e o clique não fazia
+   nada sem nenhum sinal para o usuário. */
+.btn-cps:disabled,
+.btn-cps[disabled] {
+  background-color: #C9CDD3;
+  color: #6B7280;
+  box-shadow: none;
+  opacity: 0.85;
+  cursor: not-allowed;
+}
+
+.btn-cps:disabled:hover,
+.btn-cps[disabled]:hover {
+  background-color: #C9CDD3;
+  box-shadow: none;
+}
+
 .btn-outline {
   background: transparent;
   border: 1px solid var(--border-light);

@@ -56,8 +56,8 @@ export function ModalDia({ data, lab, labNome, laboratorios = [], mostrarTodasSa
           {ordenadas.length === 0 ? (
             <div style={{
               display: 'flex', gap: 8, alignItems: 'flex-start',
-              background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 'var(--radius-md)',
-              padding: '14px 16px', fontSize: '0.85rem', color: '#065F46', fontWeight: 600
+              background: 'var(--bg-available)', border: '1px solid var(--border-available)', borderRadius: 'var(--radius-md)',
+              padding: '14px 16px', fontSize: '0.85rem', color: 'var(--color-available-text)', fontWeight: 600
             }}>
               <span style={{
                 width: 10, height: 10, borderRadius: '50%', background: '#16a34a',
@@ -73,8 +73,8 @@ export function ModalDia({ data, lab, labNome, laboratorios = [], mostrarTodasSa
                 return (
                   <li key={r.id} style={{
                     display: 'flex', gap: 10, alignItems: 'flex-start',
-                    border: `1px solid ${conflito ? '#FDE68A' : 'var(--border-light)'}`,
-                    background: conflito ? '#FFFBEB' : '#fff',
+                    border: `1px solid ${conflito ? 'var(--border-conflict)' : 'var(--border-light)'}`,
+                    background: conflito ? '#FFFBEB' : 'var(--bg-surface)',
                     borderRadius: 'var(--radius-md)', padding: '12px 14px'
                   }}>
                     <span style={{
@@ -109,8 +109,8 @@ export function ModalDia({ data, lab, labNome, laboratorios = [], mostrarTodasSa
                       {conflito && (
                         <div style={{
                           display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 6,
-                          fontSize: '0.72rem', fontWeight: 700, color: '#92400E',
-                          background: '#FEF3C7', border: '1px solid #FDE68A',
+                          fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-conflict-text)',
+                          background: 'var(--bg-conflict)', border: '1px solid var(--border-conflict)',
                           borderRadius: 4, padding: '2px 8px'
                         }}>
                           Em conflito — aguardando mediação da coordenação

@@ -150,4 +150,59 @@ public class LaboratorioService : ILaboratorioService
             Ativo = s.Ativo
         });
     }
+
+    public async Task ExcluirAsync(int laboratorioId, Guid solicitanteId, string? ipOrigem)
+    {
+        // Autorização: somente Coordenador/Administrador (identidade vinda do SIGA) pode excluir salas
+        var solicitante = await _context.Usuarios.FindAsync(solicitanteId);
+        if (solicitante == null || solicitante.Perfil != Domain.Enums.PerfilUsuario.Coordenador)
+            throw new UnauthorizedAccessException("Apenas usuários com perfil de Coordenador/Administrador possuem autorização para excluir salas.");
+
+        var laboratorio = await _context.Laboratorios.FindAsync(laboratorioId)
+            ?? throw new KeyNotFoundException($"Laboratório {laboratorioId} não encontrado.");
+
+        // O FK LaboratorioId em Reservas é DeleteBehavior.Restrict: o banco recusa a
+        // exclusão da sala enquanto existir QUALQUER reserva apontando para ela —
+        // inclusive as canceladas, que fazem parte da trilha de auditoria LGPD.
+        var totalReservas = await _context.Reservas
+            .CountAsync(r => r.LaboratorioId == laboratorioId);
+
+        if (totalReservas > 0)
+        {
+            var ativas = await _context.Reservas
+                .CountAsync(r => r.LaboratorioId == laboratorioId && r.Status != Domain.Enums.StatusReserva.Cancelada);
+
+            throw new InvalidOperationException(
+                $"A sala \"{laboratorio.Nome}\" possui {totalReservas} reserva(s) no histórico" +
+                (ativas > 0 ? $", das quais {ativas} ainda ativa(s)" : string.Empty) +
+                ". O histórico é preservado para a auditoria LGPD, então a sala não pode ser excluída.");
+        }
+
+        // Grade customizada da sala (ex: blocos ETEC) — some junto, senão fica órfã.
+        // O FK de SlotsHorario é Cascade, então o banco também removeria em cascata.
+        var slotsCustomizados = await _context.SlotsHorario
+            .Where(s => s.LaboratorioId == laboratorioId)
+            .ToListAsync();
+        if (slotsCustomizados.Count > 0)
+            _context.SlotsHorario.RemoveRange(slotsCustomizados);
+
+        _context.Laboratorios.Remove(laboratorio);
+
+        // Trilha de Auditoria LGPD — registra a remoção estrutural da sala
+        await _context.AuditoriasLgpd.AddAsync(new AgendaFatec.Domain.Entities.AuditoriaLgpd
+        {
+            UsuarioId = solicitante.Id,
+            UsuarioEmail = solicitante.Email,
+            Acao = "EXCLUSAO_LABORATORIO",
+            EntidadeAfetada = "Laboratorio",
+            RegistroId = laboratorio.Id.ToString(),
+            Detalhes = $"Sala \"{laboratorio.Nome}\" (id {laboratorio.Id}) excluída pela Coordenação. " +
+                $"Grade customizada removida: {slotsCustomizados.Count} slot(s). " +
+                "Sem reservas no histórico (exigência do FK Restrict).",
+            IpOrigem = ipOrigem,
+            DataHoraUtc = DateTime.UtcNow
+        });
+
+        await _context.SaveChangesAsync();
+    }
 }

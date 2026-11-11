@@ -17,6 +17,8 @@ public class AgendaFatecDbContext : DbContext
     public DbSet<Laboratorio> Laboratorios => Set<Laboratorio>();
     public DbSet<SlotHorario> SlotsHorario => Set<SlotHorario>();
     public DbSet<Reserva> Reservas => Set<Reserva>();
+    public DbSet<Equipamento> Equipamentos => Set<Equipamento>();
+    public DbSet<ReservaEquipamento> ReservaEquipamentos => Set<ReservaEquipamento>();
     public DbSet<AuditoriaLgpd> AuditoriasLgpd => Set<AuditoriaLgpd>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -15,6 +15,12 @@ public class CriarReservaDto
     public string? Observacao { get; set; }
 
     /// <summary>
+    /// Códigos do catálogo de equipamentos desejados (ex: "carrinho-notebooks").
+    /// Itens exclusivos já reservados no intervalo são recusados no serviço.
+    /// </summary>
+    public List<string>? Equipamentos { get; set; }
+
+    /// <summary>
     /// Indica se o agendamento deve se repetir semanalmente.
     /// </summary>
     public bool Recorrente { get; set; } = false;
@@ -46,6 +52,11 @@ public class ReservaDto
     public string? Observacao { get; set; }
     public DateTime CriadoEm { get; set; }
     public Guid? ResolvidoPorCoordenadorId { get; set; }
+
+    /// <summary>
+    /// Códigos do catálogo de equipamentos vinculados a esta reserva.
+    /// </summary>
+    public List<string> Equipamentos { get; set; } = new();
 }
 
 /// <summary>

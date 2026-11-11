@@ -1,18 +1,136 @@
-import React, { useState } from 'react';
-import { ShieldAlert, AlertTriangle } from 'lucide-react';
-import { PALETA_LABS } from './labCores';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ShieldAlert, AlertTriangle, Filter, Package, Plus, Trash2 } from 'lucide-react';
+import { api } from '../services/api';
 
-export function PainelCoordenador({ reservas, onResolverConflito, onCancelarReserva, onAdicionarLaboratorio }) {
-  const [nomeLab, setNomeLab] = useState('');
-  const [capacidadeLab, setCapacidadeLab] = useState(30);
-  const [compartilhadoEtec, setCompartilhadoEtec] = useState(false);
-  const [corLab, setCorLab] = useState(PALETA_LABS[1]);
-  const [erroLab, setErroLab] = useState('');
+// Rótulos e cores dos status (enum StatusReserva do domínio)
+const STATUS_RESERVA = [
+  { valor: '', rotulo: 'Todos os status' },
+  { valor: '1', rotulo: 'Confirmada' },
+  { valor: '2', rotulo: 'Em Conflito' },
+  { valor: '3', rotulo: 'Cancelada' }
+];
+
+const estiloStatus = (status) => ({
+  padding: '2px 8px',
+  borderRadius: '12px',
+  fontWeight: 700,
+  fontSize: '0.72rem',
+  background: status === 1 ? 'var(--bg-available)' : status === 2 ? 'var(--bg-conflict)' : 'var(--bg-subtle)',
+  color: status === 1 ? 'var(--color-available)' : status === 2 ? 'var(--color-conflict)' : 'var(--text-muted)'
+});
+
+const rotuloStatus = (status) =>
+  status === 1 ? 'Confirmada' : status === 2 ? 'Em Conflito' : 'Cancelada';
+
+// Data local (AAAA-MM-DD) de um horário vindo da API — evita o deslocamento
+// de fuso que new Date().toISOString() causa perto da meia-noite.
+const dataLocal = (iso) => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const estiloCampo = {
+  padding: '8px 10px',
+  border: '1px solid var(--border-light)',
+  borderRadius: 'var(--radius-md)',
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  color: 'var(--text-primary)',
+  background: 'var(--bg-surface)'
+};
+
+export function PainelCoordenador({ reservas, usuario, onResolverConflito, onCancelarReserva }) {
+  // Filtros do "Mapa Geral". Por padrão abre com tudo visível (inclusive as
+  // canceladas) — o checkbox só oculta quando a coordenação quiser reduzir o ruído.
+  const [filtroStatus, setFiltroStatus] = useState('');
+  const [dataDe, setDataDe] = useState('');
+  const [dataAte, setDataAte] = useState('');
+  const [ocultarCanceladas, setOcultarCanceladas] = useState(false);
+
+  // Catálogo de equipamentos das aulas — Coordenação adiciona/remove itens
+  // (o backend valida o perfil 2 e bloqueia remoção de item em uso por reserva ativa).
+  const [catalogo, setCatalogo] = useState([]);
+  const [novoNome, setNovoNome] = useState('');
+  const [novoDetalhe, setNovoDetalhe] = useState('');
+  const [novoExclusivo, setNovoExclusivo] = useState(false);
+  const [erroCatalogo, setErroCatalogo] = useState('');
+  const [catCarregando, setCatCarregando] = useState(true);
+
+  useEffect(() => {
+    let ativo = true;
+    api.getEquipamentos()
+      .then(lista => {
+        if (!ativo) return;
+        setCatalogo(Array.isArray(lista) ? lista : []);
+        setCatCarregando(false);
+      })
+      .catch(() => { if (ativo) setCatCarregando(false); });
+    return () => { ativo = false; };
+  }, []);
+
+  const recarregarCatalogo = async () => {
+    const lista = await api.getEquipamentos();
+    setCatalogo(Array.isArray(lista) ? lista : []);
+  };
+
+  const adicionarItem = async () => {
+    setErroCatalogo('');
+    const nome = novoNome.trim();
+    if (!nome) { setErroCatalogo('Informe o nome do equipamento.'); return; }
+    try {
+      await api.criarEquipamento({
+        solicitanteId: usuario?.id,
+        nome,
+        detalhe: novoDetalhe.trim() || undefined,
+        exclusivo: novoExclusivo
+      });
+      await recarregarCatalogo();
+      setNovoNome('');
+      setNovoDetalhe('');
+      setNovoExclusivo(false);
+    } catch (err) {
+      setErroCatalogo(err.message || 'Não foi possível cadastrar o equipamento.');
+    }
+  };
+
+  const removerItem = async (id) => {
+    setErroCatalogo('');
+    try {
+      await api.excluirEquipamento(id, usuario?.id);
+      await recarregarCatalogo();
+    } catch (err) {
+      setErroCatalogo(err.message || 'Não foi possível remover o equipamento.');
+    }
+  };
+
   const conflitos = reservas.filter(r => r.status === 2);
   const confirmadas = reservas.filter(r => r.status === 1);
 
+  const reservasFiltradas = useMemo(() => {
+    return reservas.filter(r => {
+      if (ocultarCanceladas && r.status === 3) return false;
+      if (filtroStatus !== '' && String(r.status) !== filtroStatus) return false;
+
+      const dia = dataLocal(r.dataInicio);
+      if (dataDe && dia < dataDe) return false;
+      if (dataAte && dia > dataAte) return false;
+
+      return true;
+    });
+  }, [reservas, filtroStatus, dataDe, dataAte, ocultarCanceladas]);
+
+  const temFiltroAtivo = filtroStatus !== '' || Boolean(dataDe) || Boolean(dataAte) || ocultarCanceladas;
+
+  const limparFiltros = () => {
+    setFiltroStatus('');
+    setDataDe('');
+    setDataAte('');
+    setOcultarCanceladas(false);
+  };
+
   return (
-    <div style={{ background: '#FFFFFF', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
+    <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-light)' }}>
         <div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -24,33 +142,20 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
         </div>
 
         <div style={{ display: 'flex', gap: '12px' }}>
-          <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', padding: '6px 14px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#B45309', display: 'block' }}>Conflitos Pendentes</span>
-            <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#B45309' }}>{conflitos.length}</span>
+          <div style={{ background: '#FEF3C7', border: '1px solid var(--border-conflict)', padding: '6px 14px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-conflict-strong)', display: 'block' }}>Conflitos Pendentes</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--color-conflict-strong)' }}>{conflitos.length}</span>
           </div>
-          <div style={{ background: '#F1F5F9', border: '1px solid #E2E8F0', padding: '6px 14px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+          <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-light)', padding: '6px 14px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'block' }}>Reservas Ativas</span>
             <span style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-primary)' }}>{confirmadas.length}</span>
           </div>
         </div>
       </div>
 
-      <form onSubmit={async e => { e.preventDefault(); setErroLab(''); try { await onAdicionarLaboratorio({ nome: nomeLab, capacidade: Number(capacidadeLab), compartilhadoEtec, cor: corLab }); setNomeLab(''); setCapacidadeLab(30); setCompartilhadoEtec(false); setCorLab(PALETA_LABS[1]); } catch (erro) { setErroLab(erro.message); } }} style={{marginBottom:24,padding:16,border:'1px solid var(--border-light)',borderRadius:'var(--radius-md)',background:'#F8FAFC'}}>
-        <h3 style={{fontSize:'.95rem',fontWeight:700,marginBottom:12}}>Adicionar laboratório</h3>
-        <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
-          <input required maxLength={100} placeholder="Nome do laboratório" value={nomeLab} onChange={e=>setNomeLab(e.target.value)} style={{padding:9,border:'1px solid var(--border-light)',borderRadius:8}} />
-          <input required type="number" min="1" placeholder="Capacidade" value={capacidadeLab} onChange={e=>setCapacidadeLab(e.target.value)} style={{width:110,padding:9,border:'1px solid var(--border-light)',borderRadius:8}} />
-          <label><input type="checkbox" checked={compartilhadoEtec} onChange={e=>setCompartilhadoEtec(e.target.checked)} /> Compartilhado com ETEC</label>
-          <label style={{display:'flex',alignItems:'center',gap:6,fontSize:'.82rem'}}>Cor da sala
-            <input type="color" value={corLab} onChange={e=>setCorLab(e.target.value)} title="Escolher cor da sala" style={{width:44,height:34,padding:2,border:'1px solid var(--border-light)',borderRadius:8,background:'#fff',cursor:'pointer'}} />
-          </label>
-          <button className="btn-cps" type="submit">Cadastrar</button>
-        </div>
-        {erroLab && <p role="alert" style={{color:'#b91c1c',marginTop:8}}>{erroLab}</p>}
-      </form>
       {/* Seção de Conflitos para Mediação */}
       <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#B45309', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-conflict-strong)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <AlertTriangle size={18} /> Situações de Conflito Requerendo Arbitragem
         </h3>
 
@@ -61,10 +166,10 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {conflitos.map(conflito => (
-              <div key={conflito.id} style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 'var(--radius-md)', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div key={conflito.id} style={{ background: 'var(--bg-conflict)', border: '1px solid var(--border-conflict)', borderRadius: 'var(--radius-md)', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontWeight: 800, color: '#B45309', fontSize: '0.95rem' }}>{conflito.laboratorioNome}</span>
+                    <span style={{ fontWeight: 800, color: 'var(--color-conflict-strong)', fontSize: '0.95rem' }}>{conflito.laboratorioNome}</span>
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                       • {new Date(conflito.dataInicio).toLocaleString('pt-BR')} até {new Date(conflito.dataFim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </span>
@@ -72,7 +177,7 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
                   <div style={{ fontSize: '0.82rem', marginTop: '4px', color: '#78350F' }}>
                     Docente Solicitante: <strong>{conflito.usuarioNome}</strong> ({conflito.usuarioEmail})
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#92400E', marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--color-conflict-text)', marginTop: '2px' }}>
                     Motivo do atrito: <em>"{conflito.justificativa || 'Tentativa de reserva simultânea no mesmo intervalo.'}"</em>
                   </div>
                 </div>
@@ -80,7 +185,7 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     className="btn-cps"
-                    style={{ background: '#B45309', padding: '8px 14px', fontSize: '0.8rem' }}
+                    style={{ background: 'var(--bg-conflict-strong)', padding: '8px 14px', fontSize: '0.8rem' }}
                     onClick={() => onResolverConflito({
                       reservaId: conflito.id,
                       horaInicio: new Date(conflito.dataInicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
@@ -94,7 +199,7 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
                   </button>
                   <button
                     className="btn-outline"
-                    style={{ color: '#DC2626', borderColor: '#FCA5A5', padding: '8px 12px', fontSize: '0.8rem' }}
+                    style={{ color: 'var(--color-danger)', borderColor: 'var(--border-danger)', padding: '8px 12px', fontSize: '0.8rem' }}
                     onClick={() => onCancelarReserva(conflito.id)}
                   >
                     Cancelar
@@ -106,15 +211,199 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
         )}
       </div>
 
+      {/* Catálogo de Equipamentos — Coordenação adiciona/remove itens das aulas */}
+      <div style={{ marginBottom: '32px' }}>
+        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Package size={18} color="var(--cps-red)" /> Equipamentos Disponíveis para as Aulas
+        </h3>
+
+        <div style={{ background: '#F8FAFC', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+          {catCarregando ? (
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '8px 0' }}>Carregando catálogo…</div>
+          ) : catalogo.length === 0 ? (
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '8px 0' }}>
+              Nenhum equipamento cadastrado. Adicione o primeiro abaixo.
+            </div>
+          ) : (
+            <ul style={{ listStyle: 'none', margin: '0 0 14px', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {catalogo.map(item => (
+                <li
+                  key={item.id}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    background: 'var(--bg-surface)', border: '1px solid var(--border-light)',
+                    borderRadius: 'var(--radius-md)', padding: '10px 14px'
+                  }}
+                >
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <strong style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{item.nome}</strong>
+                    <small style={{ display: 'block', fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
+                      {item.detalhe || 'Sem detalhe'}
+                    </small>
+                  </span>
+                  {item.exclusivo && (
+                    <span
+                      style={{
+                        fontSize: '0.68rem', fontWeight: 800, padding: '3px 9px',
+                        borderRadius: '12px', background: 'var(--bg-conflict)',
+                        color: 'var(--color-conflict-strong)', border: '1px solid var(--border-conflict)',
+                        whiteSpace: 'nowrap'
+                      }}
+                      title="Só uma reserva por horário — se já reservado, outro professor não pode pedir"
+                    >
+                      EXCLUSIVO
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removerItem(item.id)}
+                    aria-label={`Remover ${item.nome}`}
+                    title={`Remover ${item.nome} do catálogo`}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5, background: 'transparent',
+                      border: '1px solid var(--border-danger)', color: 'var(--color-danger)',
+                      borderRadius: 'var(--radius-sm)', padding: '6px 10px', fontSize: '0.74rem',
+                      fontWeight: 700, cursor: 'pointer', flexShrink: 0
+                    }}
+                  >
+                    <Trash2 size={13} /> Remover
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Formulário de cadastro de novo item */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', flex: '1 1 180px' }}>
+              Nome do equipamento
+              <input
+                type="text"
+                value={novoNome}
+                onChange={e => setNovoNome(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); adicionarItem(); } }}
+                placeholder="Ex: Mesa digitalizadora"
+                maxLength={120}
+                style={estiloCampo}
+              />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', flex: '1 1 180px' }}>
+              Detalhe (opcional)
+              <input
+                type="text"
+                value={novoDetalhe}
+                onChange={e => setNovoDetalhe(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); adicionarItem(); } }}
+                placeholder="Ex: Guarda no laboratório 2"
+                maxLength={200}
+                style={estiloCampo}
+              />
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', paddingBottom: 8, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              <input
+                type="checkbox"
+                checked={novoExclusivo}
+                onChange={e => setNovoExclusivo(e.target.checked)}
+                style={{ width: 15, height: 15, accentColor: 'var(--cps-red)' }}
+              />
+              Exclusivo (1 por horário)
+            </label>
+            <button
+              type="button"
+              className="btn-cps"
+              onClick={adicionarItem}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '9px 16px', fontSize: '0.8rem', paddingBottom: 9 }}
+            >
+              <Plus size={15} /> Adicionar
+            </button>
+          </div>
+
+          {erroCatalogo && (
+            <div style={{ marginTop: '10px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-danger-text)' }}>
+              {erroCatalogo}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Tabela de Reservas Gerais */}
       <div>
-        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px' }}>
-          Mapa Geral de Todas as Reservas Cadastradas
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: '12px' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Filter size={16} color="var(--cps-red)" /> Mapa Geral de Todas as Reservas Cadastradas
+          </h3>
+          <span style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+            {reservasFiltradas.length} de {reservas.length} reserva(s)
+          </span>
+        </div>
+
+        {/* Filtros — Status e Período. O checkbox de canceladas mantém a visão
+            completa por padrão e só esconde quando solicitado. */}
+        <div style={{
+          display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap',
+          padding: '12px 14px', marginBottom: '14px',
+          background: '#F8FAFC', border: '1px solid var(--border-light)',
+          borderRadius: 'var(--radius-md)'
+        }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+            Status
+            <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)} style={estiloCampo}>
+              {STATUS_RESERVA.map(s => <option key={s.valor} value={s.valor}>{s.rotulo}</option>)}
+            </select>
+          </label>
+
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+            De
+            <input type="date" value={dataDe} onChange={e => setDataDe(e.target.value)} style={estiloCampo} />
+          </label>
+
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+            Até
+            <input type="date" value={dataAte} onChange={e => setDataAte(e.target.value)} style={estiloCampo} />
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', paddingBottom: 8, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={ocultarCanceladas}
+              onChange={e => setOcultarCanceladas(e.target.checked)}
+              style={{ width: 15, height: 15, accentColor: 'var(--cps-red)' }}
+            />
+            Ocultar canceladas
+          </label>
+
+          {temFiltroAtivo && (
+            <button
+              type="button"
+              className="btn-outline"
+              onClick={limparFiltros}
+              style={{ fontSize: '0.75rem', padding: '7px 12px', marginLeft: 'auto' }}
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
+
+        {reservasFiltradas.length === 0 ? (
+          <div style={{
+            padding: '28px', textAlign: 'center', background: '#F8FAFC',
+            border: '1px dashed var(--border-light)', borderRadius: 'var(--radius-md)',
+            color: 'var(--text-secondary)', fontSize: '0.85rem'
+          }}>
+            Nenhuma reserva corresponde aos filtros selecionados.
+            {temFiltroAtivo && (
+              <div style={{ marginTop: 10 }}>
+                <button type="button" className="btn-outline" onClick={limparFiltros} style={{ fontSize: '0.78rem' }}>
+                  Limpar filtros
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
             <thead>
-              <tr style={{ background: '#F1F5F9', textAlign: 'left', borderBottom: '2px solid var(--border-light)' }}>
+              <tr style={{ background: 'var(--bg-subtle)', textAlign: 'left', borderBottom: '2px solid var(--border-light)' }}>
                 <th style={{ padding: '10px 12px' }}>Laboratório</th>
                 <th style={{ padding: '10px 12px' }}>Data e Horário</th>
                 <th style={{ padding: '10px 12px' }}>Docente</th>
@@ -124,7 +413,7 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
               </tr>
             </thead>
             <tbody>
-              {reservas.map((res) => (
+              {reservasFiltradas.map((res) => (
                 <tr key={res.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
                   <td style={{ padding: '10px 12px', fontWeight: 700 }}>{res.laboratorioNome}</td>
                   <td style={{ padding: '10px 12px' }}>
@@ -135,22 +424,15 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
                   <td style={{ padding: '10px 12px' }}>{res.usuarioNome}</td>
                   <td style={{ padding: '10px 12px' }}>{res.finalidade}</td>
                   <td style={{ padding: '10px 12px' }}>
-                    <span style={{
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      fontWeight: 700,
-                      fontSize: '0.72rem',
-                      background: res.status === 1 ? 'var(--bg-available)' : res.status === 2 ? 'var(--bg-conflict)' : '#F1F5F9',
-                      color: res.status === 1 ? 'var(--color-available)' : res.status === 2 ? 'var(--color-conflict)' : 'var(--text-muted)'
-                    }}>
-                      {res.status === 1 ? 'Confirmada' : res.status === 2 ? 'Em Conflito' : 'Cancelada'}
+                    <span style={estiloStatus(res.status)}>
+                      {rotuloStatus(res.status)}
                     </span>
                   </td>
                   <td style={{ padding: '10px 12px', textAlign: 'right' }}>
                     {res.status !== 3 && (
                       <button
                         onClick={() => onCancelarReserva(res.id)}
-                        style={{ background: 'transparent', color: '#DC2626', fontSize: '0.75rem', fontWeight: 600 }}
+                        style={{ background: 'transparent', color: 'var(--color-danger)', fontSize: '0.75rem', fontWeight: 600 }}
                       >
                         Revogar
                       </button>
@@ -161,6 +443,7 @@ export function PainelCoordenador({ reservas, onResolverConflito, onCancelarRese
             </tbody>
           </table>
         </div>
+        )}
       </div>
     </div>
   );
