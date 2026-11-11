@@ -25,6 +25,7 @@ public class ReservaService : IReservaService
         var reserva = await _context.Reservas
             .Include(r => r.Laboratorio)
             .Include(r => r.Usuario)
+            .Include(r => r.ReservasEquipamentos).ThenInclude(re => re.Equipamento)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         return reserva == null ? null : MapearParaDto(reserva);
@@ -35,6 +36,7 @@ public class ReservaService : IReservaService
         var query = _context.Reservas
             .Include(r => r.Laboratorio)
             .Include(r => r.Usuario)
+            .Include(r => r.ReservasEquipamentos).ThenInclude(re => re.Equipamento)
             .AsNoTracking();
 
         if (laboratorioId.HasValue)
@@ -163,6 +165,29 @@ public class ReservaService : IReservaService
         if (!laboratorio.Ativo)
             throw new InvalidOperationException("O laboratório selecionado encontra-se inativo para reservas.");
 
+        // 4. Equipamentos pedidos: resolve no catálogo (código estável vindo do frontend)
+        var codigosEquipamentos = dto.Equipamentos?
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Select(c => c.Trim())
+            .Distinct()
+            .ToList() ?? new List<string>();
+
+        var equipamentosSelecionados = new List<Equipamento>();
+        if (codigosEquipamentos.Count > 0)
+        {
+            equipamentosSelecionados = await _context.Equipamentos
+                .Where(e => codigosEquipamentos.Contains(e.Id) && e.Ativo)
+                .ToListAsync();
+
+            var naoEncontrados = codigosEquipamentos
+                .Where(c => !equipamentosSelecionados.Any(e => e.Id == c))
+                .ToList();
+            if (naoEncontrados.Count > 0)
+                throw new InvalidOperationException(
+                    $"Equipamento(s) não encontrado(s) no catálogo ou inativo(s): {string.Join(", ", naoEncontrados)}. " +
+                    "Atualize a lista de equipamentos e tente novamente.");
+        }
+
         Guid? recorrenciaGrupoId = dto.Recorrente ? Guid.NewGuid() : null;
         var novasReservas = new List<Reserva>();
 
@@ -197,6 +222,23 @@ public class ReservaService : IReservaService
                 // da coordenação — os demais dias do período são criados normalmente.
                 if (existeConflito) conflitantes++;
 
+                // Equipamento EXCLUSIVO (ex: carrinho de notebooks) já reservado por outro
+                // professor no mesmo intervalo → recusa em qualquer situação (não há
+                // mediação: o item é único e não dá para dividir entre duas aulas).
+                foreach (var equipamento in equipamentosSelecionados.Where(e => e.Exclusivo))
+                {
+                    bool equipamentoOcupado = await _context.ReservaEquipamentos.AnyAsync(re =>
+                        re.EquipamentoId == equipamento.Id &&
+                        re.Reserva.Status != StatusReserva.Cancelada &&
+                        re.Reserva.DataInicio < fimInstancia &&
+                        re.Reserva.DataFim > inicioInstancia);
+
+                    if (equipamentoOcupado)
+                        throw new InvalidOperationException(
+                            $"Equipamento exclusivo já reservado neste horário: {equipamento.Nome} " +
+                            $"({inicioInstancia:dd/MM/yyyy HH:mm} a {fimInstancia:HH:mm}). Escolha outro horário.");
+                }
+
                 var novaReserva = new Reserva
                 {
                     Id = Guid.NewGuid(),
@@ -213,6 +255,16 @@ public class ReservaService : IReservaService
 
                 novasReservas.Add(novaReserva);
                 await _context.Reservas.AddAsync(novaReserva);
+
+                // Vínculos Reserva × Equipamento (mesmos itens em todas as ocorrências)
+                foreach (var equipamento in equipamentosSelecionados)
+                {
+                    await _context.ReservaEquipamentos.AddAsync(new ReservaEquipamento
+                    {
+                        ReservaId = novaReserva.Id,
+                        EquipamentoId = equipamento.Id
+                    });
+                }
             }
 
             // Trilha de Auditoria LGPD
@@ -224,7 +276,10 @@ public class ReservaService : IReservaService
                 EntidadeAfetada = "Reserva",
                 RegistroId = recorrenciaGrupoId?.ToString() ?? novasReservas[0].Id.ToString(),
                 Detalhes = $"Reserva criada para Lab {laboratorio.Id} ({dto.Finalidade}) - Total instâncias: {novasReservas.Count}" +
-                    (conflitantes > 0 ? $" ({conflitantes} em conflito, pendente de mediação)" : string.Empty),
+                    (conflitantes > 0 ? $" ({conflitantes} em conflito, pendente de mediação)" : string.Empty) +
+                    (equipamentosSelecionados.Count > 0
+                        ? $" Equipamentos: {string.Join(", ", equipamentosSelecionados.Select(e => e.Nome))}."
+                        : string.Empty),
                 IpOrigem = ipOrigem,
                 DataHoraUtc = DateTime.UtcNow
             });
@@ -237,6 +292,7 @@ public class ReservaService : IReservaService
             var reservasSalvas = await _context.Reservas
                 .Include(r => r.Laboratorio)
                 .Include(r => r.Usuario)
+                .Include(r => r.ReservasEquipamentos).ThenInclude(re => re.Equipamento)
                 .Where(r => ids.Contains(r.Id))
                 .OrderBy(r => r.DataInicio)
                 .ToListAsync();
@@ -288,6 +344,7 @@ public class ReservaService : IReservaService
         var reserva = await _context.Reservas
             .Include(r => r.Laboratorio)
             .Include(r => r.Usuario)
+            .Include(r => r.ReservasEquipamentos).ThenInclude(re => re.Equipamento)
             .FirstOrDefaultAsync(r => r.Id == reservaId)
             ?? throw new KeyNotFoundException($"Reserva {reservaId} não encontrada.");
 
@@ -331,6 +388,7 @@ public class ReservaService : IReservaService
 
         var reserva = await _context.Reservas
             .Include(r => r.Usuario)
+            .Include(r => r.ReservasEquipamentos).ThenInclude(re => re.Equipamento)
             .FirstOrDefaultAsync(r => r.Id == reservaId)
             ?? throw new KeyNotFoundException("Reserva não encontrada.");
 
@@ -379,7 +437,11 @@ public class ReservaService : IReservaService
             Justificativa = reserva.Justificativa,
             Observacao = reserva.Observacao,
             CriadoEm = reserva.CriadoEm,
-            ResolvidoPorCoordenadorId = reserva.ResolvidoPorCoordenadorId
+            ResolvidoPorCoordenadorId = reserva.ResolvidoPorCoordenadorId,
+            Equipamentos = reserva.ReservasEquipamentos?
+                .Where(re => re.Equipamento != null)
+                .Select(re => re.Equipamento.Id)
+                .ToList() ?? new List<string>()
         };
     }
 }

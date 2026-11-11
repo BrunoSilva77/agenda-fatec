@@ -24,6 +24,7 @@ builder.Services.AddDbContext<AgendaFatecDbContext>(options =>
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<ILaboratorioService, LaboratorioService>();
 builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
+builder.Services.AddScoped<IEquipamentoService, EquipamentoService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
